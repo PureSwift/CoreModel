@@ -16,10 +16,10 @@
 #pragma mark - Initialization
 
 /** Tries to initialize a model from the description of a URL. Some entity information will be lacking without a supporting descriptor.*/
--(instancetype)initWithContentsOfModelURL:(OFURL *)url;
+-(instancetype)initWithContentsOfFile:(OFString *)file;
 
 /** Tries to initialize a model from the description of a URL that contains the model, and a supporting descriptor. */
--(instancetype)initWithContentsOfModelURL:(OFURL *)url modelSupportDescriptor:(CDAModelSupportDescriptor *)modelSupportDescriptor;
+-(instancetype)initWithContentsOfFile:(OFString *)file withModelSupportDescriptor:(CDAModelSupportDescriptor *)modelSupportDescriptor;
 
 #pragma mark - Properties
 
