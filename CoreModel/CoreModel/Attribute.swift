@@ -40,7 +40,9 @@ public struct Attribute<T>: Property {
         
         json[PropertyJSONKey.propertyType.rawValue] = self.propertyType.rawValue
         
-        json[JSONKey.attributeType.rawValue] = self.attributeType
+        json[JSONKey.attributeType.rawValue] = self.attributeType.toJSON()
+        
+        return json
     }
 }
 

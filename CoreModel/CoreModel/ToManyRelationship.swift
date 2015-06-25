@@ -39,6 +39,18 @@ public struct ToManyRelationship<T: ManagedObject>: Relationship {
     
     public func toJSON() -> JSONObject {
         
+        var json = JSONObject()
         
+        json[PropertyJSONKey.name.rawValue] = self.name
+        
+        json[PropertyJSONKey.optional.rawValue] = self.optional
+        
+        json[PropertyJSONKey.propertyType.rawValue] = self.propertyType.rawValue
+        
+        json[RelationshipJSONKey.destinationEntityName.rawValue] = self.destinationEntityName
+        
+        json[RelationshipJSONKey.inverseRelationshipName.rawValue] = self.inverseRelationshipName
+                
+        return json
     }
 }

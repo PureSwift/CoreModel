@@ -23,6 +23,41 @@ public enum AttributeType: JSONCodable {
     
     /** Attribute can be transformed from and to binary data using a value transformer. The associated value is the value transformer to use. */
     case Transformable(ValueTransformer)
+    
+    public func typeName() -> StringAlias {
+        
+        switch self {
+            
+        case .Number(_):
+            return "Number"
+            
+        case .String:
+            return "String"
+            
+        case .Date:
+            return "Date"
+            
+        case .Data:
+            return "Data"
+            
+        case .Transformable(_):
+            return "Transformable"
+        }
+    }
+    
+    // MARK: - JSONCodable
+    
+    public static func fromJSON(JSONObject: [StringAlias: AnyObject]) -> AttributeType? {
+        
+        return nil
+    }
+    
+    public func toJSON() -> JSONObject {
+        
+        var json = JSONObject()
+        
+        return json
+    }
 }
 
 /** A subset of attribute types belonging to numbers. */
@@ -34,6 +69,22 @@ public enum NumberType: String {
     /** Integer number type. */
     case Integer = "Int"
     
-    /** Decimal (floating point) number type. */
-    case Decimal = "Float"
+    /** Floating point number type. */
+    case Float = "Float"
+    
+    /** Floating point number type. */
+    case Double = "Double"
+    
+    /** Floating point number type. */
+    case Decimal = "Decimal"
 }
+
+private enum JSONKey: String {
+    
+    case type = "type"
+    
+    case value = "value"
+}
+
+// TODO: Remove compiler fix for missing string type. */
+public typealias StringAlias = String

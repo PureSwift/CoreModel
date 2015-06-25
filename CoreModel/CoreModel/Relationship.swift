@@ -19,3 +19,10 @@ public extension Relationship {
     
     public var propertyType: PropertyType { return .Relationship }
 }
+
+internal enum RelationshipJSONKey: String {
+    
+    case destinationEntityName = "destinationEntityName"
+    case inverseRelationshipName = "inverseRelationshipName"
+    case toMany = "toMany"
+}
