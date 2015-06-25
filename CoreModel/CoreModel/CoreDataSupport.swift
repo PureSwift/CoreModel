@@ -17,27 +17,40 @@ public extension NSFetchRequest {
     }
 }
 
-/*
- extension NSManagedObjectContext: Context {
+public extension CompoundPredicateType {
     
-    public var model: Model {
-        
-        return self.persistentStoreCoordinator!.managedObjectModel
+    public init(compoundPredicateTypeValue: NSCompoundPredicateType) {
+        switch compoundPredicateTypeValue {
+        case .NotPredicateType: self = .Not
+        case .AndPredicateType: self = .And
+        case .OrPredicateType: self = .Or
+        }
+    }
+    
+    public func toCompoundPredicateType() -> NSCompoundPredicateType {
+        switch self {
+        case .Not: return .NotPredicateType
+        case .And: return .AndPredicateType
+        case .Or: return .OrPredicateType
+        }
     }
 }
 
-extension NSManagedObjectModel: Model {
+public extension ComparisonPredicateModifier {
+        
+    public init(comparisonPredicateModifierValue: NSComparisonPredicateModifier) {
+        switch comparisonPredicateModifierValue {
+        case .DirectPredicateModifier: self = .Direct
+        case .AnyPredicateModifier: self = .Any
+        case .AllPredicateModifier: self = .All
+        }
+    }
     
-    
+    public func toComparisonPredicateModifier() -> NSComparisonPredicateModifier {
+        switch self {
+        case .Direct: return .DirectPredicateModifier
+        case .All: return .AllPredicateModifier
+        case .Any: return .AnyPredicateModifier
+        }
+    }
 }
-
-extension NSEntityDescription: Entity {
-    
-    
-}
-
-extension NSPropertyDescription: Property {
-    
-    
-}
-*/
