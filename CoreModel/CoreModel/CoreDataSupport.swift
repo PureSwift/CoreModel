@@ -9,9 +9,13 @@
 import Foundation
 import CoreData
 
-extension NSManagedObjectContext: Context {
+/*
+ extension NSManagedObjectContext: Context {
     
-    
+    public var model: Model {
+        
+        return self.persistentStoreCoordinator!.managedObjectModel
+    }
 }
 
 extension NSManagedObjectModel: Model {
@@ -23,3 +27,9 @@ extension NSEntityDescription: Entity {
     
     
 }
+
+extension NSPropertyDescription: Property {
+    
+    
+}
+*/

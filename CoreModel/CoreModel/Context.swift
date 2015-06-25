@@ -8,9 +8,9 @@
 
 public protocol Context {
     
-    typealias EntityType: Entity
+    typealias EntityType = Entity
     
-    typealias ModelType: Model where Model.EntityType == EntityType
+    typealias ModelType = Model
     
-    var model: Model { get }
+    var model: ModelType  { get }
 }

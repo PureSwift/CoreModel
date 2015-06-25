@@ -9,5 +9,13 @@
 
 public protocol Entity {
     
+    typealias PropertyType = Property
     
+    var name: String { get }
+    
+    var properties: [PropertyType] { get }
+    
+    var abstract: Bool { get }
+    
+    // var subentities: [Entity] { get }
 }

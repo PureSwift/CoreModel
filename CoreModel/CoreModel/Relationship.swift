@@ -6,4 +6,7 @@
 //  Copyright © 2015 ColemanCDA. All rights reserved.
 //
 
-import Foundation
+public protocol Relationship: Property {
+    
+    
+}
