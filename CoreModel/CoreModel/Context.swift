@@ -16,7 +16,7 @@ public protocol Context {
     
     func delete<T: ManagedObject>(managedObject: T)
     
-    func create<T: ManagedObject>(entity: Entity<T>, withInitialValues values: [String: Any]?) -> T
+    func create<T: ManagedObject>(entity: Entity<T>) -> T
     
     func save() throws
 }

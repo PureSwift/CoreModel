@@ -10,13 +10,23 @@ public struct SearchRequest<T: ManagedObject> {
     
     let entity: Entity<T>
     
-    let predicate: Predicate
+    let predicate: Predicate?
     
     let sortDescriptors: [SortDescriptor]
     
     let includesSubentities: Bool
     
-    let fetchLimit: Int
+    let fetchLimit: UInt?
     
-    let fetchOffset: Int
+    let fetchOffset: UInt?
+    
+    public init(entity: Entity<T>, predicate: Predicate? = nil, sortDescriptors: [SortDescriptor], includesSubentities: Bool = true, fetchLimit: UInt? = nil, fetchOffset: UInt? = nil) {
+        
+        self.entity = entity
+        self.predicate = predicate
+        self.sortDescriptors = sortDescriptors
+        self.includesSubentities = includesSubentities
+        self.fetchLimit = fetchLimit
+        self.fetchOffset = fetchOffset
+    }
 }

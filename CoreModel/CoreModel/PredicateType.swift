@@ -1,12 +1,14 @@
 //
-//  Predicate.swift
+//  PredicateType.swift
 //  CoreModel
 //
 //  Created by Alsey Coleman Miller on 6/25/15.
 //  Copyright © 2015 ColemanCDA. All rights reserved.
 //
 
-public protocol Predicate {
+public enum PredicateType {
     
-    var predicateType: PredicateType { get }
+    case Comparison
+    
+    case Compound
 }
