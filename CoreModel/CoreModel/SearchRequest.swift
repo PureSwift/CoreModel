@@ -6,4 +6,9 @@
 //  Copyright © 2015 ColemanCDA. All rights reserved.
 //
 
-import Foundation
+public struct SearchRequest<T: ManagedObject> {
+    
+    
+    
+    
+}

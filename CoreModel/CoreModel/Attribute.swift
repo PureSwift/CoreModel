@@ -6,7 +6,18 @@
 //  Copyright © 2015 ColemanCDA. All rights reserved.
 //
 
-public protocol Attribute: Property {
+public struct Attribute: Property {
     
-    var attributeType: AttributeType { get }
+    public let name: String
+    
+    public let optional: Bool
+        
+    public let attributeType: AttributeType
+    
+    public init(name: String, optional: Bool, attributeType: AttributeType) {
+        
+        self.name = name
+        self.optional = optional
+        self.attributeType = attributeType
+    }
 }

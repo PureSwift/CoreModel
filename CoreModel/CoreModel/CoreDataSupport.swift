@@ -9,6 +9,14 @@
 import Foundation
 import CoreData
 
+public extension NSFetchRequest {
+    
+    func toSearchRequest<T: ManagedObject>() -> SearchRequest<T>? {
+        
+        return nil
+    }
+}
+
 /*
  extension NSManagedObjectContext: Context {
     

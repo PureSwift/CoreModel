@@ -8,11 +8,13 @@
 
 public protocol Context {
     
-    typealias EntityType = Entity
+    typealias ManagedObjectType = ManagedObject
     
-    typealias ModelType = Model
+    var model: Model<ManagedObjectType> { get }
     
-    var model: ModelType  { get }
+    func performSearch<T: ManagedObject>(searchRequest: SearchRequest<T>) throws -> T
     
-    func performSearchRequest
+    func delete<T: ManagedObject>(managedObject: T) throws
+    
+    func create<T: ManagedObject, E: Entity<T>>(entity: E, withInitialValue values: [Property: Any]) -> T
 }

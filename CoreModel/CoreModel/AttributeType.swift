@@ -22,7 +22,7 @@ public enum AttributeType {
     case Data
     
     /** Value can be transformed from to binary data and from binary data using a transformer. The associated value is the name of transformer to use. */
-    case Transformable(UInt /* Should be String, compiler error */)
+    case Transformable(ValueTransformer)
 }
 
 /** A subset of attribute types belonging to numbers. */

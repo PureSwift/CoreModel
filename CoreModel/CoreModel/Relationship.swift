@@ -8,7 +8,9 @@
 
 public protocol Relationship: Property {
     
-    typealias DestinationEntityType = Entity
+    typealias DestinationManagedObjectType = ManagedObject
     
-    var destinationEntity: [DestinationEntityType] { get }
+    var destinationEntity: Entity<DestinationManagedObjectType> { get }
+    
+    var toMany: Bool { get }
 }

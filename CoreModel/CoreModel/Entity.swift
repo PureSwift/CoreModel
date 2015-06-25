@@ -6,18 +6,17 @@
 //  Copyright © 2015 ColemanCDA. All rights reserved.
 //
 
-
-public protocol Entity {
+public struct Entity<M: ManagedObject> {
     
-    typealias PropertyType = Property
+    public let name: String
     
-    typealias EntityManagedObjectType = ManagedObject
+    public let abstract: Bool
     
-    var name: String { get }
+    public let properties: [Property]
     
-    var properties: [PropertyType] { get }
+    public let attributes: [Attribute]
     
-    var abstract: Bool { get }
+    public let relationships: [Relationship<M>]
     
-    // var subentities: [Entity] { get }
+    public let subentities: [Entity<M>]
 }
