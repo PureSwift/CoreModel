@@ -6,11 +6,11 @@
 //  Copyright © 2015 ColemanCDA. All rights reserved.
 //
 
-struct CompoundPredicate: Predicate {
+public struct CompoundPredicate: Predicate {
     
-    let predicateType = PredicateType.Compound
+    public let predicateType = PredicateType.Compound
     
-    let compoundPredicateType: CompoundPredicateType
+    public let compoundPredicateType: CompoundPredicateType
     
-    let subpredicates: [Predicate]
+    public let subpredicates: [Predicate]
 }

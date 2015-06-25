@@ -6,9 +6,9 @@
 //  Copyright © 2015 ColemanCDA. All rights reserved.
 //
 
-public enum PredicateType {
+public enum PredicateType: String {
     
-    case Comparison
+    case Comparison = "Comparison"
+    case Compound = "Compound"
     
-    case Compound
 }

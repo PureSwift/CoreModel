@@ -7,7 +7,7 @@
 //
 
 /** Describes the model information. */
-public struct Model<T: ManagedObject> {
+public struct Model<T: ManagedObject>: JSONCodable {
     
     public let entities: [Entity<T>]
     
@@ -16,4 +16,18 @@ public struct Model<T: ManagedObject> {
         
         self.entities = entities
     }
+    
+    // MARK: - JSONCodable
+    
+    public static func fromJSON(JSONObject: JSONObject) -> Model {
+        
+        
+    }
+    
+    public func toJSON() -> [String: AnyObject] {
+        
+        
+    }
+    
+    
 }

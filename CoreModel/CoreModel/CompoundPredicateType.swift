@@ -6,9 +6,9 @@
 //  Copyright © 2015 ColemanCDA. All rights reserved.
 //
 
-public enum CompoundPredicateType {
+public enum CompoundPredicateType: String {
     
-    case And
-    case Or
-    case Not
+    case Not = "Not"
+    case And = "And"
+    case Or = "Or"
 }

@@ -10,11 +10,11 @@ public struct SortDescriptor {
     
     public let ascending: Bool
     
-    public let property: Property
+    public let propertyName: String
     
-    public init(property: Property, ascending: Bool = true) {
+    public init(propertyName: String, ascending: Bool = true) {
         
-        self.property = property
+        self.propertyName = propertyName
         self.ascending = ascending
     }
 }
