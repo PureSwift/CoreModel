@@ -12,11 +12,3 @@ public protocol Property {
     
     var optional: Bool { get }
 }
-
-public extension Property {
-    
-    var optional: Bool {
-        
-        return true
-    }
-}

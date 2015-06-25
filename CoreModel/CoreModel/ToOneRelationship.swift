@@ -8,11 +8,18 @@
 
 public struct ToOneRelationship<T: ManagedObject>: Relationship {
     
+    public let toMany = false
+    
     public let name: String
     
     public let optional: Bool
     
     public let destinationEntity: Entity<T>
     
-    public let toMany = false
+    public init(name: String, destinationEntity: Entity<T>, optional: Bool = true) {
+        
+        self.name = name
+        self.optional = optional
+        self.destinationEntity = destinationEntity
+    }
 }

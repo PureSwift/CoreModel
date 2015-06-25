@@ -6,7 +6,7 @@
 //  Copyright © 2015 ColemanCDA. All rights reserved.
 //
 
-public struct Attribute: Property {
+public struct Attribute<T>: Property {
     
     public let name: String
     
@@ -14,7 +14,7 @@ public struct Attribute: Property {
         
     public let attributeType: AttributeType
     
-    public init(name: String, optional: Bool, attributeType: AttributeType) {
+    public init(name: String, optional: Bool = true, attributeType: AttributeType) {
         
         self.name = name
         self.optional = optional

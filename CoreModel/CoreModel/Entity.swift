@@ -15,4 +15,12 @@ public struct Entity<T: ManagedObject> {
     public let properties: [Property]
     
     public let subentities: [Entity<T>]
+    
+    public init(name: String, abstract: Bool = false, properties: [Property], subentities: [Entity<T>]) {
+        
+        self.name = name
+        self.abstract = abstract
+        self.properties = properties
+        self.subentities = subentities
+    }
 }

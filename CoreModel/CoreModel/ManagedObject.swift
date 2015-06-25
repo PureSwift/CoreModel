@@ -10,9 +10,9 @@ public protocol ManagedObject {
     
     // MARK: - Property Accessors
     
-    func valueForAttribute(attribute: Attribute) -> Any
+    func valueForAttribute<T>(attribute: Attribute<T>) -> T
     
-    func setValue(value: Any, forAttribute attribute: Attribute)
+    func setValue<T>(value: T, forAttribute attribute: Attribute<T>)
     
     func valueForToOneRelationship<T: ManagedObject>(relationship: ToOneRelationship<T>) -> T
     

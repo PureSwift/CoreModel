@@ -14,7 +14,7 @@ public protocol Context {
     
     func performSearch<T: ManagedObject>(searchRequest: SearchRequest<T>) throws -> T
     
-    func delete<T: ManagedObject>(managedObject: T) throws
+    func delete<T: ManagedObject>(managedObject: T)
     
     func create<T: ManagedObject>(entity: Entity<T>, withInitialValues values: [String: Any]?) -> T
     
