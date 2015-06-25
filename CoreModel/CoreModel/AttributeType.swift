@@ -7,7 +7,7 @@
 //
 
 /** The attributes types availible in Core Model. */
-public enum AttributeType {
+public enum AttributeType: JSONCodable {
     
     /** Number type. Specific subset availible. */
     case Number(NumberType)
@@ -26,14 +26,14 @@ public enum AttributeType {
 }
 
 /** A subset of attribute types belonging to numbers. */
-public enum NumberType {
+public enum NumberType: String {
     
     /** Boolean number type. */
-    case Boolean
+    case Boolean = "Bool"
     
     /** Integer number type. */
-    case Integer
+    case Integer = "Int"
     
     /** Decimal (floating point) number type. */
-    case Decimal
+    case Decimal = "Float"
 }

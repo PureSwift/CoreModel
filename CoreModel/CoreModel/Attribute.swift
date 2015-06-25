@@ -32,6 +32,19 @@ public struct Attribute<T>: Property {
     
     public func toJSON() -> JSONObject {
         
+        var json = JSONObject()
         
+        json[PropertyJSONKey.name.rawValue] = self.name
+        
+        json[PropertyJSONKey.optional.rawValue] = self.optional
+        
+        json[PropertyJSONKey.propertyType.rawValue] = self.propertyType.rawValue
+        
+        json[JSONKey.attributeType.rawValue] = self.attributeType
     }
+}
+
+private enum JSONKey: String {
+    
+    case attributeType = "attributeType"
 }
