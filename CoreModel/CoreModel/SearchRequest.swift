@@ -8,7 +8,15 @@
 
 public struct SearchRequest<T: ManagedObject> {
     
+    let entity: Entity<T>
     
+    let predicate: Predicate
     
+    let sortDescriptors: [SortDescriptor]
     
+    let includesSubentities: Bool
+    
+    let fetchLimit: Int
+    
+    let fetchOffset: Int
 }

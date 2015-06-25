@@ -14,7 +14,7 @@ public struct Attribute<T>: Property {
         
     public let attributeType: AttributeType
     
-    public init(name: String, optional: Bool = true, attributeType: AttributeType) {
+    public init(name: String, attributeType: AttributeType, optional: Bool = true) {
         
         self.name = name
         self.optional = optional
