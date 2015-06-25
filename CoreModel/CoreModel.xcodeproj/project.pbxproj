@@ -18,6 +18,8 @@
 		6EAF65BA1B3BACB000884605 /* CoreDataSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EAF65B91B3BACB000884605 /* CoreDataSupport.swift */; };
 		6EAF65BC1B3BACE900884605 /* Context.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EAF65BB1B3BACE900884605 /* Context.swift */; };
 		6EAF65BF1B3BB4F600884605 /* AttributeType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EAF65BE1B3BB4F600884605 /* AttributeType.swift */; };
+		6EAF65C11B3BB81B00884605 /* ManagedObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EAF65C01B3BB81B00884605 /* ManagedObject.swift */; };
+		6EAF65C31B3BC0F500884605 /* SearchRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EAF65C21B3BC0F500884605 /* SearchRequest.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -45,6 +47,8 @@
 		6EAF65B91B3BACB000884605 /* CoreDataSupport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreDataSupport.swift; sourceTree = "<group>"; };
 		6EAF65BB1B3BACE900884605 /* Context.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Context.swift; sourceTree = "<group>"; };
 		6EAF65BE1B3BB4F600884605 /* AttributeType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AttributeType.swift; sourceTree = "<group>"; };
+		6EAF65C01B3BB81B00884605 /* ManagedObject.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ManagedObject.swift; sourceTree = "<group>"; };
+		6EAF65C21B3BC0F500884605 /* SearchRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SearchRequest.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -89,6 +93,8 @@
 			children = (
 				6EAF65951B3BAA6A00884605 /* CoreModel.h */,
 				6EAF65BB1B3BACE900884605 /* Context.swift */,
+				6EAF65C21B3BC0F500884605 /* SearchRequest.swift */,
+				6EAF65C01B3BB81B00884605 /* ManagedObject.swift */,
 				6EAF65BD1B3BB40E00884605 /* Model Description */,
 				6EAF65B91B3BACB000884605 /* CoreDataSupport.swift */,
 				6EAF65971B3BAA6A00884605 /* Info.plist */,
@@ -229,11 +235,13 @@
 				6EAF65B61B3BAC4800884605 /* Attribute.swift in Sources */,
 				6EAF65B81B3BAC5000884605 /* Relationship.swift in Sources */,
 				6EAF65AD1B3BAAC400884605 /* Model.swift in Sources */,
+				6EAF65C31B3BC0F500884605 /* SearchRequest.swift in Sources */,
 				6EAF65BC1B3BACE900884605 /* Context.swift in Sources */,
 				6EAF65BF1B3BB4F600884605 /* AttributeType.swift in Sources */,
 				6EAF65BA1B3BACB000884605 /* CoreDataSupport.swift in Sources */,
 				6EAF65B41B3BAC3E00884605 /* Property.swift in Sources */,
 				6EAF65B21B3BAB9800884605 /* Entity.swift in Sources */,
+				6EAF65C11B3BB81B00884605 /* ManagedObject.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -13,4 +13,6 @@ public protocol Context {
     typealias ModelType = Model
     
     var model: ModelType  { get }
+    
+    func performSearchRequest
 }

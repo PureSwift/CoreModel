@@ -8,5 +8,7 @@
 
 public protocol Relationship: Property {
     
+    typealias DestinationEntityType = Entity
     
+    var destinationEntity: [DestinationEntityType] { get }
 }

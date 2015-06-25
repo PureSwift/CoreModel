@@ -11,6 +11,8 @@ public protocol Entity {
     
     typealias PropertyType = Property
     
+    typealias EntityManagedObjectType = ManagedObject
+    
     var name: String { get }
     
     var properties: [PropertyType] { get }
