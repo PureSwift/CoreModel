@@ -19,9 +19,9 @@ public struct Model<T: ManagedObject>: JSONCodable {
     
     // MARK: - JSONCodable
     
-    public static func fromJSON(JSONObject: JSONObject) -> Model {
+    public static func fromJSON(JSONObject: [String: AnyObject]) -> Model? {
         
-        
+        return nil
     }
     
     public func toJSON() -> [String: AnyObject] {

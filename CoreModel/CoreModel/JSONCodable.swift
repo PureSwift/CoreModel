@@ -8,7 +8,7 @@
 
 public protocol JSONCodable {
     
-    static func fromJSON(JSONObject: JSONObject) -> Self
+    static func fromJSON(JSONObject: JSONObject) -> Self?
     
     func toJSON() -> JSONObject
 }
