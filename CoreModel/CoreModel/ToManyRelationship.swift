@@ -50,7 +50,15 @@ public struct ToManyRelationship<T: ManagedObject>: Relationship {
         json[RelationshipJSONKey.destinationEntityName.rawValue] = self.destinationEntityName
         
         json[RelationshipJSONKey.inverseRelationshipName.rawValue] = self.inverseRelationshipName
-                
+        
+        json[JSONKey.ordered.rawValue] = self.ordered
+        
         return json
     }
+}
+
+
+private enum JSONKey: String {
+    
+    case ordered = "ordered"
 }

@@ -46,7 +46,7 @@ public struct ToOneRelationship<T: ManagedObject>: Relationship {
         json[RelationshipJSONKey.destinationEntityName.rawValue] = self.destinationEntityName
         
         json[RelationshipJSONKey.inverseRelationshipName.rawValue] = self.inverseRelationshipName
-        
+                
         return json
     }
 }

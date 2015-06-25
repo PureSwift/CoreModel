@@ -13,8 +13,7 @@ public protocol Uniquing {
 
 public enum UniqueIdentifier {
     
-    /** Compiler error. */
-    // case String(String)
+    case String(StringAlias)
     
     case Integer(UInt)
 }
