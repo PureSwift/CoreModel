@@ -6,4 +6,13 @@
 //  Copyright © 2015 ColemanCDA. All rights reserved.
 //
 
-import Foundation
+public struct ToOneRelationship<T: ManagedObject>: Relationship {
+    
+    public let name: String
+    
+    public let optional: Bool
+    
+    public let destinationEntity: Entity<T>
+    
+    public let toMany = false
+}

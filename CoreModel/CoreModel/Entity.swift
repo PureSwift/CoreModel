@@ -6,7 +6,7 @@
 //  Copyright © 2015 ColemanCDA. All rights reserved.
 //
 
-public struct Entity<M: ManagedObject> {
+public struct Entity<T: ManagedObject> {
     
     public let name: String
     
@@ -14,9 +14,5 @@ public struct Entity<M: ManagedObject> {
     
     public let properties: [Property]
     
-    public let attributes: [Attribute]
-    
-    public let relationships: [Relationship<M>]
-    
-    public let subentities: [Entity<M>]
+    public let subentities: [Entity<T>]
 }

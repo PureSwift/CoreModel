@@ -7,12 +7,12 @@
 //
 
 /** Describes the model information. */
-public struct Model<M: ManagedObject> {
+public struct Model<T: ManagedObject> {
     
-    public let entities: [Entity<M>]
+    public let entities: [Entity<T>]
     
     /** Creates a new model with the specified entities. Generic passed should be the **base** ```ManagedObject``` class and not a specific subclass. */
-    public init(entities: [Entity<M>]) {
+    public init(entities: [Entity<T>]) {
         
         self.entities = entities
     }

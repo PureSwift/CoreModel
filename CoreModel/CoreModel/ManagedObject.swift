@@ -14,11 +14,11 @@ public protocol ManagedObject {
     
     func setValue(value: Any, forAttribute attribute: Attribute)
     
-    func valueForToManyRelationship(relationship: Relationship) -> [ManagedObject]
+    func valueForToOneRelationship<T: ManagedObject>(relationship: ToOneRelationship<T>) -> T
     
-    func setValue(value: [ManagedObject], forToManyRelationship relationship: Relationship)
+    func setValue<T: ManagedObject>(value: T, forToOneRelationship relationship: ToOneRelationship<T>)
     
-    func valueForToOneRelationship(relationship: Relationship) -> ManagedObject
+    func valueForToManyRelationship<T: ManagedObject>(relationship: ToManyRelationship<T>) -> [T]
     
-    func setValue(value: ManagedObject, forToOneRelationship relationship: Relationship)
+    func setValue<T: ManagedObject>(value: [T], forToManyRelationship relationship: ToManyRelationship<T>)
 }

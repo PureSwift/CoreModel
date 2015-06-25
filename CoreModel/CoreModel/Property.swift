@@ -6,7 +6,7 @@
 //  Copyright © 2015 ColemanCDA. All rights reserved.
 //
 
-public protocol Property: Hashable {
+public protocol Property {
     
     var name: String { get }
     
@@ -18,12 +18,5 @@ public extension Property {
     var optional: Bool {
         
         return true
-    }
-    
-    // MARK: - Hashable
-    
-    var hashValue: Int {
-        
-        return name.hashValue
     }
 }

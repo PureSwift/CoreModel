@@ -8,7 +8,7 @@
 
 public protocol Relationship: Property {
     
-    typealias DestinationManagedObjectType = ManagedObject
+    typealias DestinationManagedObjectType: ManagedObject
     
     var destinationEntity: Entity<DestinationManagedObjectType> { get }
     

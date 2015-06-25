@@ -126,8 +126,8 @@
 				6EAF65B51B3BAC4800884605 /* Attribute.swift */,
 				6EAF65BE1B3BB4F600884605 /* AttributeType.swift */,
 				6EAF65B71B3BAC5000884605 /* Relationship.swift */,
-				6EAF65C71B3BD11600884605 /* ToManyRelationship.swift */,
 				6EAF65C91B3BD12400884605 /* ToOneRelationship.swift */,
+				6EAF65C71B3BD11600884605 /* ToManyRelationship.swift */,
 			);
 			name = "Model Description";
 			sourceTree = "<group>";

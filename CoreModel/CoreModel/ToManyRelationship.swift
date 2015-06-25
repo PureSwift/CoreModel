@@ -6,11 +6,13 @@
 //  Copyright © 2015 ColemanCDA. All rights reserved.
 //
 
-public struct ToManyRelationship: Relationship {
+public struct ToManyRelationship<T: ManagedObject>: Relationship {
     
     public let name: String
     
     public let optional: Bool
     
+    public let destinationEntity: Entity<T>
     
+    public let toMany = true
 }
