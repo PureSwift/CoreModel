@@ -14,12 +14,30 @@ public struct ToOneRelationship<T: ManagedObject>: Relationship {
     
     public let optional: Bool
     
-    public let destinationEntity: Entity<T>
+    public let destinationEntityName: String
     
-    public init(name: String, destinationEntity: Entity<T>, optional: Bool = true) {
+    public let inverseRelationshipName: String
+    
+    public let ordered: Bool
+    
+    public init(name: String, destinationEntityName: String, inverseRelationshipName: String, ordered: Bool = false, optional: Bool = true) {
         
         self.name = name
         self.optional = optional
-        self.destinationEntity = destinationEntity
+        self.destinationEntityName = destinationEntityName
+        self.inverseRelationshipName = inverseRelationshipName
+    }
+    
+    // MARK: - JSONCodable
+    
+    public static func fromJSON(JSONObject: JSONObject) -> ToOneRelationship<T>? {
+        
+        
+        return nil
+    }
+    
+    public func toJSON() -> JSONObject {
+        
+        
     }
 }

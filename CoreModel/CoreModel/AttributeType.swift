@@ -21,7 +21,7 @@ public enum AttributeType {
     /** Binary Data attribute type. */
     case Data
     
-    /** Value can be transformed from to binary data and from binary data using a transformer. The associated value is the name of transformer to use. */
+    /** Attribute can be transformed from and to binary data using a value transformer. The associated value is the value transformer to use. */
     case Transformable(ValueTransformer)
 }
 
@@ -31,7 +31,7 @@ public enum NumberType {
     /** Boolean number type. */
     case Boolean
     
-    /** Integet number type. */
+    /** Integer number type. */
     case Integer
     
     /** Decimal (floating point) number type. */

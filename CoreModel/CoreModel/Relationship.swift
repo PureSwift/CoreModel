@@ -8,9 +8,14 @@
 
 public protocol Relationship: Property {
     
-    typealias DestinationManagedObjectType: ManagedObject
+    var destinationEntityName: String { get }
     
-    var destinationEntity: Entity<DestinationManagedObjectType> { get }
+    var inverseRelationshipName: String { get }
     
     var toMany: Bool { get }
+}
+
+public extension Relationship {
+    
+    public var propertyType: PropertyType { return .Relationship }
 }

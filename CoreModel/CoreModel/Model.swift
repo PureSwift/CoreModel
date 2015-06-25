@@ -26,8 +26,22 @@ public struct Model<T: ManagedObject>: JSONCodable {
     
     public func toJSON() -> [String: AnyObject] {
         
+        var json = JSONObject()
         
+        var entities = [JSONObject]()
+        
+        for entity in self.entities {
+            
+            entities.append(entity.toJSON())
+        }
+        
+        json[JSONKey.entities.rawValue] = entities
+        
+        return json
     }
-    
-    
+}
+
+private enum JSONKey: String {
+        
+    case entities = "entities"
 }

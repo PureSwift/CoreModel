@@ -6,9 +6,18 @@
 //  Copyright © 2015 ColemanCDA. All rights reserved.
 //
 
-public protocol Property {
+public protocol Property: JSONCodable {
     
     var name: String { get }
     
     var optional: Bool { get }
+    
+    var propertyType: PropertyType { get }
+}
+
+internal enum PropertyJSONKey: String {
+    
+    case name = "name"
+    case optional = "optional"
+    case propertyType = "propertyType"
 }

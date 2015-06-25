@@ -14,15 +14,31 @@ public struct ToManyRelationship<T: ManagedObject>: Relationship {
     
     public let optional: Bool
     
-    public let destinationEntity: Entity<T>
+    public let destinationEntityName: String
+    
+    public let inverseRelationshipName: String
     
     public let ordered: Bool
     
-    public init(name: String, destinationEntity: Entity<T>, ordered: Bool = false, optional: Bool = true) {
+    public init(name: String, destinationEntityName: String, inverseRelationshipName: String, ordered: Bool = false, optional: Bool = true) {
         
         self.name = name
         self.optional = optional
-        self.destinationEntity = destinationEntity
-        self.ordered = false
+        self.destinationEntityName = destinationEntityName
+        self.inverseRelationshipName = inverseRelationshipName
+        self.ordered = ordered
+    }
+    
+    // MARK: - JSONCodable
+    
+    public static func fromJSON(JSONObject: [String: AnyObject]) -> ToManyRelationship<T>? {
+        
+        
+        return nil
+    }
+    
+    public func toJSON() -> JSONObject {
+        
+        
     }
 }

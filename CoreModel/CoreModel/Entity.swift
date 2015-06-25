@@ -6,7 +6,7 @@
 //  Copyright © 2015 ColemanCDA. All rights reserved.
 //
 
-public struct Entity<T: ManagedObject> {
+public struct Entity<T: ManagedObject>: JSONCodable {
     
     public let name: String
     
@@ -23,14 +23,6 @@ public struct Entity<T: ManagedObject> {
         self.properties = properties
         self.subentities = subentities
     }
-}
-
-extension Entity: JSONCodable {
-    
-    public func toBriefJSON() -> String {
-        
-        return self.name
-    }
     
     // MARK: - JSONCodable
     
@@ -41,6 +33,48 @@ extension Entity: JSONCodable {
     
     public func toJSON() -> [String: AnyObject] {
         
+        var jsonObject = JSONObject()
         
+        jsonObject[JSONKey.name.rawValue] = self.name
+        
+        jsonObject[JSONKey.abstract.rawValue] = self.abstract
+        
+        jsonObject[JSONKey.properties.rawValue] = {
+            
+            var propertiesJSON = [JSONObject]()
+            
+            for property in self.properties {
+                
+                propertiesJSON.append(property.toJSON())
+            }
+            
+            return propertiesJSON
+            }() as [JSONObject]
+        
+        if let subentities = self.subentities {
+            
+            jsonObject[JSONKey.subentities.rawValue] = {
+                
+                var subentitiesJSON = [JSONObject]()
+                
+                for entity in subentities {
+                    
+                    subentitiesJSON.append(entity.toJSON())
+                }
+                
+                return subentitiesJSON
+                
+                }() as [JSONObject]
+        }
+        
+        return jsonObject
     }
+}
+
+private enum JSONKey: String {
+        
+        case name = "name"
+        case abstract = "abstract"
+        case properties = "properties"
+        case subentities = "subentities"
 }

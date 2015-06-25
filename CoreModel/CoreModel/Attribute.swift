@@ -8,6 +8,8 @@
 
 public struct Attribute<T>: Property {
     
+    public let propertyType: PropertyType = .Attribute
+    
     public let name: String
     
     public let optional: Bool
@@ -19,5 +21,17 @@ public struct Attribute<T>: Property {
         self.name = name
         self.optional = optional
         self.attributeType = attributeType
+    }
+    
+    // MARK: - JSONCodable
+    
+    public static func fromJSON(JSONObject: [String: AnyObject]) -> Attribute<T>? {
+        
+        return nil
+    }
+    
+    public func toJSON() -> JSONObject {
+        
+        
     }
 }
