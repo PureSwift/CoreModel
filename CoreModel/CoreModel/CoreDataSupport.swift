@@ -11,7 +11,7 @@ import CoreData
 
 public extension NSFetchRequest {
     
-    func toSearchRequest<T: ManagedObject>() -> SearchRequest<T>? {
+    func toFetchRequest<T: ManagedObject>() -> FetchRequest<T>? {
         
         return nil
     }

@@ -6,7 +6,7 @@
 //  Copyright © 2015 ColemanCDA. All rights reserved.
 //
 
-public struct SearchRequest<T: ManagedObject> {
+public struct FetchRequest<T: ManagedObject> {
     
     let entity: Entity<T>
     
@@ -16,11 +16,11 @@ public struct SearchRequest<T: ManagedObject> {
     
     let includesSubentities: Bool
     
-    let fetchLimit: UInt?
+    let fetchLimit: UInt
     
-    let fetchOffset: UInt?
+    let fetchOffset: UInt
     
-    public init(entity: Entity<T>, predicate: Predicate? = nil, sortDescriptors: [SortDescriptor], includesSubentities: Bool = true, fetchLimit: UInt? = nil, fetchOffset: UInt? = nil) {
+    public init(entity: Entity<T>, predicate: Predicate? = nil, sortDescriptors: [SortDescriptor], includesSubentities: Bool = true, fetchLimit: UInt = 0, fetchOffset: UInt = 0) {
         
         self.entity = entity
         self.predicate = predicate

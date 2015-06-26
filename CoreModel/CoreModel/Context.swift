@@ -12,11 +12,17 @@ public protocol Context {
     
     var model: Model<ManagedObjectBaseType> { get }
     
-    func performSearch<T: ManagedObject>(searchRequest: SearchRequest<T>) throws -> T
-    
     func delete<T: ManagedObject>(managedObject: T)
     
     func create<T: ManagedObject>(entity: Entity<T>) -> T
     
     func save() throws
+    
+    // MARK: - Fetching
+    
+    func performFetch<T: ManagedObject>(FetchRequest: FetchRequest<T>) throws -> T
+    
+    func findEntity<T: ManagedObject, I>(entity: Entity<T>, withUniqueIdentifier identifier: I, identifierAttribute Attribute<I>) -> T?
+    
+    func findOrCreateEntity<T: ManagedObject, I>(entity: Entity<T>, withUniqueIdentifier identifier: I, identifierAttribute Attribute<I>) -> T
 }
