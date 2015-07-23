@@ -6,9 +6,8 @@
 //  Copyright © 2015 ColemanCDA. All rights reserved.
 //
 
-public enum PropertyType: String {
+public enum PropertyType {
     
-    case Attribute = "Attribute"
-    
-    case Relationship = "Relationship"
+    case Attribute(AttributeType)
+    case Relationship(
 }

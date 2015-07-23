@@ -22,7 +22,7 @@ public enum AttributeType: JSONCodable {
     case Data
     
     /** Attribute can be transformed from and to binary data using a value transformer. The associated value is the value transformer to use. */
-    case Transformable(ValueTransformer)
+    case Transformable(StringAlias)
     
     public func typeName() -> StringAlias {
         
@@ -64,19 +64,19 @@ public enum AttributeType: JSONCodable {
 public enum NumberType: String {
     
     /** Boolean number type. */
-    case Boolean = "Bool"
+    case Boolean
     
     /** Integer number type. */
-    case Integer = "Int"
+    case Integer
     
     /** Floating point number type. */
-    case Float = "Float"
+    case Float
     
     /** Floating point number type. */
-    case Double = "Double"
+    case Double
     
     /** Floating point number type. */
-    case Decimal = "Decimal"
+    case Decimal
 }
 
 private enum JSONKey: String {

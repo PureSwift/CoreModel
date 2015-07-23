@@ -22,7 +22,7 @@ public extension Relationship {
 
 internal enum RelationshipJSONKey: String {
     
-    case destinationEntityName = "destinationEntityName"
-    case inverseRelationshipName = "inverseRelationshipName"
-    case toMany = "toMany"
+    case DestinationEntityName
+    case InverseRelationshipName
+    case ToMany
 }
