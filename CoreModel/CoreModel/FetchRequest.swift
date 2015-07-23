@@ -6,27 +6,23 @@
 //  Copyright © 2015 ColemanCDA. All rights reserved.
 //
 
-public struct FetchRequest<T: ManagedObject> {
+public struct FetchRequest<T: Entity> {
     
-    let entity: Entity<T>
+    public let entity: T.Type
     
-    let predicate: Predicate?
+    public var predicate: Predicate?
     
-    let sortDescriptors: [SortDescriptor]
+    public var sortDescriptors: [SortDescriptor]
     
-    let includesSubentities: Bool
+    public var includesSubentities: Bool = true
     
-    let fetchLimit: UInt
+    public var fetchLimit: UInt = 0
     
-    let fetchOffset: UInt
+    public var fetchOffset: UInt = 0
     
-    public init(entity: Entity<T>, predicate: Predicate? = nil, sortDescriptors: [SortDescriptor], includesSubentities: Bool = true, fetchLimit: UInt = 0, fetchOffset: UInt = 0) {
+    init(entity: T.Type, sortDescriptors: [SortDescriptor]) {
         
         self.entity = entity
-        self.predicate = predicate
         self.sortDescriptors = sortDescriptors
-        self.includesSubentities = includesSubentities
-        self.fetchLimit = fetchLimit
-        self.fetchOffset = fetchOffset
     }
 }

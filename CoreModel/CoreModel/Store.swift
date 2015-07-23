@@ -29,9 +29,6 @@ public protocol Store {
     
     /// Returns the entity's values as a JSON object.
     func values<T: Entity>(forEntity entity: T) throws -> JSONObject
-    
-    /// Attempts to sets the JSON values.
-    func setValues<T: Entity>(values: JSONObject, forEntity entity: T) throws
 }
 
 /// Standard errors for Store.
