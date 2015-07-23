@@ -6,6 +6,8 @@
 //  Copyright © 2015 ColemanCDA. All rights reserved.
 //
 
+import SwiftFoundation
+
 public typealias ValuesObject = [String: Value]
 
 public enum Value {
@@ -23,9 +25,9 @@ public enum AttributeValue {
     
     case Number(NumberValue)
     
-    //case Data(Data)
+    case Data(DataValue)
     
-    //case Date(Date)
+    case Date(DateValue)
 }
 
 public enum NumberValue {
@@ -34,11 +36,11 @@ public enum NumberValue {
     
     case Integer(Int)
     
-    //case Float(Float)
+    case Float(FloatValue)
     
-    //case Double(Double)
+    case Double(DoubleValue)
     
-    //case Decimal(Decimal)
+    case Decimal(DecimalValue)
 }
 
 public enum RelationshipValue {
@@ -48,4 +50,8 @@ public enum RelationshipValue {
     case ToMany([StringValue])
 }
 
-public typealias StringValue = String
+// Typealises to fix compiler error
+
+public typealias DataValue = Data
+
+public typealias DateValue = Date

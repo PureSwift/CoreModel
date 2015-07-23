@@ -10,7 +10,13 @@ public struct CompoundPredicate: Predicate {
     
     public let predicateType = PredicateType.Compound
     
-    public let compoundPredicateType: CompoundPredicateType
+    public var compoundPredicateType: CompoundPredicateType
     
-    public let subpredicates: [Predicate]
+    public var subpredicates: [Predicate]
+    
+    public init(compoundPredicateType: CompoundPredicateType, subpredicates: [Predicate]) {
+        
+        self.compoundPredicateType = compoundPredicateType
+        self.subpredicates = subpredicates
+    }
 }

@@ -6,21 +6,25 @@
 //  Copyright © 2015 ColemanCDA. All rights reserved.
 //
 
-public struct ComparisonPredicate<T>: Predicate {
+public struct ComparisonPredicate: Predicate {
     
     public let predicateType = PredicateType.Comparison
     
-    public let predicateOperator: ComparisonPredicateOperator
+    public var predicateOperator: ComparisonPredicateOperator
     
-    public let modifier: ComparisonPredicateModifier
+    public var modifier: ComparisonPredicateModifier
     
-    public let options: [ComparisonPredicateOption]?
+    public var options: [ComparisonPredicateOption]?
     
-    public let propertyName: String
+    public var propertyName: String
     
-    public let value: T
+    public var value: Value
     
-    public init(predicateOperator: ComparisonPredicateOperator, propertyName: String, value: T, modifier: ComparisonPredicateModifier = .All, options: [ComparisonPredicateOption]? = nil) {
+    public init(predicateOperator: ComparisonPredicateOperator = .EqualTo,
+        propertyName: String,
+        value: Value,
+        modifier: ComparisonPredicateModifier = .All,
+        options: [ComparisonPredicateOption]? = nil) {
         
         self.predicateOperator = predicateOperator
         self.modifier = modifier

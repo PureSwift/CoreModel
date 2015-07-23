@@ -6,7 +6,9 @@
 //  Copyright © 2015 ColemanCDA. All rights reserved.
 //
 
-public protocol Property: JSONCodable {
+public protocol Property {
+    
+    typealias PropertyType
     
     var name: String { get }
     
@@ -15,9 +17,24 @@ public protocol Property: JSONCodable {
     var propertyType: PropertyType { get }
 }
 
-internal enum PropertyJSONKey: String {
+public struct Attribute {
     
-    case name = "name"
-    case optional = "optional"
-    case propertyType = "propertyType"
+    var name: String
+    
+    var optional: Bool = false
+    
+    var propertyType: AttributeType
+}
+
+public struct Relationship {
+    
+    var name: String
+    
+    var optional: Bool = false
+    
+    var propertyType: RelationshipType
+    
+    var destinationEntityName: String
+    
+    var inverseRelationshipName: String
 }

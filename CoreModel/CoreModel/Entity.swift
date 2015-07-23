@@ -14,7 +14,7 @@ public protocol Entity {
     /// Entity's name
     static var entityName: String { get }
     
-    static var attributes: [String] { get }
+    static var attributes: [Attribute] { get }
     
-    static var relationships: [String] { get }
+    static var relationships: [Relationship] { get }
 }

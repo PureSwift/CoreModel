@@ -10,3 +10,9 @@ public protocol Predicate {
     
     var predicateType: PredicateType { get }
 }
+
+public enum PredicateType: String {
+    
+    case Comparison
+    case Compound
+}
