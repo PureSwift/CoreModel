@@ -10,6 +10,8 @@
 		1A1B5A911B60A82A0025FE7C /* Store.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A1B5A901B60A82A0025FE7C /* Store.swift */; };
 		1A1B5A931B60B06E0025FE7C /* ValueType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A1B5A921B60B06E0025FE7C /* ValueType.swift */; };
 		1A1B5A9A1B60CB420025FE7C /* Resource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A1B5A991B60CB420025FE7C /* Resource.swift */; };
+		1A1B5A9D1B616AC30025FE7C /* Value.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A1B5A9C1B616AC30025FE7C /* Value.swift */; };
+		1A1B5A9F1B6171840025FE7C /* ValueJSON.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A1B5A9E1B6171840025FE7C /* ValueJSON.swift */; };
 		6E419EC51B3C3D6100E72876 /* JSON.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E419EC41B3C3D6100E72876 /* JSON.swift */; };
 		6E419EC91B3C531D00E72876 /* PropertyType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E419EC81B3C531D00E72876 /* PropertyType.swift */; };
 		6E7474881B3C34630039596D /* ComparisonPredicateOperator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E7474871B3C34630039596D /* ComparisonPredicateOperator.swift */; };
@@ -48,6 +50,8 @@
 		1A1B5A901B60A82A0025FE7C /* Store.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Store.swift; sourceTree = "<group>"; };
 		1A1B5A921B60B06E0025FE7C /* ValueType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ValueType.swift; sourceTree = "<group>"; };
 		1A1B5A991B60CB420025FE7C /* Resource.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Resource.swift; sourceTree = "<group>"; };
+		1A1B5A9C1B616AC30025FE7C /* Value.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Value.swift; sourceTree = "<group>"; };
+		1A1B5A9E1B6171840025FE7C /* ValueJSON.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ValueJSON.swift; sourceTree = "<group>"; };
 		6E419EC41B3C3D6100E72876 /* JSON.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JSON.swift; sourceTree = "<group>"; };
 		6E419EC81B3C531D00E72876 /* PropertyType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PropertyType.swift; sourceTree = "<group>"; };
 		6E7474871B3C34630039596D /* ComparisonPredicateOperator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ComparisonPredicateOperator.swift; sourceTree = "<group>"; };
@@ -140,6 +144,8 @@
 				6EAF65C01B3BB81B00884605 /* Entity.swift */,
 				1A1B5A991B60CB420025FE7C /* Resource.swift */,
 				1A1B5A901B60A82A0025FE7C /* Store.swift */,
+				1A1B5A9C1B616AC30025FE7C /* Value.swift */,
+				1A1B5A9E1B6171840025FE7C /* ValueJSON.swift */,
 				6EAF65CD1B3BE31D00884605 /* Search Description */,
 				6EAF65BD1B3BB40E00884605 /* Model Description */,
 				6EAF65971B3BAA6A00884605 /* Info.plist */,
@@ -159,9 +165,9 @@
 		6EAF65BD1B3BB40E00884605 /* Model Description */ = {
 			isa = PBXGroup;
 			children = (
-				6E419EC81B3C531D00E72876 /* PropertyType.swift */,
 				1A1B5A921B60B06E0025FE7C /* ValueType.swift */,
 				6EAF65B31B3BAC3E00884605 /* Property.swift */,
+				6E419EC81B3C531D00E72876 /* PropertyType.swift */,
 				6EAF65B51B3BAC4800884605 /* Attribute.swift */,
 				6EAF65BE1B3BB4F600884605 /* AttributeType.swift */,
 				6EAF65B71B3BAC5000884605 /* Relationship.swift */,
@@ -293,6 +299,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				6E7474881B3C34630039596D /* ComparisonPredicateOperator.swift in Sources */,
+				1A1B5A9F1B6171840025FE7C /* ValueJSON.swift in Sources */,
 				6EAF65B61B3BAC4800884605 /* Attribute.swift in Sources */,
 				6EAF65D11B3BEB2000884605 /* PredicateType.swift in Sources */,
 				1A1B5A9A1B60CB420025FE7C /* Resource.swift in Sources */,
@@ -312,6 +319,7 @@
 				6EAF65D51B3BEC8200884605 /* CompoundPredicate.swift in Sources */,
 				6EAF65D31B3BEB9600884605 /* ComparisonPredicate.swift in Sources */,
 				6EAF65C11B3BB81B00884605 /* Entity.swift in Sources */,
+				1A1B5A9D1B616AC30025FE7C /* Value.swift in Sources */,
 				6EAF65CF1B3BE34600884605 /* SortDescriptor.swift in Sources */,
 				6E419EC91B3C531D00E72876 /* PropertyType.swift in Sources */,
 			);
@@ -456,6 +464,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.colemancda.CoreModel;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
 			};
 			name = Release;
 		};
