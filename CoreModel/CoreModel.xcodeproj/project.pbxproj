@@ -167,8 +167,8 @@
 			children = (
 				1A1B5A921B60B06E0025FE7C /* ValueType.swift */,
 				6EAF65B31B3BAC3E00884605 /* Property.swift */,
-				6E419EC81B3C531D00E72876 /* PropertyType.swift */,
 				6EAF65B51B3BAC4800884605 /* Attribute.swift */,
+				6E419EC81B3C531D00E72876 /* PropertyType.swift */,
 				6EAF65BE1B3BB4F600884605 /* AttributeType.swift */,
 				6EAF65B71B3BAC5000884605 /* Relationship.swift */,
 				6EAF65C91B3BD12400884605 /* ToOneRelationship.swift */,
@@ -248,7 +248,7 @@
 			attributes = {
 				LastSwiftUpdateCheck = 0700;
 				LastUpgradeCheck = 0700;
-				ORGANIZATIONNAME = ColemanCDA;
+				ORGANIZATIONNAME = PureSwift;
 				TargetAttributes = {
 					6EAF65911B3BAA6A00884605 = {
 						CreatedOnToolsVersion = 7.0;
@@ -441,7 +441,7 @@
 				INFOPLIST_FILE = CoreModel/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.colemancda.CoreModel;
+				PRODUCT_BUNDLE_IDENTIFIER = org.pureswift.CoreModel;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -461,7 +461,7 @@
 				INFOPLIST_FILE = CoreModel/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.colemancda.CoreModel;
+				PRODUCT_BUNDLE_IDENTIFIER = org.pureswift.CoreModel;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";

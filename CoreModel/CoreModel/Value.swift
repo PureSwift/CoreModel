@@ -10,6 +10,8 @@ public typealias ValuesObject = [String: Value]
 
 public enum Value {
     
+    case Null
+    
     case Attribute(AttributeValue)
     
     case Relationship(RelationshipValue)
@@ -17,17 +19,13 @@ public enum Value {
 
 public enum AttributeValue {
     
-    case Null
-    
     case String(StringValue)
     
     case Number(NumberValue)
     
-    //case Data([UInt8])
+    //case Data(Data)
     
     //case Date(Date)
-    
-    //case Transformable([UInt8], String)
 }
 
 public enum NumberValue {
@@ -45,9 +43,9 @@ public enum NumberValue {
 
 public enum RelationshipValue {
     
-    case ToOne((String, String))
+    case ToOne(StringValue)
     
-    case ToMany([(String, String)])
+    case ToMany([StringValue])
 }
 
 public typealias StringValue = String

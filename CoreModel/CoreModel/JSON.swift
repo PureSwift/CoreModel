@@ -10,7 +10,7 @@ public typealias JSONArray = [JSONValue]
 
 public typealias JSONObject = [String: JSONValue]
 
-public enum JSONValue {
+public enum JSONValue: RawRepresentable {
     
     case Null
     
@@ -25,15 +25,53 @@ public enum JSONValue {
     
     /// JSON value a JSON object
     case Object(JSONObject)
+    
+    // MARK: RawRepresentable
+    
+    public var rawValue: Any {
+        
+        switch self {
+            
+        case .Null: return Null
+            
+        case .String(let string): return string
+            
+        case .Number(let number): return number.rawValue
+            
+        case .Array(let array): return array
+        }
+    }
+    
+    public init?(rawValue: Any) {
+        
+        
+    }
 }
 
-public enum JSONNumber {
+public enum JSONNumber: RawRepresentable {
     
     case Boolean(Bool)
     
     case Integer(Int)
+    
+    // MARK: RawRepresentable
+    
+    public var rawValue: Any {
+        
+        
+    }
+    
+    public init?(rawValue: Any) {
+        
+        
+    }
 }
 
 // Typealiases only due to compiler error
 
 public typealias JSONString = String
+
+public protocol JSONCodable {
+    
+    
+}
