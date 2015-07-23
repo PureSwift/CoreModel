@@ -12,6 +12,7 @@
 		1A1B5A9A1B60CB420025FE7C /* Resource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A1B5A991B60CB420025FE7C /* Resource.swift */; };
 		1A1B5A9D1B616AC30025FE7C /* Value.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A1B5A9C1B616AC30025FE7C /* Value.swift */; };
 		1A1B5A9F1B6171840025FE7C /* ValueJSON.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A1B5A9E1B6171840025FE7C /* ValueJSON.swift */; };
+		1A1B5AB11B61B5100025FE7C /* SwiftFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1A1B5AB01B61B5100025FE7C /* SwiftFoundation.framework */; };
 		6E7474881B3C34630039596D /* ComparisonPredicateOperator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E7474871B3C34630039596D /* ComparisonPredicateOperator.swift */; };
 		6E74748C1B3C364B0039596D /* ComparisonPredicateModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E74748B1B3C364B0039596D /* ComparisonPredicateModifier.swift */; };
 		6E74748E1B3C36790039596D /* ComparisonPredicateOption.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E74748D1B3C36790039596D /* ComparisonPredicateOption.swift */; };
@@ -29,20 +30,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		1A1B5AAB1B619C2F0025FE7C /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 1A1B5AA51B619C2E0025FE7C /* SwiftFoundation.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 6E30BA0D1B40F543009B1B49;
-			remoteInfo = SwiftFoundation;
-		};
-		1A1B5AAD1B619C2F0025FE7C /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 1A1B5AA51B619C2E0025FE7C /* SwiftFoundation.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 6E30BA171B40F543009B1B49;
-			remoteInfo = SwiftFoundationTests;
-		};
 		6EAF659E1B3BAA6A00884605 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 6EAF65891B3BAA6A00884605 /* Project object */;
@@ -58,7 +45,7 @@
 		1A1B5A991B60CB420025FE7C /* Resource.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Resource.swift; sourceTree = "<group>"; };
 		1A1B5A9C1B616AC30025FE7C /* Value.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Value.swift; sourceTree = "<group>"; };
 		1A1B5A9E1B6171840025FE7C /* ValueJSON.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ValueJSON.swift; sourceTree = "<group>"; };
-		1A1B5AA51B619C2E0025FE7C /* SwiftFoundation.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SwiftFoundation.xcodeproj; path = ../Carthage/Checkouts/SwiftFoundation/SwiftFoundation/SwiftFoundation.xcodeproj; sourceTree = "<group>"; };
+		1A1B5AB01B61B5100025FE7C /* SwiftFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftFoundation.framework; path = ../Carthage/Build/Mac/SwiftFoundation.framework; sourceTree = "<group>"; };
 		6E7474871B3C34630039596D /* ComparisonPredicateOperator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ComparisonPredicateOperator.swift; sourceTree = "<group>"; };
 		6E74748B1B3C364B0039596D /* ComparisonPredicateModifier.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ComparisonPredicateModifier.swift; sourceTree = "<group>"; };
 		6E74748D1B3C36790039596D /* ComparisonPredicateOption.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ComparisonPredicateOption.swift; sourceTree = "<group>"; };
@@ -83,6 +70,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1A1B5AB11B61B5100025FE7C /* SwiftFoundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -97,13 +85,12 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		1A1B5AA61B619C2E0025FE7C /* Products */ = {
+		1A1B5AB21B61B51A0025FE7C /* Dependencies */ = {
 			isa = PBXGroup;
 			children = (
-				1A1B5AAC1B619C2F0025FE7C /* SwiftFoundation.framework */,
-				1A1B5AAE1B619C2F0025FE7C /* SwiftFoundationTests.xctest */,
+				1A1B5AB01B61B5100025FE7C /* SwiftFoundation.framework */,
 			);
-			name = Products;
+			name = Dependencies;
 			sourceTree = "<group>";
 		};
 		6E7474891B3C34F70039596D /* Comparison Predicate */ = {
@@ -129,7 +116,7 @@
 		6EAF65881B3BAA6A00884605 = {
 			isa = PBXGroup;
 			children = (
-				1A1B5AA51B619C2E0025FE7C /* SwiftFoundation.xcodeproj */,
+				1A1B5AB21B61B51A0025FE7C /* Dependencies */,
 				6EAF65941B3BAA6A00884605 /* CoreModel */,
 				6EAF65A01B3BAA6A00884605 /* CoreModelTests */,
 				6EAF65931B3BAA6A00884605 /* Products */,
@@ -269,12 +256,6 @@
 			mainGroup = 6EAF65881B3BAA6A00884605;
 			productRefGroup = 6EAF65931B3BAA6A00884605 /* Products */;
 			projectDirPath = "";
-			projectReferences = (
-				{
-					ProductGroup = 1A1B5AA61B619C2E0025FE7C /* Products */;
-					ProjectRef = 1A1B5AA51B619C2E0025FE7C /* SwiftFoundation.xcodeproj */;
-				},
-			);
 			projectRoot = "";
 			targets = (
 				6EAF65911B3BAA6A00884605 /* CoreModel */,
@@ -282,23 +263,6 @@
 			);
 		};
 /* End PBXProject section */
-
-/* Begin PBXReferenceProxy section */
-		1A1B5AAC1B619C2F0025FE7C /* SwiftFoundation.framework */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.framework;
-			path = SwiftFoundation.framework;
-			remoteRef = 1A1B5AAB1B619C2F0025FE7C /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		1A1B5AAE1B619C2F0025FE7C /* SwiftFoundationTests.xctest */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.cfbundle;
-			path = SwiftFoundationTests.xctest;
-			remoteRef = 1A1B5AAD1B619C2F0025FE7C /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		6EAF65901B3BAA6A00884605 /* Resources */ = {
