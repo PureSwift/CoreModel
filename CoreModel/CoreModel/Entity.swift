@@ -6,16 +6,22 @@
 //  Copyright © 2015 ColemanCDA. All rights reserved.
 //
 
-/// Defines an interface for class or struct
+/// Defines the model for an entity
 public protocol Entity {
     
-    // MARK: Static Model
+    // MARK: Model
     
+    /// Entity's name
     static var entityName: String { get }
+    
+    /// Subentities
+    static var subEntities: [Entity.Type]? { get }
     
     static var attributes: [String] { get }
     
     static var relationships: [String] { get }
+    
+    // MARK: Instance
     
     /// Initializes an entity instance with the specified resource ID.
     init(resourceID: String)

@@ -6,21 +6,43 @@
 //  Copyright © 2015 ColemanCDA. All rights reserved.
 //
 
+/// Defines the interface for CoreModel's Store type.
 public protocol Store {
     
-    // The model the persistent store will handle.
+    /// The model the persistent store will handle.
     var model: [Entity] { get }
     
-    /// Fetches the entity with the specified
-    func get<entity: T>, withResourceID resourceID: String) throws -> T
+    /// Queries the store for entities matching the fetch request.
+    func fetch<T: Entity>(fetchRequest: FetchRequest<T>) throws -> [Resource<T>]
     
-    func create<T: Entity>(entity: T, initialValues: JSONObject?) throws
+    /// Creates the specified entity
+    func create<T: Entity>(entity: T.Type, initialValues: JSONObject?) throws -> Resource<T>
     
-    func delete(entity entityName: String, resourceID: String)
+    /// Fetches the specified entity.
+    func get<T: Entity>(entity: T.Type, withResourceID resourceID: String) throws -> Resource<T>
+    
+    /// Deletes the specified entity.
+    func delete<T: Entity>(resource: Resource<T>) throws
+    
+    /// Edits the specified entity.
+    func edit<T: Entity>(resource: Resource<T>, changes: JSONObject) throws
     
     /// Returns the entity's values as a JSON object.
-    var values: JSONObject { get }
+    func values<T: Entity>(forEntity entity: T) throws -> JSONObject
     
-    /// Attempts to sets the JSON values. Returns false for invalid data
-    func setValues(values: JSONObject) -> Bool
+    /// Attempts to sets the JSON values.
+    func setValues<T: Entity>(values: JSONObject, forEntity entity: T) throws
+}
+
+/// Standard errors for Store.
+public enum StoreError: ErrorType {
+    
+    /// The entity provided doesn't belong to the store's schema.
+    case InvalidEntity
+    
+    /// Invalid Values were given to the Store.
+    case InvalidValues
+    
+    /// The specified entity could not be found.
+    case NotFound
 }

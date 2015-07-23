@@ -8,7 +8,7 @@
 
 public enum PredicateType: String {
     
-    case Comparison = "Comparison"
-    case Compound = "Compound"
+    case Comparison
+    case Compound
     
 }

@@ -9,5 +9,5 @@
 public enum PropertyType {
     
     case Attribute(AttributeType)
-    case Relationship(
+    case Relationship()
 }

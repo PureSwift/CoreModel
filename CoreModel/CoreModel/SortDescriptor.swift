@@ -8,9 +8,9 @@
 
 public struct SortDescriptor {
     
-    public let ascending: Bool
+    public var ascending: Bool
     
-    public let propertyName: String
+    public var propertyName: String
     
     public init(propertyName: String, ascending: Bool = true) {
         
