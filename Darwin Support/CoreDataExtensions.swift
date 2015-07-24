@@ -9,9 +9,37 @@
 import Foundation
 import CoreData
 
-internal extension NSManagedObject {
+public extension NSManagedObjectContext {
+    
+    /// Wraps the block to allow for error throwing.
+    @available(OSX 10.7, *)
+    func performErrorBlock(block: () throws -> Void) throws {
         
-    /** Get an array from a to-many relationship. */
+        var blockError: ErrorType?
+        
+        self.performBlockAndWait { () -> Void in
+            
+            do {
+                try block()
+            }
+            catch {
+                
+                blockError = error
+            }
+        }
+        
+        if blockError != nil {
+            
+            throw blockError!
+        }
+        
+        return
+    }
+}
+
+public extension NSManagedObject {
+    
+    /// Get an array from a to-many relationship.
     func arrayValueForToManyRelationship(relationship key: String) -> [NSManagedObject]? {
         
         // assert relationship exists
@@ -44,7 +72,7 @@ internal extension NSManagedObject {
         return set.allObjects as? [NSManagedObject]
     }
     
-    /** Wraps the -valueForKey: method in the context's queue. */
+    /// Wraps the ```-valueForKey:``` method in the context's queue.
     func valueForKey(key: String, managedObjectContext: NSManagedObjectContext) -> AnyObject? {
         
         var value: AnyObject?
@@ -58,9 +86,12 @@ internal extension NSManagedObject {
     }
 }
 
-internal extension NSPredicate {
+public extension NSPredicate {
     
-    /** Transverses the predicate tree and returns all comparison predicates. If this is called on an instance of NSComparisonPredicate, then an array with self is returned. Only use with concrete subclasses of NSPredicate. */
+    /// Transverses the predicate tree and returns all comparison predicates. 
+    /// If this is called on an instance of ```NSComparisonPredicate```, then an array with self is returned.
+    ///
+    /// - note: Only use with concrete subclasses of ```NSPredicate```.
     func extractComparisonSubpredicates() -> [NSComparisonPredicate] {
         
         assert(self.dynamicType !== NSPredicate.self, "Cannot extract comparison subpredicates from NSPredicate, must use concrete subclasses")

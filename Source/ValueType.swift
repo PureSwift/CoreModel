@@ -51,4 +51,25 @@ public enum RelationshipType: String {
     
     case ToOne
     case ToMany
+    
+    public init(toMany: Bool) {
+        
+        if toMany {
+            
+            self = .ToMany
+        }
+        else {
+            
+            self = .ToOne
+        }
+    }
+    
+    public var toMany: Bool {
+        
+        switch self {
+            
+        case .ToMany: return true
+        case .ToOne: return false
+        }
+    }
 }

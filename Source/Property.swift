@@ -21,9 +21,16 @@ public struct Attribute {
     
     var name: String
     
-    var optional: Bool = false
+    var optional: Bool
     
     var propertyType: AttributeType
+    
+    init(name: String, propertyType: AttributeType, optional: Bool = false) {
+        
+        self.name = name
+        self.propertyType = propertyType
+        self.optional = optional
+    }
 }
 
 public struct Relationship {
@@ -37,4 +44,17 @@ public struct Relationship {
     var destinationEntityName: String
     
     var inverseRelationshipName: String
+    
+    init(name: String,
+        propertyType: RelationshipType,
+        optional: Bool = false,
+        destinationEntityName: String,
+        inverseRelationshipName: String) {
+        
+        self.name = name
+        self.propertyType = propertyType
+        self.optional = optional
+        self.destinationEntityName = destinationEntityName
+        self.inverseRelationshipName = inverseRelationshipName
+    }
 }
