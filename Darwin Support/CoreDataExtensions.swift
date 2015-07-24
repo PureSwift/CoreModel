@@ -13,7 +13,7 @@ public extension NSManagedObjectContext {
     
     /// Wraps the block to allow for error throwing.
     @available(OSX 10.7, *)
-    func performErrorBlock(block: () throws -> Void) throws {
+    func performErrorBlockAndWait(block: () throws -> Void) throws {
         
         var blockError: ErrorType?
         
