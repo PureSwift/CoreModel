@@ -6,7 +6,7 @@
 //  Copyright © 2015 PureSwift. All rights reserved.
 //
 
-/// Defines the interface for CoreModel's Store type.
+/// Defines the interface for **CoreModel**'s ```Store``` type.
 public protocol Store {
     
     /// The model the persistent store will handle.
@@ -37,5 +37,12 @@ public protocol Store {
 /// Common errors for ```Store```.
 public enum StoreError: ErrorType {
     
+    /// The entity provided doesn't belong to the ```Store```'s schema.
+    case InvalidEntity
+    
+    /// Invalid ```ValuesObject``` was given to the ```Store```.
+    case InvalidValues
+    
+    /// The specified resource could not be found.
     case NotFound
 }
