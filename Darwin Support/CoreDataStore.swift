@@ -44,9 +44,14 @@ public final class CoreDataStore: Store {
     
     public func delete(resource: Resource) throws {
         
-        guard let entity = self.managedObjectContext.persistentStoreCoordinator?.managedObjectModel.entitiesByName[resource.entityName] else { return }
+        guard let entity = self.managedObjectContext.persistentStoreCoordinator?.managedObjectModel.entitiesByName[resource.entityName] else { throw StoreError.InvalidEntity }
         
-        guard let managedObjectID = try self.findEntity(entity, withResourceID: resource.resourceID) else { return }
+        guard let managedObjectID = try self.findEntity(entity, withResourceID: resource.resourceID)
+            else { throw StoreError.NotFound }
+        
+        let managedObject = self.managedObjectContext.objectWithID(managedObjectID)
+        
+        try self.managedObjectContext.deleteObject(managedObject)
     }
     
     // MARK: - Utility
