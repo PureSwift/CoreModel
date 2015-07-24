@@ -46,6 +46,7 @@
 		1A1B5A9C1B616AC30025FE7C /* Value.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Value.swift; sourceTree = "<group>"; };
 		1A1B5A9E1B6171840025FE7C /* ValueJSON.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ValueJSON.swift; sourceTree = "<group>"; };
 		1A1B5AB01B61B5100025FE7C /* SwiftFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftFoundation.framework; path = ../Carthage/Build/Mac/SwiftFoundation.framework; sourceTree = "<group>"; };
+		1A1B5AB31B61C26B0025FE7C /* CoreDataStore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreDataStore.swift; sourceTree = "<group>"; };
 		6E7474871B3C34630039596D /* ComparisonPredicateOperator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ComparisonPredicateOperator.swift; sourceTree = "<group>"; };
 		6E74748B1B3C364B0039596D /* ComparisonPredicateModifier.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ComparisonPredicateModifier.swift; sourceTree = "<group>"; };
 		6E74748D1B3C36790039596D /* ComparisonPredicateOption.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ComparisonPredicateOption.swift; sourceTree = "<group>"; };
@@ -93,6 +94,17 @@
 			name = Dependencies;
 			sourceTree = "<group>";
 		};
+		1A1B5AB51B61C6000025FE7C /* Darwin Support */ = {
+			isa = PBXGroup;
+			children = (
+				6EAF65971B3BAA6A00884605 /* Info.plist */,
+				6EAF65951B3BAA6A00884605 /* CoreModel.h */,
+				1A1B5AB31B61C26B0025FE7C /* CoreDataStore.swift */,
+			);
+			name = "Darwin Support";
+			path = "../Darwin Support";
+			sourceTree = "<group>";
+		};
 		6E7474891B3C34F70039596D /* Comparison Predicate */ = {
 			isa = PBXGroup;
 			children = (
@@ -135,16 +147,16 @@
 		6EAF65941B3BAA6A00884605 /* CoreModel */ = {
 			isa = PBXGroup;
 			children = (
-				6EAF65951B3BAA6A00884605 /* CoreModel.h */,
 				1A1B5A991B60CB420025FE7C /* Resource.swift */,
 				1A1B5A901B60A82A0025FE7C /* Store.swift */,
 				1A1B5A9C1B616AC30025FE7C /* Value.swift */,
 				1A1B5A9E1B6171840025FE7C /* ValueJSON.swift */,
 				6EAF65BD1B3BB40E00884605 /* Model Description */,
 				6EAF65CD1B3BE31D00884605 /* Search Description */,
-				6EAF65971B3BAA6A00884605 /* Info.plist */,
+				1A1B5AB51B61C6000025FE7C /* Darwin Support */,
 			);
-			path = CoreModel;
+			name = CoreModel;
+			path = ../Source;
 			sourceTree = "<group>";
 		};
 		6EAF65A01B3BAA6A00884605 /* CoreModelTests */ = {
@@ -418,7 +430,7 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				FRAMEWORK_VERSION = A;
-				INFOPLIST_FILE = CoreModel/Info.plist;
+				INFOPLIST_FILE = "$(SRCROOT)/../Darwin Support/Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = org.pureswift.CoreModel;
@@ -438,7 +450,7 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				FRAMEWORK_VERSION = A;
-				INFOPLIST_FILE = CoreModel/Info.plist;
+				INFOPLIST_FILE = "$(SRCROOT)/../Darwin Support/Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = org.pureswift.CoreModel;
