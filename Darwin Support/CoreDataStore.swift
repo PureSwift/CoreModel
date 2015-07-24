@@ -17,17 +17,15 @@ public final class CoreDataStore: Store {
     /// The managed object context this ```Store``` is backed by.
     public let managedObjectContext: NSManagedObjectContext
     
-    /// Name of the attribute that all entities
+    /// Name of the attribute that all entities have that will be used for uniquing.
     public let resourceIDAttributeName: String
     
     // MARK: - Initialization
     
     public init?(managedObjectContext: NSManagedObjectContext) {
         
-        guard let model = managedObjectContext.persistentStoreCoordinator.managedObjectModel.toModel else { r
-            
-            return nil
-        }
+        guard let model = managedObjectContext.persistentStoreCoordinator?.managedObjectModel.toModel()
+            else { return nil }
         
         self.model = model
         self.managedObjectContext = managedObjectContext
@@ -39,14 +37,46 @@ public final class CoreDataStore: Store {
     
     public func exists(resource: Resource) throws -> Bool {
         
+        guard let entity = self.managedObjectContext.persistentStoreCoordinator?.managedObjectModel.entitiesByName[resource.entityName] else { return false }
         
+        return (try self.findEntity(entity, withResourceID: resource.resourceID) != nil)
     }
     
+    public func delete(resource: Resource) throws {
+        
+        guard let entity = self.managedObjectContext.persistentStoreCoordinator?.managedObjectModel.entitiesByName[resource.entityName] else { return }
+        
+        guard let managedObjectID = try self.findEntity(entity, withResourceID: resource.resourceID) else { return }
+    }
     
+    // MARK: - Utility
+    
+    public func findEntity(entity: NSEntityDescription, withResourceID resourceID: String) throws -> NSManagedObjectID? {
+        
+        // get cached resource...
+        
+        let fetchRequest = NSFetchRequest(entityName: entity.name!)
+        
+        fetchRequest.fetchLimit = 1
+        
+        fetchRequest.resultType = NSFetchRequestResultType.ManagedObjectIDResultType
+        
+        fetchRequest.includesSubentities = false
+        
+        // create predicate
+        
+        fetchRequest.predicate = NSComparisonPredicate(leftExpression: NSExpression(forKeyPath: self.resourceIDAttributeName), rightExpression: NSExpression(forConstantValue: resourceID), modifier: NSComparisonPredicateModifier.DirectPredicateModifier, type: NSPredicateOperatorType.EqualToPredicateOperatorType, options: NSComparisonPredicateOptions.NormalizedPredicateOption)
+        
+        // fetch
+        
+        let results = try managedObjectContext.executeFetchRequest(fetchRequest) as! [NSManagedObjectID]
+        
+        let objectID = results.first
+        
+        return objectID
+    }
 }
 
-// MARK: - CoreData Extensions
 
 
 
-// MARK: - Model Conversion

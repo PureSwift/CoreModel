@@ -19,7 +19,7 @@ public protocol Store {
     func exists(resource: Resource) throws -> Bool
     
     /// Determines whether the specified resources exist.
-    func exists(resources: [Resource]) throws -> Bool
+    func exist(resources: [Resource]) throws -> Bool
     
     /// Creates an entity with the specified values.
     func create(entity entityName: String, initialValues: ValuesObject?) throws -> Resource
@@ -32,4 +32,10 @@ public protocol Store {
     
     /// Returns the entity's values as a JSON object.
     func values(forResource resource: Resource) throws -> ValuesObject
+}
+
+/// Common errors for ```Store```.
+public enum StoreError: ErrorType {
+    
+    case NotFound
 }
