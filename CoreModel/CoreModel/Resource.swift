@@ -6,16 +6,16 @@
 //  Copyright © 2015 ColemanCDA. All rights reserved.
 //
 
-public struct Resource<T: Entity> {
+public struct Resource {
     
-    let entity: T.Type
+    let entityName: String
     
     let resourceID: String
     
     /// Initializes a resource with the specified resource ID.
-    public init(entity: T.Type, resourceID: String) {
+    public init(entity: String, resourceID: String) {
         
-        self.entity = entity
+        self.entityName = entity
         self.resourceID = resourceID
     }
 }

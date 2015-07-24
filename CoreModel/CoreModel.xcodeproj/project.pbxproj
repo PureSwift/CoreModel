@@ -140,8 +140,8 @@
 				1A1B5A901B60A82A0025FE7C /* Store.swift */,
 				1A1B5A9C1B616AC30025FE7C /* Value.swift */,
 				1A1B5A9E1B6171840025FE7C /* ValueJSON.swift */,
-				6EAF65CD1B3BE31D00884605 /* Search Description */,
 				6EAF65BD1B3BB40E00884605 /* Model Description */,
+				6EAF65CD1B3BE31D00884605 /* Search Description */,
 				6EAF65971B3BAA6A00884605 /* Info.plist */,
 			);
 			path = CoreModel;

@@ -10,26 +10,26 @@
 public protocol Store {
     
     /// The model the persistent store will handle.
-    var model: [Entity.Type] { get }
+    var model: [Entity] { get }
     
     /// Queries the store for entities matching the fetch request.
-    func fetch<T: Entity>(fetchRequest: FetchRequest<T>) throws -> [Resource<T>]
+    func fetch(fetchRequest: FetchRequest) throws -> [Resource]
     
     /// Fetches the specified specified by resource ID.
-    func fetch<T: Entity>(entity: T.Type, withResourceID resourceID: String) throws -> Resource<T>?
+    func fetch(entity entityName: String, withResourceID resourceID: String) throws -> Resource?
     
     /// Fetches the entities specified in the resource IDs.
-    func fetch<T: Entity>(entity: T.Type, withResourceIDs resourceIDs: [String]) throws -> [Resource<T>]
+    func fetch(entity entityName: String, withResourceIDs resourceIDs: [String]) throws -> [Resource]
     
     /// Creates the specified entity
-    func create<T: Entity>(entity: T.Type, initialValues: ValuesObject?) throws -> Resource<T>
+    func create(entity entityName: String, initialValues: ValuesObject?) throws -> Resource
     
     /// Deletes the specified entity.
-    func delete<T: Entity>(resource: Resource<T>) throws
+    func delete(resource: Resource) throws
     
     /// Edits the specified entity.
-    func edit<T: Entity>(resource: Resource<T>, changes: ValuesObject) throws
+    func edit(resource: Resource, changes: ValuesObject) throws
     
     /// Returns the entity's values as a JSON object.
-    func values<T: Entity>(forEntity entity: T) throws -> ValuesObject
+    func values(forResource resource: Resource) throws -> ValuesObject
 }

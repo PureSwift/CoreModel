@@ -7,14 +7,18 @@
 //
 
 /// Defines the model for an entity
-public protocol Entity {
+public struct Entity {
     
     // MARK: Model
     
-    /// Entity's name
-    static var entityName: String { get }
+    public var entityName: String
     
-    static var attributes: [Attribute] { get }
+    public var attributes: [Attribute] = []
     
-    static var relationships: [Relationship] { get }
+    public var relationships: [Relationship] = []
+    
+    public init(entityName: String) {
+        
+        self.entityName = entityName
+    }
 }

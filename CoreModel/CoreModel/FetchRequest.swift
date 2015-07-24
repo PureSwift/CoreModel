@@ -6,9 +6,9 @@
 //  Copyright © 2015 ColemanCDA. All rights reserved.
 //
 
-public struct FetchRequest<T: Entity> {
+public struct FetchRequest {
     
-    public let entity: T.Type
+    public var entityName: String
     
     public var sortDescriptors: [SortDescriptor]
     
@@ -18,9 +18,9 @@ public struct FetchRequest<T: Entity> {
     
     public var fetchOffset: UInt = 0
     
-    public init(entity: T.Type, sortDescriptors: [SortDescriptor]) {
+    public init(entityName: String, sortDescriptors: [SortDescriptor]) {
         
-        self.entity = entity
+        self.entityName = entityName
         self.sortDescriptors = sortDescriptors
     }
 }
