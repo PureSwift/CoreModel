@@ -39,7 +39,7 @@ public final class CoreDataStore: Store {
         
         guard let entity = self.managedObjectContext.persistentStoreCoordinator?.managedObjectModel.entitiesByName[resource.entityName] else { throw StoreError.InvalidEntity }
         
-        var exists: Bool!
+        var exists: Bool = false
         
         try self.managedObjectContext.performErrorBlockAndWait({ () -> Void in
             
@@ -64,6 +64,28 @@ public final class CoreDataStore: Store {
             
             try self.managedObjectContext.save()
         }
+    }
+    
+    public func edit(resource: Resource, changes: ValuesObject) throws {
+        
+        guard let entity = self.managedObjectContext.persistentStoreCoordinator?.managedObjectModel.entitiesByName[resource.entityName] else { throw StoreError.InvalidEntity }
+        
+        try self.managedObjectContext.performErrorBlockAndWait({ () -> Void in
+            
+            guard let objectID = try self.findEntity(entity, withResourceID: resource.resourceID)
+                else { throw StoreError.NotFound }
+            
+            let managedObject = self.managedObjectContext.objectWithID(objectID)
+            
+            try managedObject.setValues(changes, store: self)
+            
+            try self.managedObjectContext.save()
+        })
+    }
+    
+    public func values(forResource resource: Resource) throws -> ValuesObject {
+        
+        
     }
     
     // MARK: - Utility

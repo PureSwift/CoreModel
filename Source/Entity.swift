@@ -7,7 +7,7 @@
 //
 
 /// Defines the model for an entity
-public struct Entity {
+public struct Entity: Equatable {
     
     // MARK: Model
     
@@ -21,4 +21,9 @@ public struct Entity {
         
         self.entityName = entityName
     }
+}
+
+public func == (lhs: Entity, rhs: Entity) -> Bool {
+    
+    return lhs.entityName == rhs.entityName && lhs.attributes == rhs.attributes && lhs.relationships == rhs.relationships
 }

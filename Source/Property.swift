@@ -17,7 +17,7 @@ public protocol Property {
     var propertyType: PropertyType { get }
 }
 
-public struct Attribute {
+public struct Attribute: Equatable {
     
     var name: String
     
@@ -33,7 +33,12 @@ public struct Attribute {
     }
 }
 
-public struct Relationship {
+public func == (lhs: Attribute, rhs: Attribute) -> Bool {
+    
+    return lhs.name == rhs.name && lhs.optional == rhs.optional && lhs.propertyType == rhs.propertyType
+}
+
+public struct Relationship: Equatable {
     
     var name: String
     
@@ -58,3 +63,13 @@ public struct Relationship {
         self.inverseRelationshipName = inverseRelationshipName
     }
 }
+
+public func == (lhs: Relationship, rhs: Relationship) -> Bool {
+    
+    return lhs.name == rhs.name
+        && lhs.optional == rhs.optional
+        && lhs.propertyType == rhs.propertyType
+        && lhs.destinationEntityName == rhs.destinationEntityName
+        && lhs.inverseRelationshipName == rhs.inverseRelationshipName
+}
+

@@ -116,3 +116,4 @@ public extension NSPredicate {
         return (comparisonPredicates as NSArray) as! [NSComparisonPredicate]
     }
 }
+

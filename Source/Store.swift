@@ -46,3 +46,25 @@ public enum StoreError: ErrorType {
     /// The specified resource could not be found.
     case NotFound
 }
+
+// MARK: - Implementation
+
+extension Store {
+    
+    func validate(values: ValuesObject, forEntity entity: Entity) -> Bool {
+        
+        // verify entity belongs to model
+        guard (self.model.contains { (element: Entity) -> Bool in entity == entity })
+            else { return false }
+        
+        for (key, value) in values {
+            
+            entity.filter 
+            
+            if let attribute
+        }
+        
+        return true
+    }
+}
+
