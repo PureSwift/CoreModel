@@ -20,13 +20,13 @@ public extension NSManagedObject {
     /// Set the properties from a ```ValuesObject```. Does not save managed object context.
     func setValues(values: ValuesObject, store: CoreDataStore) throws {
         
-        guard let entityName = self.entity.name else { fatalError("Cora Data Entity is unnamed") }
+        guard let entityName = self.entity.name else { fatalError("Core Data Entity is unnamed") }
         
         guard let entity = store.model.filter({ (entity: Entity) -> Bool in entity.name == entityName}).first
             else { fatalError("No entity named '\(entityName)' in CoreDataStore") }
         
         // sanity check
-        guard store.validate(values, forEntity: entity) else { throw StoreError.InvalidValues }
+        try store.validate(values, forEntity: entity)
         
         for (key, value) in values {
             

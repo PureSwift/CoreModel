@@ -49,13 +49,14 @@ public enum StoreError: ErrorType {
 
 // MARK: - Implementation
 
-extension Store {
+public extension Store {
     
     /// Attempts to validate setting the values object for an entity.
-    func validate(values: ValuesObject, forEntity entity: Entity) throws -> Bool {
+    func validate(values: ValuesObject, forEntity entity: Entity) throws {
         
         // verify entity belongs to model
-        guard (self.model.contains { (element: Entity) -> Bool in entity == entity }) else { return false }
+        guard (self.model.contains { (element: Entity) -> Bool in entity == entity })
+            else { throw StoreError.InvalidEntity }
         
         for (key, value) in values {
             
@@ -64,48 +65,65 @@ extension Store {
             let relationship = entity.relationships.filter({ (element) -> Bool in element.name == key }).first
             
             // property not found on entity
-            if attribute == nil && relationship == nil { return false }
+            if attribute == nil && relationship == nil { throw StoreError.InvalidValues }
             
             switch value {
                 
             case .Null:
-                if let attribute = attribute { guard attribute.optional else { return false }}
-                if let relationship = relationship { guard relationship.optional else { return false }}
-                return true
+                if let attribute = attribute { guard attribute.optional
+                    else { throw StoreError.InvalidValues }}
+                
+                if let relationship = relationship { guard relationship.optional
+                    else { throw StoreError.InvalidValues }}
                 
             case .Attribute(let attributeValue):
-                guard let attribute = attribute else { return false }
+                guard let attribute = attribute else { throw StoreError.InvalidValues }
                 
                 switch attributeValue {
                     
-                case .String(_): guard attribute.propertyType == .String else { return false }
-                case .Date(_):   guard attribute.propertyType == .Date   else { return false }
-                case .Data(_):   guard attribute.propertyType == .Data   else { return false }
+                case .String(_): guard attribute.propertyType == .String
+                    else { throw StoreError.InvalidValues }
+                    
+                case .Date(_):   guard attribute.propertyType == .Date
+                    else { throw StoreError.InvalidValues }
+                    
+                case .Data(_):   guard attribute.propertyType == .Data
+                    else { throw StoreError.InvalidValues }
+                    
                 case .Number(let numberValue):
                     switch numberValue {
                         
-                    case .Boolean(_): guard attribute.propertyType == .Number(.Boolean) else { return false }
-                    case .Integer(_): guard attribute.propertyType == .Number(.Integer) else { return false }
-                    case .Float(_):   guard attribute.propertyType == .Number(.Float)   else { return false }
-                    case .Double(_):  guard attribute.propertyType == .Number(.Boolean) else { return false }
-                    case .Decimal(_): guard attribute.propertyType == .Number(.Decimal) else { return false }
+                    case .Boolean(_): guard attribute.propertyType == .Number(.Boolean)
+                        else { throw StoreError.InvalidValues }
+                        
+                    case .Integer(_): guard attribute.propertyType == .Number(.Integer)
+                        else { throw StoreError.InvalidValues }
+                        
+                    case .Float(_):   guard attribute.propertyType == .Number(.Float)
+                        else { throw StoreError.InvalidValues }
+                        
+                    case .Double(_):  guard attribute.propertyType == .Number(.Boolean)
+                        else { throw StoreError.InvalidValues }
+                        
+                    case .Decimal(_): guard attribute.propertyType == .Number(.Decimal)
+                        else { throw StoreError.InvalidValues }
                     }
                 }
                 
             case .Relationship(let relationshipValue):
-                guard let relationship = relationship else { return false }
+                guard let relationship = relationship else { throw StoreError.InvalidValues }
                 
                 switch relationshipValue {
                     
                 case .ToOne(let value):
-                    guard relationship.propertyType == .ToOne else { return false }
+                    guard relationship.propertyType == .ToOne else { throw StoreError.InvalidValues }
                     
                     let resource = Resource(entity: relationship.destinationEntityName, resourceID: value)
                     
-                    guard try self.exists(resource) else { return false }
+                    guard try self.exists(resource) else { throw StoreError.InvalidValues }
                     
                 case .ToMany(let value):
-                    guard relationship.propertyType == .ToMany else { return false }
+                    guard relationship.propertyType == .ToMany else { throw StoreError.InvalidValues }
                     
                     var resources = [Resource]()
                     
@@ -116,13 +134,10 @@ extension Store {
                         resources.append(resource)
                     }
                     
-                    guard try self.exist(resources) else { return false }
+                    guard try self.exist(resources) else { throw StoreError.InvalidValues }
                 }
-                
             }
         }
-        
-        return true
     }
 }
 
