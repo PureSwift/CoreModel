@@ -63,6 +63,9 @@ extension Store {
             
             let relationship = entity.relationships.filter({ (element) -> Bool in element.name == key }).first
             
+            // property not found on entity
+            if attribute == nil && relationship == nil { return false }
+            
             switch value {
                 
             case .Null:
@@ -70,47 +73,35 @@ extension Store {
                 if let relationship = relationship { guard relationship.optional else { return false }}
                 return true
                 
-            case .Attribute(let attributeType):
+            case .Attribute(let attributeValue):
                 guard let attribute = attribute else { return false }
                 
-                
-            }
-            
-            
-            
-            
-            let attribute = entity.attributes.filter({ (element) -> Bool in element.name == key }).first
-            
-            let relationship = entity.relationships.filter({ (element) -> Bool in element.name == key }).first
-            
-            if let attribute = attribute {
-                
-                if value == Value.Null {
+                switch attributeValue {
                     
-                    guard value == Value.Null else { return false }
-                }
-                
-                guard attribute.isOptional == false
-                
-                switch attribute.propertyType {
-                    
-                case .String:
-                    switch value {
+                case .String(_): guard attribute.propertyType == .String else { return false }
+                case .Date(_):   guard attribute.propertyType == .Date   else { return false }
+                case .Data(_):   guard attribute.propertyType == .Data   else { return false }
+                case .Number(let numberValue):
+                    switch numberValue {
                         
-                        
+                    case .Boolean(_): guard attribute.propertyType == .Number(.Boolean) else { return false }
+                    case .Integer(_): guard attribute.propertyType == .Number(.Integer) else { return false }
+                    case .Float(_):   guard attribute.propertyType == .Number(.Float)   else { return false }
+                    case .Double(_):  guard attribute.propertyType == .Number(.Boolean) else { return false }
+                    case .Decimal(_): guard attribute.propertyType == .Number(.Decimal) else { return false }
                     }
                 }
+                
+            case .Relationship(let relationshipValue):
+                guard let relationship = relationship else { return false }
+                
+                switch relationshipValue {
+                    
+                case .ToOne(let value):
+                    
+                }
+                
             }
-            
-            if let relationship = relationship {
-                
-                guard (value == Value.Null && !attribute.optional) else { return false }
-                
-                
-            }
-            
-            // property not found on entity
-            return false
         }
         
         return true
