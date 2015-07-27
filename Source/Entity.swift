@@ -11,7 +11,7 @@ public struct Entity: Equatable {
     
     // MARK: Model
     
-    public var entityName: String
+    public var name: String
     
     public var attributes: [Attribute] = []
     
@@ -19,11 +19,11 @@ public struct Entity: Equatable {
     
     public init(entityName: String) {
         
-        self.entityName = entityName
+        self.name = entityName
     }
 }
 
 public func == (lhs: Entity, rhs: Entity) -> Bool {
     
-    return lhs.entityName == rhs.entityName && lhs.attributes == rhs.attributes && lhs.relationships == rhs.relationships
+    return lhs.name == rhs.name && lhs.attributes == rhs.attributes && lhs.relationships == rhs.relationships
 }

@@ -59,9 +59,58 @@ extension Store {
         
         for (key, value) in values {
             
-            entity.filter 
+            let attribute = entity.attributes.filter({ (element) -> Bool in element.name == key }).first
             
-            if let attribute
+            let relationship = entity.relationships.filter({ (element) -> Bool in element.name == key }).first
+            
+            switch value {
+                
+            case .Null:
+                if let attribute = attribute { guard attribute.optional else { return false }}
+                if let relationship = relationship { guard relationship.optional else { return false }}
+                return true
+                
+            case .Attribute(let attributeType):
+                guard let attribute = attribute else { return false }
+                
+                
+            }
+            
+            
+            
+            
+            let attribute = entity.attributes.filter({ (element) -> Bool in element.name == key }).first
+            
+            let relationship = entity.relationships.filter({ (element) -> Bool in element.name == key }).first
+            
+            if let attribute = attribute {
+                
+                if value == Value.Null {
+                    
+                    guard value == Value.Null else { return false }
+                }
+                
+                guard attribute.isOptional == false
+                
+                switch attribute.propertyType {
+                    
+                case .String:
+                    switch value {
+                        
+                        
+                    }
+                }
+            }
+            
+            if let relationship = relationship {
+                
+                guard (value == Value.Null && !attribute.optional) else { return false }
+                
+                
+            }
+            
+            // property not found on entity
+            return false
         }
         
         return true

@@ -20,10 +20,13 @@ public extension NSManagedObject {
     /// Set the properties from a ```ValuesObject```. Does not save managed object context.
     func setValues(values: ValuesObject, store: CoreDataStore) throws {
         
-        store.model.filter(<#T##includeElement: (Self.Generator.Element) -> Bool##(Self.Generator.Element) -> Bool#>)
+        guard let entityName = self.entity.name else { fatalError("Cora Data Entity is unnamed") }
+        
+        guard let entity = store.model.filter({ (entity: Entity) -> Bool in entity.name == entityName}).first
+            else { fatalError("No entity named '\(entityName)' in CoreDataStore") }
         
         // sanity check
-        guard store.validate(values, forEntity: <#T##Entity#>) else { throw StoreError.InvalidValues }
+        guard store.validate(values, forEntity: entity) else { throw StoreError.InvalidValues }
         
         for (key, value) in values {
             
@@ -38,15 +41,10 @@ public extension NSManagedObject {
                     
                 case .Attribute(let attributeValue):
                     
-                    guard let attributeDescription = property as? NSAttributeDescription
+                    guard (property as? NSAttributeDescription != nil)
                         else { throw StoreError.InvalidValues }
                     
-                    let newValue = attributeValue.toCoreDataValue()
-                    
-                    guard attributeValue.isValidCoreDataValue(newValue, forAttribute: attributeDescription)
-                        else { throw StoreError.InvalidValues }
-                    
-                    return newValue
+                    return attributeValue.toCoreDataValue()
                     
                 case .Relationship(let relationshipValue):
                     
@@ -57,7 +55,8 @@ public extension NSManagedObject {
                         
                     case .ToOne(let resourceID):
                         
-                        guard let destinationObjectID = try store.findEntity(relationshipDescription.destinationEntity!, withResourceID: resourceID) else { throw StoreError.InvalidValues }
+                        guard let destinationObjectID = try store.findEntity(relationshipDescription.destinationEntity!, withResourceID: resourceID)
+                            else { throw StoreError.InvalidValues }
                         
                         let destinationManagedObject = store.managedObjectContext.objectWithID(destinationObjectID)
                         
@@ -69,7 +68,8 @@ public extension NSManagedObject {
                         
                         for resourceID in resourceIDs {
                             
-                            guard let destinationObjectID = try store.findEntity(relationshipDescription.destinationEntity!, withResourceID: resourceID) else { throw StoreError.InvalidValues }
+                            guard let destinationObjectID = try store.findEntity(relationshipDescription.destinationEntity!, withResourceID: resourceID)
+                                else { throw StoreError.InvalidValues }
                             
                             let destinationManagedObject = store.managedObjectContext.objectWithID(destinationObjectID)
                             

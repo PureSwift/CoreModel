@@ -17,15 +17,15 @@ public protocol Property {
     var propertyType: PropertyType { get }
 }
 
-public struct Attribute: Equatable {
+public struct Attribute: Property, Equatable {
     
-    var name: String
+    public var name: String
     
-    var optional: Bool
+    public var optional: Bool
     
-    var propertyType: AttributeType
+    public var propertyType: AttributeType
     
-    init(name: String, propertyType: AttributeType, optional: Bool = false) {
+    public init(name: String, propertyType: AttributeType, optional: Bool = false) {
         
         self.name = name
         self.propertyType = propertyType
@@ -38,19 +38,19 @@ public func == (lhs: Attribute, rhs: Attribute) -> Bool {
     return lhs.name == rhs.name && lhs.optional == rhs.optional && lhs.propertyType == rhs.propertyType
 }
 
-public struct Relationship: Equatable {
+public struct Relationship: Property, Equatable {
     
-    var name: String
+    public var name: String
     
-    var optional: Bool = false
+    public var optional: Bool = false
     
-    var propertyType: RelationshipType
+    public var propertyType: RelationshipType
     
-    var destinationEntityName: String
+    public var destinationEntityName: String
     
-    var inverseRelationshipName: String
+    public var inverseRelationshipName: String
     
-    init(name: String,
+    public init(name: String,
         propertyType: RelationshipType,
         optional: Bool = false,
         destinationEntityName: String,
