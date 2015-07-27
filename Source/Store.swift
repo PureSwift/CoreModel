@@ -51,11 +51,11 @@ public enum StoreError: ErrorType {
 
 extension Store {
     
-    func validate(values: ValuesObject, forEntity entity: Entity) -> Bool {
+    /// Attempts to validate setting the values object for an entity.
+    func validate(values: ValuesObject, forEntity entity: Entity) throws -> Bool {
         
         // verify entity belongs to model
-        guard (self.model.contains { (element: Entity) -> Bool in entity == entity })
-            else { return false }
+        guard (self.model.contains { (element: Entity) -> Bool in entity == entity }) else { return false }
         
         for (key, value) in values {
             
@@ -98,7 +98,25 @@ extension Store {
                 switch relationshipValue {
                     
                 case .ToOne(let value):
+                    guard relationship.propertyType == .ToOne else { return false }
                     
+                    let resource = Resource(entity: relationship.destinationEntityName, resourceID: value)
+                    
+                    guard try self.exists(resource) else { return false }
+                    
+                case .ToMany(let value):
+                    guard relationship.propertyType == .ToMany else { return false }
+                    
+                    var resources = [Resource]()
+                    
+                    for resourceID in value {
+                        
+                        let resource = Resource(entity: relationship.destinationEntityName, resourceID: resourceID)
+                        
+                        resources.append(resource)
+                    }
+                    
+                    guard try self.exist(resources) else { return false }
                 }
                 
             }
