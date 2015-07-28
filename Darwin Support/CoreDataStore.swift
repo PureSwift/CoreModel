@@ -35,6 +35,11 @@ public final class CoreDataStore: Store {
     
     public let model: [Entity]
     
+    public func fetch(fetchRequest: FetchRequest) throws -> [Resource] {
+        
+        
+    }
+    
     public func exists(resource: Resource) throws -> Bool {
         
         guard let entity = self.managedObjectContext.persistentStoreCoordinator?.managedObjectModel.entitiesByName[resource.entityName] else { throw StoreError.InvalidEntity }
@@ -85,7 +90,21 @@ public final class CoreDataStore: Store {
     
     public func values(forResource resource: Resource) throws -> ValuesObject {
         
+        guard let entity = self.managedObjectContext.persistentStoreCoordinator?.managedObjectModel.entitiesByName[resource.entityName] else { throw StoreError.InvalidEntity }
         
+        var values: ValuesObject!
+        
+        try self.managedObjectContext.performErrorBlockAndWait { () -> Void in
+            
+            guard let objectID = try self.findEntity(entity, withResourceID: resource.resourceID)
+                else { throw StoreError.NotFound }
+            
+            let managedObject = self.managedObjectContext.objectWithID(objectID)
+            
+            values = try managedObject.values(self)
+        }
+        
+        return values
     }
     
     // MARK: - Utility

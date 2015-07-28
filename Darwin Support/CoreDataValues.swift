@@ -14,7 +14,51 @@ public extension NSManagedObject {
     
     func values(store: CoreDataStore) throws -> ValuesObject {
         
+        var values = ValuesObject()
         
+        for (attributeName, _) in self.entity.attributesByName {
+        
+            guard let CoreDataValue = self.valueForKey(attributeName)
+                else { values[attributeName] = Value.Null }
+            
+            guard let value = AttributeValue(CoreDataValue: CoreDataValue)
+                else { fatalError("Could not convert Core Data attribute value \(CoreDataValue)") }
+            
+            values[attributeName] = Value.Attribute(value)
+        }
+        
+        for (relationshipName, relationship) in self.entity.relationshipsByName {
+            
+            guard let CoreDataValue = self.valueForKey(relationshipName)
+                else { values[relationshipName] = Value.Null }
+            
+            // to-one
+            if !relationship.toMany {
+                
+                let destinationManagedObject = CoreDataValue as! NSManagedObject
+                
+                let resourceID = destinationManagedObject.valueForKey(relationshipName) as! String
+                
+                values[relationshipName] = Value.Relationship(.ToOne(resourceID))
+            }
+                
+            // to-many
+            else {
+                
+                let destinationManagedObjects = self.arrayValueForToManyRelationship(relationship: relationshipName)!
+                
+                var resourceIDs = [String]()
+                
+                for destinationManagedObject in destinationManagedObjects {
+                    
+                    let resourceID = destinationManagedObject.valueForKey(relationshipName) as! String
+                    
+                    resourceIDs.append(resourceID)
+                }
+                
+                values[relationshipName] = Value.Relationship(.ToMany(resourceIDs))
+            }
+        }
     }
     
     /// Set the properties from a ```ValuesObject```. Does not save managed object context.
@@ -92,12 +136,57 @@ public extension NSManagedObject {
     }
 }
 
-
 public extension AttributeValue {
     
     init?(CoreDataValue: AnyObject) {
         
+        if let value = CoreDataValue as? NSString {
+            
+            self = .String(value as StringValue)
+        }
         
+        if let value = CoreDataValue as? NSDate {
+            
+            let date = value.toDate()
+            
+            self = .Date(date)
+        }
+        
+        if let value = CoreDataValue as? NSData {
+            
+            let data = value.arrayOfBytes()
+            
+            self = .Data(data)
+        }
+        
+        // number types
+        
+        if let value = CoreDataValue as? Bool {
+            
+            self = .Number(.Boolean(value))
+        }
+        
+        if let value = CoreDataValue as? Int {
+            
+            self = .Number(.Integer(value))
+        }
+        
+        if let value = CoreDataValue as? Float {
+            
+            self = .Number(.Float(value))
+        }
+        
+        if let value = CoreDataValue as? Double {
+            
+            self = .Number(.Double(value))
+        }
+        
+        if let _ = CoreDataValue as? NSDecimalNumber {
+            
+            fatalError("Decimal conversion not implemented")
+        }
+        
+        return nil
     }
     
     func toCoreDataValue() -> AnyObject {
