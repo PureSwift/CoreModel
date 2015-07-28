@@ -17,6 +17,9 @@ public extension NSManagedObject {
         var values = ValuesObject()
         
         for (attributeName, _) in self.entity.attributesByName {
+            
+            // skip resource ID value
+            if attributeName == store.resourceIDAttributeName { continue }
         
             guard let CoreDataValue = self.valueForKey(attributeName)
                 else { values[attributeName] = Value.Null }
@@ -73,6 +76,8 @@ public extension NSManagedObject {
         try store.validate(values, forEntity: entity)
         
         for (key, value) in values {
+            
+            guard key != store.resourceIDAttributeName else {  }
             
             // validate entity exists
             guard let property = self.entity.propertiesByName[key] else { throw StoreError.InvalidValues }

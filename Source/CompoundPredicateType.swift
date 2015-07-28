@@ -8,7 +8,7 @@
 
 public enum CompoundPredicateType: String {
     
-    case Not = "Not"
-    case And = "And"
-    case Or = "Or"
+    case Not
+    case And
+    case Or
 }

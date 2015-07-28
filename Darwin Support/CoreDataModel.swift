@@ -11,13 +11,13 @@ import CoreData
 
 public extension NSManagedObjectModel {
     
-    func toModel() -> [Entity]? {
+    func toModel(resourceIDAttributeName: String) -> [Entity]? {
         
         var model = [Entity]()
         
         for entityDescription in self.entities {
             
-            guard let entity = entityDescription.toEntity() else { return nil }
+            guard let entity = entityDescription.toEntity(resourceIDAttributeName) else { return nil }
             
             model.append(entity)
         }
@@ -28,11 +28,13 @@ public extension NSManagedObjectModel {
 
 public extension NSEntityDescription {
     
-    func toEntity() -> Entity? {
+    func toEntity(resourceIDAttributeName: String) -> Entity? {
         
         var attributes = [Attribute]()
         
-        for (_, description) in self.attributesByName {
+        for (key, description) in self.attributes {
+            
+            guard key != resourceIDAttributeName else {  }
             
             guard let attribute = description.toAttribute() else { return nil }
             
