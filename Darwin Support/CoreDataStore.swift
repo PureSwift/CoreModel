@@ -24,12 +24,16 @@ public final class CoreDataStore: Store {
     
     public init?(managedObjectContext: NSManagedObjectContext, resourceIDAttributeName: String = "id") {
         
-        guard let model = managedObjectContext.persistentStoreCoordinator?.managedObjectModel.toModel(resourceIDAttributeName)
-            else { return nil }
-        
-        self.model = model
         self.managedObjectContext = managedObjectContext
         self.resourceIDAttributeName = resourceIDAttributeName
+        
+        guard let model = managedObjectContext.persistentStoreCoordinator?.managedObjectModel.toModel(resourceIDAttributeName) else {
+            
+            self.model = []
+            return nil
+        }
+        
+        self.model = model
     }
     
     // MARK: - Store
@@ -38,7 +42,29 @@ public final class CoreDataStore: Store {
     
     public func fetch(fetchRequest: FetchRequest) throws -> [Resource] {
         
+        var resources = [Resource]()
         
+        try self.managedObjectContext.performErrorBlockAndWait({ () -> Void in
+            
+            let fetchRequest = try NSFetchRequest(fetchRequest: fetchRequest, store: self)
+            
+            fetchRequest.resultType = NSFetchRequestResultType.ManagedObjectIDResultType
+            
+            let results = try self.managedObjectContext.executeFetchRequest(fetchRequest) as! [NSManagedObjectID]
+            
+            for objectID in results {
+                
+                let managedObject = self.managedObjectContext.objectWithID(objectID)
+                
+                let resourceID = managedObject.valueForKey(self.resourceIDAttributeName) as! String
+                
+                let resource = Resource(entity: managedObject.entity.name!, resourceID: resourceID)
+                
+                resources.append(resource)
+            }
+        })
+        
+        return resources
     }
     
     public func exists(resource: Resource) throws -> Bool {
