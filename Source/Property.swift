@@ -17,24 +17,59 @@ public protocol Property {
     var propertyType: PropertyType { get }
 }
 
-public struct Attribute {
+public struct Attribute: Property, Equatable {
     
-    var name: String
+    public var name: String
     
-    var optional: Bool = false
+    public var optional: Bool
     
-    var propertyType: AttributeType
+    public var propertyType: AttributeType
+    
+    public init(name: String, propertyType: AttributeType, optional: Bool = false) {
+        
+        self.name = name
+        self.propertyType = propertyType
+        self.optional = optional
+    }
 }
 
-public struct Relationship {
+public func == (lhs: Attribute, rhs: Attribute) -> Bool {
     
-    var name: String
-    
-    var optional: Bool = false
-    
-    var propertyType: RelationshipType
-    
-    var destinationEntityName: String
-    
-    var inverseRelationshipName: String
+    return lhs.name == rhs.name && lhs.optional == rhs.optional && lhs.propertyType == rhs.propertyType
 }
+
+public struct Relationship: Property, Equatable {
+    
+    public var name: String
+    
+    public var optional: Bool = false
+    
+    public var propertyType: RelationshipType
+    
+    public var destinationEntityName: String
+    
+    public var inverseRelationshipName: String
+    
+    public init(name: String,
+        propertyType: RelationshipType,
+        optional: Bool = false,
+        destinationEntityName: String,
+        inverseRelationshipName: String) {
+        
+        self.name = name
+        self.propertyType = propertyType
+        self.optional = optional
+        self.destinationEntityName = destinationEntityName
+        self.inverseRelationshipName = inverseRelationshipName
+    }
+}
+
+public func == (lhs: Relationship, rhs: Relationship) -> Bool {
+    
+    return lhs.name == rhs.name
+        && lhs.optional == rhs.optional
+        && lhs.propertyType == rhs.propertyType
+        && lhs.destinationEntityName == rhs.destinationEntityName
+        && lhs.inverseRelationshipName == rhs.inverseRelationshipName
+}
+

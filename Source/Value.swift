@@ -50,8 +50,9 @@ public enum RelationshipValue {
     case ToMany([StringValue])
 }
 
-// Typealises to fix compiler error
+// Typealiases to fix compiler error
 
 public typealias DataValue = Data
 
 public typealias DateValue = Date
+

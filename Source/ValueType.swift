@@ -12,7 +12,7 @@ public enum ValueType {
     case Relationship(RelationshipType)
 }
 
-public enum AttributeType {
+public enum AttributeType: Equatable {
     
     /// Attribute is a string.
     case String
@@ -25,6 +25,25 @@ public enum AttributeType {
     
     /// Attribute is a date.
     case Date
+}
+
+public func == (lhs: AttributeType, rhs: AttributeType) -> Bool {
+    
+    switch lhs {
+        
+    case .String: switch rhs { case .String: return true; default: return false }
+    case .Data: switch rhs { case .Data: return true; default: return false }
+    case .Date: switch rhs { case .Date: return true; default: return false }
+    case .Number(let number):
+        
+        switch rhs {
+            
+        case .Number(let rhsNumber): return (number == rhsNumber)
+        
+        default: return false
+        
+        }
+    }
 }
 
 /// Number attribute type.
@@ -51,4 +70,25 @@ public enum RelationshipType: String {
     
     case ToOne
     case ToMany
+    
+    public init(toMany: Bool) {
+        
+        if toMany {
+            
+            self = .ToMany
+        }
+        else {
+            
+            self = .ToOne
+        }
+    }
+    
+    public var toMany: Bool {
+        
+        switch self {
+            
+        case .ToMany: return true
+        case .ToOne: return false
+        }
+    }
 }

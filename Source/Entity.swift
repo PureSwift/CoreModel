@@ -7,11 +7,11 @@
 //
 
 /// Defines the model for an entity
-public struct Entity {
+public struct Entity: Equatable {
     
     // MARK: Model
     
-    public var entityName: String
+    public var name: String
     
     public var attributes: [Attribute] = []
     
@@ -19,6 +19,11 @@ public struct Entity {
     
     public init(entityName: String) {
         
-        self.entityName = entityName
+        self.name = entityName
     }
+}
+
+public func == (lhs: Entity, rhs: Entity) -> Bool {
+    
+    return lhs.name == rhs.name && lhs.attributes == rhs.attributes && lhs.relationships == rhs.relationships
 }
