@@ -22,13 +22,14 @@ public final class CoreDataStore: Store {
     
     // MARK: - Initialization
     
-    public init?(managedObjectContext: NSManagedObjectContext) {
+    public init?(managedObjectContext: NSManagedObjectContext, resourceIDAttributeName: String = "id") {
         
-        guard let model = managedObjectContext.persistentStoreCoordinator?.managedObjectModel.toModel()
+        guard let model = managedObjectContext.persistentStoreCoordinator?.managedObjectModel.toModel(resourceIDAttributeName)
             else { return nil }
         
         self.model = model
         self.managedObjectContext = managedObjectContext
+        self.resourceIDAttributeName = resourceIDAttributeName
     }
     
     // MARK: - Store
@@ -58,8 +59,10 @@ public final class CoreDataStore: Store {
         
         for resource in resources {
             
-            try self.exists(resource)
+            guard try self.exists(resource) else { return false }
         }
+        
+        return true
     }
     
     public func create(resource: Resource, initialValues: ValuesObject?) throws {

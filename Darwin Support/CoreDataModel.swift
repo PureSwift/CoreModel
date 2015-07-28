@@ -32,9 +32,9 @@ public extension NSEntityDescription {
         
         var attributes = [Attribute]()
         
-        for (key, description) in self.attributes {
+        for (key, description) in self.attributesByName {
             
-            guard key != resourceIDAttributeName else {  }
+            guard key != resourceIDAttributeName else { continue }
             
             guard let attribute = description.toAttribute() else { return nil }
             

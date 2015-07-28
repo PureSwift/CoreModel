@@ -22,7 +22,7 @@ public extension NSManagedObject {
             if attributeName == store.resourceIDAttributeName { continue }
         
             guard let CoreDataValue = self.valueForKey(attributeName)
-                else { values[attributeName] = Value.Null }
+                else { values[attributeName] = Value.Null; continue }
             
             guard let value = AttributeValue(CoreDataValue: CoreDataValue)
                 else { fatalError("Could not convert Core Data attribute value \(CoreDataValue)") }
@@ -33,7 +33,7 @@ public extension NSManagedObject {
         for (relationshipName, relationship) in self.entity.relationshipsByName {
             
             guard let CoreDataValue = self.valueForKey(relationshipName)
-                else { values[relationshipName] = Value.Null }
+                else { values[relationshipName] = Value.Null; continue }
             
             // to-one
             if !relationship.toMany {
@@ -62,6 +62,8 @@ public extension NSManagedObject {
                 values[relationshipName] = Value.Relationship(.ToMany(resourceIDs))
             }
         }
+        
+        return values
     }
     
     /// Set the properties from a ```ValuesObject```. Does not save managed object context.
@@ -77,7 +79,7 @@ public extension NSManagedObject {
         
         for (key, value) in values {
             
-            guard key != store.resourceIDAttributeName else {  }
+            guard key != store.resourceIDAttributeName else { continue }
             
             // validate entity exists
             guard let property = self.entity.propertiesByName[key] else { throw StoreError.InvalidValues }

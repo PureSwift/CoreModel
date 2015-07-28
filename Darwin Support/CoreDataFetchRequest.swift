@@ -57,7 +57,7 @@ public extension Predicate {
                 }
             }
             
-            let value: AnyObject? = {
+            let value: AnyObject? = try {
                
                 switch predicate.value {
                     
@@ -68,15 +68,40 @@ public extension Predicate {
                 case .Relationship(let value):
                     
                     guard let entity = store.managedObjectContext.persistentStoreCoordinator?.managedObjectModel.entitiesByName[fetchRequest.entityName]
-                        else { fatalError() }
+                        else { throw StoreError.InvalidEntity }
                     
-                    let relationship = entity.relationshipsByName[key]
+                    guard let relationship = entity.relationshipsByName[predicate.propertyName]
+                        else { throw StoreError.InvalidValues }
                     
                     switch value {
                         
-                    case .ToOne(let resource):
+                    case .ToOne(let resourceID):
                         
-                        let objectID = store.findEntity(<#T##entity: NSEntityDescription##NSEntityDescription#>, withResourceID: <#T##String#>)
+                        guard let objectID = try store.findEntity(relationship.destinationEntity!, withResourceID: resourceID) else { throw StoreError.InvalidValues }
+                        
+                        let managedObject = store.managedObjectContext.objectWithID(objectID)
+                        
+                        return managedObject
+                        
+                    case .ToMany(let resourceIDs):
+                        
+                        var managedObjects = [NSManagedObject]()
+                        
+                        for resourceID in resourceIDs {
+                            
+                            guard let objectID = try store.findEntity(relationship.destinationEntity!, withResourceID: resourceID) else { throw StoreError.InvalidValues }
+                            
+                            let managedObject = store.managedObjectContext.objectWithID(objectID)
+                            
+                            managedObjects.append(managedObject)
+                        }
+                        
+                        if relationship.ordered {
+                            
+                            return NSOrderedSet(array: managedObjects)
+                        }
+                        
+                        return NSSet(array: managedObjects)
                     }
                 }
                 
@@ -90,7 +115,16 @@ public extension Predicate {
             
         case .Compound:
             
+            let predicate = self as! CompoundPredicate
             
+            var subpredicates = [NSPredicate]()
+            
+            for subpredicate in predicate.subpredicates {
+                
+                subpredicates.append(try subpredicate.toPredicate(forFetchRequest: fetchRequest, store: store))
+            }
+            
+            return NSCompoundPredicate(type: predicate.compoundPredicateType.toCompoundPredicateType(), subpredicates: subpredicates)
         }
     }
 }
