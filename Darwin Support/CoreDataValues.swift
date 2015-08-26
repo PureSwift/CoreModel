@@ -154,7 +154,7 @@ public extension AttributeValue {
         
         if let value = CoreDataValue as? NSDate {
             
-            let date = value.toDate()
+            let date = SwiftFoundation.Date(foundation: value)
             
             self = .Date(date)
         }
@@ -201,7 +201,7 @@ public extension AttributeValue {
         switch self {
             
         case .String(let value): return value
-        case .Date(let value): return NSDate(date: value)
+        case .Date(let value): return value.toFoundation()
         case .Data(let value): return NSData(bytes: value)
         case .Number(let number):
             switch number {
@@ -210,7 +210,6 @@ public extension AttributeValue {
             case .Integer(let value): return NSNumber(integer: value)
             case .Float(let value): return NSNumber(float: value)
             case .Double(let value): return NSNumber(double: value)
-            case .Decimal(_): fatalError("Not Implemented") //return NSNumber(bool: value)
             }
         }
     }

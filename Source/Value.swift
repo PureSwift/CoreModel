@@ -39,8 +39,6 @@ public enum NumberValue {
     case Float(FloatValue)
     
     case Double(DoubleValue)
-    
-    case Decimal(DecimalValue)
 }
 
 public enum RelationshipValue {

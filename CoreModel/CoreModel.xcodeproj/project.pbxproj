@@ -18,7 +18,6 @@
 		1A1B5AC71B61E84E0025FE7C /* CoreDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A1B5AB31B61C26B0025FE7C /* CoreDataStore.swift */; };
 		1A1B5AC91B61FC9D0025FE7C /* CoreDataValues.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A1B5AC81B61FC9D0025FE7C /* CoreDataValues.swift */; };
 		1AF65F161B673D1A00A8D987 /* CoreDataFetchRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AF65F151B673D1A00A8D987 /* CoreDataFetchRequest.swift */; };
-		1AF65F181B677BE400A8D987 /* MemoryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AF65F171B677BE400A8D987 /* MemoryStore.swift */; };
 		6E7474881B3C34630039596D /* ComparisonPredicateOperator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E7474871B3C34630039596D /* ComparisonPredicateOperator.swift */; };
 		6E74748C1B3C364B0039596D /* ComparisonPredicateModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E74748B1B3C364B0039596D /* ComparisonPredicateModifier.swift */; };
 		6E74748E1B3C36790039596D /* ComparisonPredicateOption.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E74748D1B3C36790039596D /* ComparisonPredicateOption.swift */; };
@@ -57,7 +56,6 @@
 		1A1B5AC51B61D7F70025FE7C /* CoreDataModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreDataModel.swift; sourceTree = "<group>"; };
 		1A1B5AC81B61FC9D0025FE7C /* CoreDataValues.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreDataValues.swift; sourceTree = "<group>"; };
 		1AF65F151B673D1A00A8D987 /* CoreDataFetchRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreDataFetchRequest.swift; sourceTree = "<group>"; };
-		1AF65F171B677BE400A8D987 /* MemoryStore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MemoryStore.swift; sourceTree = "<group>"; };
 		6E7474871B3C34630039596D /* ComparisonPredicateOperator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ComparisonPredicateOperator.swift; sourceTree = "<group>"; };
 		6E74748B1B3C364B0039596D /* ComparisonPredicateModifier.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ComparisonPredicateModifier.swift; sourceTree = "<group>"; };
 		6E74748D1B3C36790039596D /* ComparisonPredicateOption.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ComparisonPredicateOption.swift; sourceTree = "<group>"; };
@@ -166,7 +164,6 @@
 				1A1B5A901B60A82A0025FE7C /* Store.swift */,
 				1A1B5A9C1B616AC30025FE7C /* Value.swift */,
 				1A1B5A9E1B6171840025FE7C /* ValueJSON.swift */,
-				1AF65F171B677BE400A8D987 /* MemoryStore.swift */,
 				6EAF65BD1B3BB40E00884605 /* Model Description */,
 				6EAF65CD1B3BE31D00884605 /* Search Description */,
 				1A1B5AB51B61C6000025FE7C /* Darwin Support */,
@@ -326,7 +323,6 @@
 				1A1B5A911B60A82A0025FE7C /* Store.swift in Sources */,
 				1AF65F161B673D1A00A8D987 /* CoreDataFetchRequest.swift in Sources */,
 				1A1B5AC91B61FC9D0025FE7C /* CoreDataValues.swift in Sources */,
-				1AF65F181B677BE400A8D987 /* MemoryStore.swift in Sources */,
 				1A1B5AC71B61E84E0025FE7C /* CoreDataStore.swift in Sources */,
 				6E74748C1B3C364B0039596D /* ComparisonPredicateModifier.swift in Sources */,
 				6EAF65D51B3BEC8200884605 /* CompoundPredicate.swift in Sources */,
