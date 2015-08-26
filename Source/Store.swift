@@ -104,9 +104,6 @@ public extension Store {
                         
                     case .Double(_):  guard attribute.propertyType == .Number(.Boolean)
                         else { throw StoreError.InvalidValues }
-                        
-                    case .Decimal(_): guard attribute.propertyType == .Number(.Decimal)
-                        else { throw StoreError.InvalidValues }
                     }
                 }
                 
