@@ -42,7 +42,7 @@ public struct Relationship: Property, Equatable {
     
     public var name: String
     
-    public var optional: Bool = false
+    public var optional: Bool
     
     public var propertyType: RelationshipType
     

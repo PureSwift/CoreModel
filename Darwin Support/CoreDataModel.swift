@@ -11,6 +11,7 @@ import CoreData
 
 public extension NSManagedObjectModel {
     
+    /// Converts a **CoreData** model to **CoreModel** model. Skips the attribute representing the resource ID.
     func toModel(resourceIDAttributeName: String) -> [Entity]? {
         
         var model = [Entity]()

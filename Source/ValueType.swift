@@ -60,9 +60,6 @@ public enum NumberType: String {
     
     /// Floating point number type.
     case Double
-    
-    /// Floating point number type.
-    case Decimal
 }
 
 // Type of relationship
