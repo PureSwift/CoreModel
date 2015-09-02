@@ -14,9 +14,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "6EAF65911B3BAA6A00884605"
+               BlueprintIdentifier = "1AE790061B969DF100CDEF17"
                BuildableName = "CoreModel.framework"
-               BlueprintName = "CoreModel"
+               BlueprintName = "CoreModel iOS"
                ReferencedContainer = "container:CoreModel.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -28,26 +28,7 @@
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       shouldUseLaunchSchemeArgsEnv = "YES">
       <Testables>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "6EAF659B1B3BAA6A00884605"
-               BuildableName = "CoreModelTests.xctest"
-               BlueprintName = "CoreModelTests"
-               ReferencedContainer = "container:CoreModel.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
       </Testables>
-      <MacroExpansion>
-         <BuildableReference
-            BuildableIdentifier = "primary"
-            BlueprintIdentifier = "6EAF65911B3BAA6A00884605"
-            BuildableName = "CoreModel.framework"
-            BlueprintName = "CoreModel"
-            ReferencedContainer = "container:CoreModel.xcodeproj">
-         </BuildableReference>
-      </MacroExpansion>
       <AdditionalOptions>
       </AdditionalOptions>
    </TestAction>
@@ -64,9 +45,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "6EAF65911B3BAA6A00884605"
+            BlueprintIdentifier = "1AE790061B969DF100CDEF17"
             BuildableName = "CoreModel.framework"
-            BlueprintName = "CoreModel"
+            BlueprintName = "CoreModel iOS"
             ReferencedContainer = "container:CoreModel.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
@@ -82,9 +63,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "6EAF65911B3BAA6A00884605"
+            BlueprintIdentifier = "1AE790061B969DF100CDEF17"
             BuildableName = "CoreModel.framework"
-            BlueprintName = "CoreModel"
+            BlueprintName = "CoreModel iOS"
             ReferencedContainer = "container:CoreModel.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
