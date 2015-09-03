@@ -8,7 +8,7 @@
 
 import SwiftFoundation
 
-public struct Resource: JSONConvertible {
+public struct Resource {
     
     public let entityName: String
     
@@ -19,29 +19,5 @@ public struct Resource: JSONConvertible {
         
         self.entityName = entity
         self.resourceID = resourceID
-    }
-    
-    // MARK: - JSONConvertible
-    
-    public init?(JSONValue: JSON.Value) {
-        
-        switch JSONValue {
-            
-        case let .Object(jsonObject):
-            
-            guard let entityName = jsonObject.keys.first,
-                let resourceID = jsonObject.values.first?.rawValue as? String
-            where jsonObject.count == 1 else { return nil }
-            
-            self.entityName = entityName
-            self.resourceID = resourceID
-            
-        default: return nil
-        }
-    }
-    
-    public func toJSON() -> JSON.Value {
-        
-        return JSON.Value.Object([entityName: .String(resourceID)])
     }
 }

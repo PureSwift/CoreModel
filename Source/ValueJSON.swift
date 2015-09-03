@@ -38,7 +38,7 @@ public extension Entity {
             
             guard jsonValue != JSON.Value.Null else {
                 
-                convertedValues[key] = AttributeValue.Null
+                convertedValues[key] = Value.Null
                 
                 continue
             }
@@ -92,9 +92,16 @@ public extension Entity {
                     
                 case let (.ToOne, JSON.Value.String(value)):
                     
-                    guard let resource = Resource(JSONValue: json) else { return nil }
+                    relationshipValue = RelationshipValue.ToOne(value)
                     
-                    relationshipValue = RelationshipValue.ToOne(<#T##StringValue#>)
+                case let (.ToMany, JSON.Value.Array(value)):
+                    
+                    guard let resourceIDs = value.rawValues as? [String] else { return nil }
+                    
+                    relationshipValue = RelationshipValue.ToMany(resourceIDs)
+                    
+                default: return nil
+                
                 }
                 
                 assert(relationshipValue != nil)
@@ -106,7 +113,7 @@ public extension Entity {
             assert(convertedValues[key] != nil)
         }
         
-        
+        return convertedValues
     }
 }
 
@@ -115,6 +122,32 @@ public extension JSON {
     /// Converts **CoreModel** values to ```JSON```.
     static func fromValues(values: ValuesObject) -> JSONObject {
         
+        
+        
         return JSONObject()
+    }
+}
+
+public extension Value {
+    
+    func toJSON() -> JSON.Value {
+        
+        switch self {
+            
+        case Value.Null: return JSON.Value.Null
+            
+        case let .Attribute(.String(value)): return JSON.Value.String(value)
+            
+        case let .Attribute(.Number(.Boolean(value))): return JSON.Value.Number(.Boolean(value))
+            
+        case let .Attribute(.Number(.Integer(value))): return JSON.Value.Number(.Integer(value))
+            
+        case let .Attribute(.Number(.Double(value))): return JSON.Value.Number(.Double(value))
+            
+        case let .Attribute(.Data(value)):
+            
+            let encodedData = Base64.encode(value)
+            
+        }
     }
 }

@@ -94,7 +94,7 @@ public extension NSAttributeType {
         case .Integer16AttributeType, .Integer32AttributeType, .Integer64AttributeType:
             return .Number(.Integer)
             
-        case .DecimalAttributeType: return .Number(.Decimal)
+        case .DecimalAttributeType: return .Number(.Double)
             
         case .DoubleAttributeType: return .Number(.Double)
             
