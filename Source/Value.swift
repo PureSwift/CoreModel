@@ -36,8 +36,6 @@ public enum NumberValue {
     
     case Integer(Int)
     
-    case Float(FloatValue)
-    
     case Double(DoubleValue)
 }
 

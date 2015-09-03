@@ -13,7 +13,7 @@ private let ISO8601DateFormatter = DateFormatter(format: "yyyy-MM-dd'T'HH:mm:ssZ
 /// Converts the values object to JSON
 public extension Entity {
     
-    /// Converts ```JSON``` to *CoreModel* values. 
+    /// Converts ```JSON``` to **CoreModel** values.
     ///
     /// - returns: The converted values or ```nil``` if the provided values do not match the entity's properties.
     func convert(values: JSONObject) -> ValuesObject? {
@@ -122,9 +122,16 @@ public extension JSON {
     /// Converts **CoreModel** values to ```JSON```.
     static func fromValues(values: ValuesObject) -> JSONObject {
         
+        var jsonObject = JSONObject()
         
+        for (key, value) in values {
+            
+            let jsonValue = value.toJSON()
+            
+            jsonObject[key] = jsonValue
+        }
         
-        return JSONObject()
+        return jsonObject
     }
 }
 
@@ -134,20 +141,57 @@ public extension Value {
         
         switch self {
             
+        // Null
+            
         case Value.Null: return JSON.Value.Null
             
-        case let .Attribute(.String(value)): return JSON.Value.String(value)
+        // Attribute
             
-        case let .Attribute(.Number(.Boolean(value))): return JSON.Value.Number(.Boolean(value))
+        case let .Attribute(.String(value)):
+            return JSON.Value.String(value)
             
-        case let .Attribute(.Number(.Integer(value))): return JSON.Value.Number(.Integer(value))
+        case let .Attribute(.Number(.Boolean(value))):
+            return JSON.Value.Number(.Boolean(value))
             
-        case let .Attribute(.Number(.Double(value))): return JSON.Value.Number(.Double(value))
+        case let .Attribute(.Number(.Integer(value))):
+            return JSON.Value.Number(.Integer(value))
+            
+        case let .Attribute(.Number(.Double(value))):
+            return JSON.Value.Number(.Double(value))
             
         case let .Attribute(.Data(value)):
             
             let encodedData = Base64.encode(value)
             
+            var encodedString = ""
+            
+            for byte in encodedData {
+                
+                let unicodeScalar = UnicodeScalar(byte)
+                
+                encodedString.append(unicodeScalar)
+            }
+            
+            return JSON.Value.String(encodedString)
+            
+        case let .Attribute(.Date(value)):
+            
+            let dateString = ISO8601DateFormatter.stringFromValue(value)
+            
+            return JSON.Value.String(dateString)
+            
+        case let .Relationship(.ToOne(value)):
+            
+            return JSON.Value.String(value)
+            
+        case let .Relationship(.ToMany(value)):
+            
+            let jsonArray = value.map({ (element: String) -> JSON.Value in
+                
+                return JSON.Value.String(element)
+            })
+            
+            return JSON.Value.Array(jsonArray)
         }
     }
 }

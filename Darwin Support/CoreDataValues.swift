@@ -180,7 +180,7 @@ public extension AttributeValue {
         
         if let value = CoreDataValue as? Float {
             
-            self = .Number(.Float(value))
+            self = .Number(.Double(Double(value)))
         }
         
         if let value = CoreDataValue as? Double {
@@ -208,7 +208,6 @@ public extension AttributeValue {
                 
             case .Boolean(let value): return NSNumber(bool: value)
             case .Integer(let value): return NSNumber(integer: value)
-            case .Float(let value): return NSNumber(float: value)
             case .Double(let value): return NSNumber(double: value)
             }
         }

@@ -99,9 +99,6 @@ public extension Store {
                     case .Integer(_): guard attribute.propertyType == .Number(.Integer)
                         else { throw StoreError.InvalidValues }
                         
-                    case .Float(_):   guard attribute.propertyType == .Number(.Float)
-                        else { throw StoreError.InvalidValues }
-                        
                     case .Double(_):  guard attribute.propertyType == .Number(.Boolean)
                         else { throw StoreError.InvalidValues }
                     }
