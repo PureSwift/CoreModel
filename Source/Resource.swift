@@ -8,16 +8,41 @@
 
 import SwiftFoundation
 
-public struct Resource {
+public struct Resource: JSONEncodable, JSONDecodable {
     
     public let entityName: String
     
     public let resourceID: String
     
     /// Initializes a resource with the specified resource ID.
-    public init(entity: String, resourceID: String) {
+    public init(entityName: String, resourceID: String) {
         
         self.entityName = entity
         self.resourceID = resourceID
     }
+    
+    // MARK: - JSON
+    
+    public init?(JSONValue: JSON.Value) {
+        
+        switch JSONValue {
+            
+        case let .Object(jsonObject):
+            
+            guard let entityName = jsonObject.keys.first,
+                let resourceID = jsonObject.values.first?.rawValue as? String
+                where jsonObject.count == 1 else { return nil }
+            
+            self.entityName = entityName
+            self.resourceID = resourceID
+            
+        default: return nil
+        }
+    }
+    
+    public func toJSON() -> JSON.Value {
+        
+        return JSON.Value.Object([entityName: .String(resourceID)])
+    }
 }
+

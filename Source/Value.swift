@@ -10,7 +10,7 @@ import SwiftFoundation
 
 public typealias ValuesObject = [String: Value]
 
-public enum Value {
+public enum Value: JSONEncodable {
     
     case Null
     

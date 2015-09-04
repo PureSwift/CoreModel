@@ -14,9 +14,9 @@ public struct FetchRequest {
     
     public var predicate: Predicate?
     
-    public var fetchLimit: UInt = 0
+    public var fetchLimit: Int = 0
     
-    public var fetchOffset: UInt = 0
+    public var fetchOffset: Int = 0
     
     public init(entityName: String, sortDescriptors: [SortDescriptor]) {
         
