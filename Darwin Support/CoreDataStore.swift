@@ -58,7 +58,7 @@ public final class CoreDataStore: Store {
                 
                 let resourceID = managedObject.valueForKey(self.resourceIDAttributeName) as! String
                 
-                let resource = Resource(entity: managedObject.entity.name!, resourceID: resourceID)
+                let resource = Resource(managedObject.entity.name!, resourceID: resourceID)
                 
                 resources.append(resource)
             }
