@@ -6,7 +6,7 @@
 //  Copyright © 2015 PureSwift. All rights reserved.
 //
 
-public struct ComparisonPredicate: Predicate {
+public struct ComparisonPredicate {
     
     public let predicateType = PredicateType.Comparison
     

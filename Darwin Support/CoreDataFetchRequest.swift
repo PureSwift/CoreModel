@@ -39,11 +39,9 @@ public extension Predicate {
     
     func toPredicate(forFetchRequest fetchRequest: FetchRequest, store: CoreDataStore) throws -> NSPredicate {
         
-        switch self.predicateType {
+        switch self {
             
-        case .Comparison:
-            
-            let predicate = self as! ComparisonPredicate
+        case let .Comparison(predicate):
             
             var rawOptionValue: UInt = 0
             

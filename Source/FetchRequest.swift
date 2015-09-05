@@ -45,7 +45,35 @@ public extension FetchRequest {
     
     init?(JSONValue: JSON.Value) {
         
+        guard let jsonObject = JSONValue.objectValue,
+            let entityName = jsonObject[JSONKey.EntityName.rawValue]?.rawValue as? String,
+            let sortDescriptorsJSONArray = jsonObject[JSONKey.SortDescriptors.rawValue]?.arrayValue,
+            let sortDescriptors = SortDescriptor.fromJSON(sortDescriptorsJSONArray)
+            else { return nil }
         
+        self.entityName = entityName
+        self.sortDescriptors = sortDescriptors
+        
+        if let fetchLimitJSON = jsonObject[JSONKey.FetchLimit.rawValue] {
+            
+            guard let fetchLimit = fetchLimitJSON.rawValue as? Int else { return nil }
+            
+            self.fetchLimit = fetchLimit
+        }
+        
+        if let fetchOffsetJSON = jsonObject[JSONKey.FetchOffset.rawValue] {
+            
+            guard let fetchOffset = fetchOffsetJSON.rawValue as? Int else { return nil }
+            
+            self.fetchOffset = fetchOffset
+        }
+        
+        if let predicateJSON = jsonObject[JSONKey.Predicate.rawValue] {
+            
+            guard let predicate = Predicate(JSONValue: predicateJSON) else { return nil }
+            
+            self.predicate = predicate
+        }
     }
     
     func toJSON() -> JSON.Value {
@@ -53,5 +81,21 @@ public extension FetchRequest {
         var jsonObject = JSONObject()
         
         jsonObject[JSONKey.EntityName.rawValue] = JSON.Value.String(self.entityName)
+        
+        jsonObject[JSONKey.SortDescriptors.rawValue] = self.sortDescriptors.toJSON()
+        
+        jsonObject[JSONKey.Predicate.rawValue] = self.predicate?.toJSON()
+        
+        if self.fetchLimit > 0 {
+            
+            jsonObject[JSONKey.FetchLimit.rawValue] = JSON.Value.Number(.Integer(self.fetchLimit))
+        }
+        
+        if self.fetchOffset > 0 {
+            
+            jsonObject[JSONKey.FetchOffset.rawValue] = JSON.Value.Number(.Integer(self.fetchOffset))
+        }
+        
+        return JSON.Value.Object(jsonObject)
     }
 }

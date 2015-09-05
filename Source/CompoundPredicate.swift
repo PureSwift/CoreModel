@@ -6,7 +6,7 @@
 //  Copyright © 2015 PureSwift. All rights reserved.
 //
 
-public struct CompoundPredicate: Predicate {
+public struct CompoundPredicate {
     
     public let predicateType = PredicateType.Compound
     

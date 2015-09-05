@@ -6,13 +6,40 @@
 //  Copyright © 2015 PureSwift. All rights reserved.
 //
 
-public protocol Predicate {
+import SwiftFoundation
+
+public enum Predicate: JSONEncodable, JSONDecodable {
     
-    var predicateType: PredicateType { get }
+    case Comparison(ComparisonPredicate)
+    case Compound(CompoundPredicate)
+    
+    public var type: PredicateType {
+        
+        switch self {
+            
+        case Comparison(_): return .Comparison
+        case Compound(_):   return .Compound
+        }
+    }
 }
 
 public enum PredicateType: String {
     
     case Comparison
     case Compound
+}
+
+// MARK: - JSON
+
+public extension Predicate {
+    
+    init?(JSONValue: JSON.Value) {
+        
+        guard let jsonObject = JSONValue.objectValue else {  }
+    }
+    
+    func toJSON() -> JSON.Value {
+        
+        let predicateJSON =
+    }
 }
