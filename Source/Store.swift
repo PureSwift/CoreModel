@@ -112,7 +112,7 @@ public extension Store {
                 case .ToOne(let value):
                     guard relationship.propertyType == .ToOne else { throw StoreError.InvalidValues }
                     
-                    let resource = Resource(relationship.destinationEntityName, resourceID: value)
+                    let resource = Resource(relationship.destinationEntityName, value)
                     
                     guard try self.exists(resource) else { throw StoreError.InvalidValues }
                     
@@ -123,7 +123,7 @@ public extension Store {
                     
                     for resourceID in value {
                         
-                        let resource = Resource(relationship.destinationEntityName, resourceID: resourceID)
+                        let resource = Resource(relationship.destinationEntityName, resourceID)
                         
                         resources.append(resource)
                     }

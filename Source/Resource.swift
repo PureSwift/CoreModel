@@ -15,7 +15,7 @@ public struct Resource: JSONEncodable, JSONDecodable {
     public let resourceID: String
     
     /// Initializes a resource with the specified resource ID.
-    public init(_ entityName: String, resourceID: String) {
+    public init(_ entityName: String, _ resourceID: String) {
         
         self.entityName = entityName
         self.resourceID = resourceID
