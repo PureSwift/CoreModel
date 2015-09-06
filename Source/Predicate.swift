@@ -62,7 +62,10 @@ public extension Predicate {
         
         switch self {
             
-            case let .Compound 
+        case let .Comparison(predicate):    predicateJSON = predicate.toJSON()
+        case let .Compound(predicate):      predicateJSON = predicate.toJSON()
         }
+        
+        return JSON.Value.Object([self.type.rawValue: predicateJSON])
     }
 }

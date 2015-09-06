@@ -9,9 +9,7 @@
 import SwiftFoundation
 
 public struct ComparisonPredicate: JSONEncodable, JSONDecodable {
-    
-    public let predicateType = PredicateType.Comparison
-    
+        
     public var predicateOperator: ComparisonPredicateOperator
     
     public var modifier: ComparisonPredicateModifier

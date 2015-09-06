@@ -8,7 +8,7 @@
 
 public enum ComparisonPredicateModifier: String {
     
-    case Direct = "DIRECT"
-    case All = "ANY"
-    case Any = "ALL"
+    case Direct     = "DIRECT"
+    case All        = "ANY"
+    case Any        = "ALL"
 }

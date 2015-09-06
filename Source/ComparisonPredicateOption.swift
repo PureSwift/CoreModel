@@ -8,8 +8,8 @@
 
 public enum ComparisonPredicateOption: String {
     
-    case CaseInsensitive = "[c]"
-    case DiacriticInsensitive = "[d]"
-    case Normalized = "[n]"
-    case LocaleSensitive = "[l]"
+    case CaseInsensitive        = "[c]"
+    case DiacriticInsensitive   = "[d]"
+    case Normalized             = "[n]"
+    case LocaleSensitive        = "[l]"
 }

@@ -9,9 +9,7 @@
 import SwiftFoundation
 
 public struct CompoundPredicate: JSONEncodable, JSONDecodable {
-    
-    public let predicateType = PredicateType.Compound
-    
+        
     public var compoundPredicateType: CompoundPredicateType
     
     public var subpredicates: [Predicate]
