@@ -111,9 +111,7 @@ public extension Predicate {
                 type: predicate.predicateOperator.toPredicateOperatorType(),
                 options: NSComparisonPredicateOptions(rawValue: rawOptionValue))
             
-        case .Compound:
-            
-            let predicate = self as! CompoundPredicate
+        case let .Compound(predicate):
             
             var subpredicates = [NSPredicate]()
             
