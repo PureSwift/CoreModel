@@ -31,7 +31,7 @@ public protocol Store {
     func edit(resource: Resource, changes: ValuesObject) throws
     
     /// Returns the entity's values as a JSON object.
-    func values(forResource resource: Resource) throws -> ValuesObject
+    func values(resource: Resource) throws -> ValuesObject
 }
 
 /// Common errors for ```Store```.

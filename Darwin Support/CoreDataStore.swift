@@ -142,7 +142,7 @@ public final class CoreDataStore: Store {
         })
     }
     
-    public func values(forResource resource: Resource) throws -> ValuesObject {
+    public func values(resource: Resource) throws -> ValuesObject {
         
         guard let entity = self.managedObjectContext.persistentStoreCoordinator?.managedObjectModel.entitiesByName[resource.entityName] else { throw StoreError.InvalidEntity }
         
