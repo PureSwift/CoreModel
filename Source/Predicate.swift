@@ -8,7 +8,7 @@
 
 import SwiftFoundation
 
-public enum Predicate: JSONEncodable, JSONDecodable {
+public enum Predicate: JSONEncodable, JSONParametrizedDecodable {
     
     case Comparison(ComparisonPredicate)
     case Compound(CompoundPredicate)
@@ -33,7 +33,9 @@ public enum PredicateType: String {
 
 public extension Predicate {
     
-    init?(JSONValue: JSON.Value) {
+    init?(JSONValue: JSON.Value, parameters: Entity) {
+        
+        let entity = parameters
         
         guard let jsonObject = JSONValue.objectValue where jsonObject.count == 1,
             let (key, value) = jsonObject.first,
@@ -44,13 +46,13 @@ public extension Predicate {
             
         case .Comparison:
             
-            guard let comparisonPredicate = ComparisonPredicate(JSONValue: value) else { return nil }
+            guard let comparisonPredicate = ComparisonPredicate(JSONValue: value, parameters: entity) else { return nil }
             
             self = Predicate.Comparison(comparisonPredicate)
             
         case .Compound:
             
-            guard let compoundPredicate = CompoundPredicate(JSONValue: value) else { return nil }
+            guard let compoundPredicate = CompoundPredicate(JSONValue: value, parameters: entity) else { return nil }
             
             self = Predicate.Compound(compoundPredicate)
         }

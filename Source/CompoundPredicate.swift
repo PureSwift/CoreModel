@@ -8,7 +8,7 @@
 
 import SwiftFoundation
 
-public struct CompoundPredicate: JSONEncodable, JSONDecodable {
+public struct CompoundPredicate: JSONEncodable, JSONParametrizedDecodable {
         
     public var type: CompoundPredicateType
     
@@ -34,13 +34,13 @@ private extension CompoundPredicate {
 
 public extension CompoundPredicate {
     
-    init?(JSONValue: JSON.Value) {
+    init?(JSONValue: JSON.Value, parameters: Entity) {
         
         guard let jsonObject = JSONValue.objectValue where jsonObject.count == 2,
             let typeString = jsonObject[JSONKey.CompoundPredicateType.rawValue]?.rawValue as? String,
             let type = CompoundPredicateType(rawValue: typeString),
             let subpredicatesJSONArray = jsonObject[JSONKey.Subpredicates.rawValue]?.rawValue as? JSONArray,
-            let subpredicates = Predicate.fromJSON(subpredicatesJSONArray)
+            let subpredicates = Predicate.fromJSON(subpredicatesJSONArray, parameters: parameters)
             else { return nil }
         
         self.type = type

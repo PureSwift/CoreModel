@@ -8,7 +8,7 @@
 
 import SwiftFoundation
 
-public struct FetchRequest: JSONEncodable, JSONDecodable {
+public struct FetchRequest: JSONEncodable, JSONParametrizedDecodable {
     
     public var entityName: String
     
@@ -43,13 +43,22 @@ private extension FetchRequest {
 
 public extension FetchRequest {
     
-    init?(JSONValue: JSON.Value) {
+    init?(JSONValue: JSON.Value, parameters: [Entity]) {
+        
+        let model = parameters
         
         guard let jsonObject = JSONValue.objectValue,
             let entityName = jsonObject[JSONKey.EntityName.rawValue]?.rawValue as? String,
             let sortDescriptorsJSONArray = jsonObject[JSONKey.SortDescriptors.rawValue]?.arrayValue,
             let sortDescriptors = SortDescriptor.fromJSON(sortDescriptorsJSONArray)
             else { return nil }
+        
+        // find entity with specified name
+        
+        guard let entity = {
+            for entity in model { if entity.name == entityName { return entity } }
+            return nil
+            }() as Entity? else { return nil }
         
         self.entityName = entityName
         self.sortDescriptors = sortDescriptors
@@ -70,7 +79,7 @@ public extension FetchRequest {
         
         if let predicateJSON = jsonObject[JSONKey.Predicate.rawValue] {
             
-            guard let predicate = Predicate(JSONValue: predicateJSON) else { return nil }
+            guard let predicate = Predicate(JSONValue: predicateJSON, parameters: entity) else { return nil }
             
             self.predicate = predicate
         }
