@@ -120,7 +120,7 @@ public extension Predicate {
                 subpredicates.append(try subpredicate.toPredicate(forFetchRequest: fetchRequest, store: store))
             }
             
-            return NSCompoundPredicate(type: predicate.compoundPredicateType.toCompoundPredicateType(), subpredicates: subpredicates)
+            return NSCompoundPredicate(type: predicate.type.toCompoundPredicateType(), subpredicates: subpredicates)
         }
     }
 }
