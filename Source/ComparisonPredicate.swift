@@ -90,7 +90,27 @@ public extension ComparisonPredicate {
         
         var jsonObject = JSON.Object()
         
+        jsonObject[JSONKey.Property.rawValue] = JSON.Value.String(self.propertyName)
         
+        jsonObject[JSONKey.Value.rawValue] = self.value.toJSON()
+        
+        jsonObject[JSONKey.Operator.rawValue] = JSON.Value.String(self.predicateOperator.rawValue)
+        
+        jsonObject[JSONKey.Modifier.rawValue] = JSON.Value.String(self.modifier.rawValue)
+        
+        if let options = self.options {
+            
+            var optionsJSON = JSON.Array()
+            
+            for option in options {
+                
+                let jsonValue = JSON.Value.String(option.rawValue)
+                
+                optionsJSON.append(jsonValue)
+            }
+            
+            jsonObject[JSONKey.Options.rawValue] = JSON.Value.Array(optionsJSON)
+        }
         
         return JSON.Value.Object(jsonObject)
     }
