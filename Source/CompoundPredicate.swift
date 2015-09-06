@@ -6,7 +6,9 @@
 //  Copyright © 2015 PureSwift. All rights reserved.
 //
 
-public struct CompoundPredicate {
+import SwiftFoundation
+
+public struct CompoundPredicate: JSONEncodable, JSONDecodable {
     
     public let predicateType = PredicateType.Compound
     
@@ -18,5 +20,20 @@ public struct CompoundPredicate {
         
         self.compoundPredicateType = compoundPredicateType
         self.subpredicates = subpredicates
+    }
+}
+
+// MARK: - JSON
+
+public extension CompoundPredicate {
+    
+    init?(JSONValue: JSON.Value) {
+        
+        
+    }
+    
+    func toJSON() -> JSON.Value {
+        
+        
     }
 }

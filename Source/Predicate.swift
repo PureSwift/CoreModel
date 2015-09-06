@@ -35,11 +35,34 @@ public extension Predicate {
     
     init?(JSONValue: JSON.Value) {
         
-        guard let jsonObject = JSONValue.objectValue else {  }
+        guard let jsonObject = JSONValue.objectValue where jsonObject.count == 1,
+            let (key, value) = jsonObject.first,
+            let predicateType = PredicateType(rawValue: key)
+            else { return nil }
+        
+        switch predicateType {
+            
+        case .Comparison:
+            
+            guard let comparisonPredicate = ComparisonPredicate(JSONValue: value) else { return nil }
+            
+            self = Predicate.Comparison(comparisonPredicate)
+            
+        case .Compound:
+            
+            guard let compoundPredicate = CompoundPredicate(JSONValue: value) else { return nil }
+            
+            self = Predicate.Compound(compoundPredicate)
+        }
     }
-    
+
     func toJSON() -> JSON.Value {
         
-        let predicateJSON =
+        let predicateJSON: JSON.Value
+        
+        switch self {
+            
+            case let .Compound 
+        }
     }
 }

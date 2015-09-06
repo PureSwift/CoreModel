@@ -6,7 +6,9 @@
 //  Copyright © 2015 PureSwift. All rights reserved.
 //
 
-public struct ComparisonPredicate {
+import SwiftFoundation
+
+public struct ComparisonPredicate: JSONEncodable, JSONDecodable {
     
     public let predicateType = PredicateType.Comparison
     
@@ -31,5 +33,20 @@ public struct ComparisonPredicate {
         self.options = options
         self.propertyName = propertyName
         self.value = value
+    }
+}
+
+// MARK: - JSON
+
+public extension ComparisonPredicate {
+    
+    init?(JSONValue: JSON.Value) {
+        
+        
+    }
+    
+    func toJSON() -> JSON.Value {
+        
+        
     }
 }
