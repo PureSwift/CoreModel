@@ -33,7 +33,6 @@ private extension FetchRequest {
     
     private enum JSONKey: String {
         
-        case EntityName
         case SortDescriptors
         case Predicate // Optional
         case FetchLimit // Optional
@@ -43,24 +42,17 @@ private extension FetchRequest {
 
 public extension FetchRequest {
     
-    init?(JSONValue: JSON.Value, parameters: [Entity]) {
+    init?(JSONValue: JSON.Value, parameters: Entity) {
         
-        let model = parameters
+        let entity = parameters
         
         guard let jsonObject = JSONValue.objectValue,
-            let entityName = jsonObject[JSONKey.EntityName.rawValue]?.rawValue as? String,
             let sortDescriptorsJSONArray = jsonObject[JSONKey.SortDescriptors.rawValue]?.arrayValue,
             let sortDescriptors = SortDescriptor.fromJSON(sortDescriptorsJSONArray)
             else { return nil }
         
-        // find entity with specified name
+        self.entityName = entity.name
         
-        guard let entity = {
-            for entity in model { if entity.name == entityName { return entity } }
-            return nil
-            }() as Entity? else { return nil }
-        
-        self.entityName = entityName
         self.sortDescriptors = sortDescriptors
         
         if let fetchLimitJSON = jsonObject[JSONKey.FetchLimit.rawValue] {
@@ -88,8 +80,6 @@ public extension FetchRequest {
     func toJSON() -> JSON.Value {
         
         var jsonObject = JSONObject()
-        
-        jsonObject[JSONKey.EntityName.rawValue] = JSON.Value.String(self.entityName)
         
         jsonObject[JSONKey.SortDescriptors.rawValue] = self.sortDescriptors.toJSON()
         
