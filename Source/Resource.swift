@@ -10,9 +10,9 @@ import SwiftFoundation
 
 public struct Resource: JSONEncodable, JSONDecodable {
     
-    public let entityName: String
+    public var entityName: String
     
-    public let resourceID: String
+    public var resourceID: String
     
     /// Initializes a resource with the specified resource ID.
     public init(_ entityName: String, _ resourceID: String) {
