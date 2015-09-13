@@ -11,31 +11,52 @@ import CoreData
 
 public extension NSManagedObjectModel {
     
-    /// Converts a **CoreData** model to **CoreModel** model. Skips the attribute representing the resource ID.
-    func toModel(resourceIDAttributeName: String) -> [Entity]? {
+    /// Converts a **CoreData** model to **CoreModel** model.
+    /// 
+    /// -Note: The managed object model should not include the attribute that will be used for storing the
+    /// resource ID. That attribute should be added later (programatically) for the **CoreData** stack.
+    func toModel() -> [Entity]? {
         
         var model = [Entity]()
         
         for entityDescription in self.entities {
             
-            guard let entity = entityDescription.toEntity(resourceIDAttributeName) else { return nil }
+            guard let entity = entityDescription.toEntity() else { return nil }
             
             model.append(entity)
         }
         
         return model
     }
+    
+    /// Programatically adds a unique resource identifier attribute to each entity in the managed object model.
+    func addResourceIDAttribute(resourceIDAttributeName: String) {
+        
+        // add a resourceID attribute to managed object model
+        for (_, entity) in self.entitiesByName {
+            
+            if entity.superentity == nil {
+                
+                // create new (runtime) attribute
+                let resourceIDAttribute = NSAttributeDescription()
+                resourceIDAttribute.attributeType = NSAttributeType.Integer64AttributeType
+                resourceIDAttribute.name = resourceIDAttributeName
+                resourceIDAttribute.optional = false
+                
+                // add to entity
+                entity.properties.append(resourceIDAttribute)
+            }
+        }
+    }
 }
 
 public extension NSEntityDescription {
     
-    func toEntity(resourceIDAttributeName: String) -> Entity? {
+    func toEntity() -> Entity? {
         
         var attributes = [Attribute]()
         
-        for (key, description) in self.attributesByName {
-            
-            guard key != resourceIDAttributeName else { continue }
+        for (_, description) in self.attributesByName {
             
             guard let attribute = description.toAttribute() else { return nil }
             
