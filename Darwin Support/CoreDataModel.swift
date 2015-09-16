@@ -48,6 +48,25 @@ public extension NSManagedObjectModel {
             }
         }
     }
+    
+    /// Programatically adds a date attribute to each entity in the managed object model.
+    func addDateCachedAttribute(dateCachedAttributeName: String) {
+        
+        // add a date attribute to managed object model
+        for (_, entity) in self.entitiesByName as [String: NSEntityDescription] {
+            
+            if entity.superentity == nil {
+                
+                // create new (runtime) attribute
+                let dateAttribute = NSAttributeDescription()
+                dateAttribute.attributeType = NSAttributeType.DateAttributeType
+                dateAttribute.name = dateCachedAttributeName
+                
+                // add to entity
+                entity.properties.append(dateAttribute)
+            }
+        }
+    }
 }
 
 public extension NSEntityDescription {
