@@ -27,7 +27,7 @@ public extension SortDescriptor {
     
     init?(JSONValue: JSON.Value) {
         
-        guard let jsonObject = JSONValue.rawValue as? [String: Bool]
+        guard let jsonObject = (JSONValue.rawValue as? [String: Any]) as? [String: Bool]
             where jsonObject.count == 1,
             let (key, value) = jsonObject.first
             else { return nil }
