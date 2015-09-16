@@ -39,7 +39,7 @@ public extension NSManagedObjectModel {
                 
                 // create new (runtime) attribute
                 let resourceIDAttribute = NSAttributeDescription()
-                resourceIDAttribute.attributeType = NSAttributeType.Integer64AttributeType
+                resourceIDAttribute.attributeType = NSAttributeType.StringAttributeType
                 resourceIDAttribute.name = resourceIDAttributeName
                 resourceIDAttribute.optional = false
                 
