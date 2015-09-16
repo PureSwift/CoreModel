@@ -67,6 +67,19 @@ public extension NSManagedObjectModel {
             }
         }
     }
+    
+    /// Marks all properties as optional.
+    func markAllPropertiesAsOptional() {
+        
+        // add a date attribute to managed object model
+        for (_, entity) in self.entitiesByName as [String: NSEntityDescription] {
+            
+            for (_, property) in entity.propertiesByName as [String: NSPropertyDescription] {
+                
+                property.optional = true
+            }
+        }
+    }
 }
 
 public extension NSEntityDescription {
