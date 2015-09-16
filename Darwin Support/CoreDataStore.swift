@@ -87,22 +87,22 @@ public final class CoreDataStore: Store {
         return true
     }
     
-    public func create(resource: Resource, initialValues: ValuesObject?) throws {
+    public func create(resource: Resource, initialValues: ValuesObject) throws {
         
         guard self.managedObjectContext.persistentStoreCoordinator?.managedObjectModel.entitiesByName[resource.entityName] != nil else { throw StoreError.InvalidEntity }
         
         try self.managedObjectContext.performErrorBlockAndWait({ () -> Void in
             
+            // create managed object
             let managedObject = NSEntityDescription.insertNewObjectForEntityForName(resource.entityName, inManagedObjectContext: self.managedObjectContext)
             
             // set resource ID
             managedObject.setValue(resource.resourceID, forKey: self.resourceIDAttributeName)
             
-            if let values = initialValues {
-                
-                try managedObject.setValues(values, store: self)
-            }
+            // set initial values
+            try managedObject.setValues(initialValues, store: self)
             
+            // save
             try self.managedObjectContext.save()
         })
     }

@@ -22,7 +22,7 @@ public protocol Store {
     func exist(resources: [Resource]) throws -> Bool
     
     /// Creates an entity with the specified values.
-    func create(resource: Resource, initialValues: ValuesObject?) throws
+    func create(resource: Resource, initialValues: ValuesObject) throws
     
     /// Deletes the specified entity.
     func delete(resource: Resource) throws
