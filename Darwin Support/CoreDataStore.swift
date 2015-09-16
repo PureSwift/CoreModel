@@ -95,6 +95,9 @@ public final class CoreDataStore: Store {
             
             let managedObject = NSEntityDescription.insertNewObjectForEntityForName(resource.entityName, inManagedObjectContext: self.managedObjectContext)
             
+            // set resource ID
+            managedObject.setValue(resource.resourceID, forKey: self.resourceIDAttributeName)
+            
             if let values = initialValues {
                 
                 try managedObject.setValues(values, store: self)
