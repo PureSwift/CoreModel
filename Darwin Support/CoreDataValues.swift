@@ -74,8 +74,9 @@ public extension NSManagedObject {
         guard let entity = store.model.filter({ (entity: Entity) -> Bool in entity.name == entityName}).first
             else { fatalError("No entity named '\(entityName)' in CoreDataStore") }
         
+        // TODO: Fix values validation
         // sanity check
-        try store.validate(values, forEntity: entity)
+        //try store.validate(values, forEntity: entity)
         
         for (key, value) in values {
             
@@ -152,14 +153,14 @@ public extension AttributeValue {
             self = .String(value as StringValue)
         }
         
-        if let value = CoreDataValue as? NSDate {
+        else if let value = CoreDataValue as? NSDate {
             
             let date = SwiftFoundation.Date(foundation: value)
             
             self = .Date(date)
         }
         
-        if let value = CoreDataValue as? NSData {
+        else if let value = CoreDataValue as? NSData {
             
             let data = value.arrayOfBytes()
             
@@ -168,32 +169,32 @@ public extension AttributeValue {
         
         // number types
         
-        if let value = CoreDataValue as? Bool {
+        else if let value = CoreDataValue as? Bool {
             
             self = .Number(.Boolean(value))
         }
         
-        if let value = CoreDataValue as? Int {
+        else if let value = CoreDataValue as? Int {
             
             self = .Number(.Integer(value))
         }
         
-        if let value = CoreDataValue as? Float {
+        else if let value = CoreDataValue as? Float {
             
             self = .Number(.Double(Double(value)))
         }
         
-        if let value = CoreDataValue as? Double {
+        else if let value = CoreDataValue as? Double {
             
             self = .Number(.Double(value))
         }
         
-        if let _ = CoreDataValue as? NSDecimalNumber {
+        else if let _ = CoreDataValue as? NSDecimalNumber {
             
             fatalError("Decimal conversion not implemented")
         }
         
-        return nil
+        else { return nil }
     }
     
     func toCoreDataValue() -> AnyObject {
