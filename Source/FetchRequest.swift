@@ -42,16 +42,16 @@ private extension FetchRequest {
 
 public extension FetchRequest {
     
-    init?(JSONValue: JSON.Value, parameters: Entity) {
+    init?(JSONValue: JSON.Value, parameters: (entityName: String, entity: Entity)) {
         
-        let entity = parameters
+        let entity = parameters.entity
+        
+        self.entityName = parameters.entityName
         
         guard let jsonObject = JSONValue.objectValue,
             let sortDescriptorsJSONArray = jsonObject[JSONKey.SortDescriptors.rawValue]?.arrayValue,
             let sortDescriptors = SortDescriptor.fromJSON(sortDescriptorsJSONArray)
             else { return nil }
-        
-        self.entityName = entity.name
         
         self.sortDescriptors = sortDescriptors
         

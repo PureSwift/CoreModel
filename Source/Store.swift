@@ -10,7 +10,7 @@
 public protocol Store {
     
     /// The model the persistent store will handle.
-    var model: [Entity] { get }
+    var model: [String: Entity] { get }
     
     /// Queries the store for entities matching the fetch request.
     func fetch(fetchRequest: FetchRequest) throws -> [Resource]
@@ -47,12 +47,13 @@ public enum StoreError: ErrorType {
     case NotFound
 }
 
+/*
 // MARK: - Implementation
 
 public extension Store {
     
     /// Attempts to validate setting the values object for an entity.
-    func validate(values: ValuesObject, forEntity entity: Entity) throws {
+    func validate(values: ValuesObject, forEntity entity: Entity, named entityName: String) throws {
         
         // verify entity belongs to model
         guard (self.model.contains { (element: Entity) -> Bool in entity == entity })
@@ -60,9 +61,9 @@ public extension Store {
         
         for (key, value) in values {
             
-            let attribute = entity.attributes.filter({ (element) -> Bool in element.name == key }).first
+            let attribute = entity.attributes[key]
             
-            let relationship = entity.relationships.filter({ (element) -> Bool in element.name == key }).first
+            let relationship = entity.relationships[key]
             
             // property not found on entity
             if attribute == nil && relationship == nil { throw StoreError.InvalidValues }
@@ -81,25 +82,25 @@ public extension Store {
                 
                 switch attributeValue {
                     
-                case .String(_): guard attribute.propertyType == .String
+                case .String(_): guard attribute.type == .String
                     else { throw StoreError.InvalidValues }
                     
-                case .Date(_):   guard attribute.propertyType == .Date
+                case .Date(_):   guard attribute.type == .Date
                     else { throw StoreError.InvalidValues }
                     
-                case .Data(_):   guard attribute.propertyType == .Data
+                case .Data(_):   guard attribute.type == .Data
                     else { throw StoreError.InvalidValues }
                     
                 case .Number(let numberValue):
                     switch numberValue {
                         
-                    case .Boolean(_): guard attribute.propertyType == .Number(.Boolean)
+                    case .Boolean(_): guard attribute.type == .Number(.Boolean)
                         else { throw StoreError.InvalidValues }
                         
-                    case .Integer(_): guard attribute.propertyType == .Number(.Integer)
+                    case .Integer(_): guard attribute.type == .Number(.Integer)
                         else { throw StoreError.InvalidValues }
                         
-                    case .Double(_):  guard attribute.propertyType == .Number(.Boolean)
+                    case .Double(_):  guard attribute.type == .Number(.Boolean)
                         else { throw StoreError.InvalidValues }
                     }
                 }
@@ -110,14 +111,14 @@ public extension Store {
                 switch relationshipValue {
                     
                 case .ToOne(let value):
-                    guard relationship.propertyType == .ToOne else { throw StoreError.InvalidValues }
+                    guard relationship.type == .ToOne else { throw StoreError.InvalidValues }
                     
                     let resource = Resource(relationship.destinationEntityName, value)
                     
                     guard try self.exists(resource) else { throw StoreError.InvalidValues }
                     
                 case .ToMany(let value):
-                    guard relationship.propertyType == .ToMany else { throw StoreError.InvalidValues }
+                    guard relationship.type == .ToMany else { throw StoreError.InvalidValues }
                     
                     var resources = [Resource]()
                     
@@ -134,4 +135,4 @@ public extension Store {
         }
     }
 }
-
+*/

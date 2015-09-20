@@ -25,7 +25,7 @@ public final class CoreDataStore: Store {
     /// Creates a Store backed by a **CoreData** managed object context.
     ///
     /// - Note: The provided managed object context have its own ```NSPersistentCoordinator``` setup and the **CoreData** managed object model must match the provided model with the exception that the managed object model must contain an extra *resource ID* attribute for each entity.
-    public init?(model:[Entity], managedObjectContext: NSManagedObjectContext, resourceIDAttributeName: String = "id") {
+    public init?(model:[String: Entity], managedObjectContext: NSManagedObjectContext, resourceIDAttributeName: String = "id") {
         
         self.model = model
         self.managedObjectContext = managedObjectContext
@@ -34,7 +34,7 @@ public final class CoreDataStore: Store {
     
     // MARK: - Store
     
-    public let model: [Entity]
+    public let model: [String: Entity]
     
     public func fetch(fetchRequest: FetchRequest) throws -> [Resource] {
         

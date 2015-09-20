@@ -71,7 +71,7 @@ public extension NSManagedObject {
         
         guard let entityName = self.entity.name else { fatalError("Core Data Entity is unnamed") }
         
-        guard let entity = store.model.filter({ (entity: Entity) -> Bool in entity.name == entityName}).first
+        guard let _ = store.model[entityName]
             else { fatalError("No entity named '\(entityName)' in CoreDataStore") }
         
         // TODO: Fix values validation

@@ -9,21 +9,14 @@
 /// Defines the model for an entity
 public struct Entity: Equatable {
     
-    // MARK: Model
+    public var attributes = [String: Attribute]()
     
-    public var name: String
+    public var relationships = [String: Relationship]()
     
-    public var attributes: [Attribute] = []
-    
-    public var relationships: [Relationship] = []
-    
-    public init(entityName: String) {
-        
-        self.name = entityName
-    }
+    public init() { }
 }
 
 public func == (lhs: Entity, rhs: Entity) -> Bool {
     
-    return lhs.name == rhs.name && lhs.attributes == rhs.attributes && lhs.relationships == rhs.relationships
+    return lhs.attributes == rhs.attributes && lhs.relationships == rhs.relationships
 }

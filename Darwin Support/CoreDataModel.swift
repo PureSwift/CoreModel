@@ -86,27 +86,27 @@ public extension NSEntityDescription {
     
     func toEntity() -> Entity? {
         
-        var attributes = [Attribute]()
+        var attributes = [String: Attribute]()
         
-        for (_, description) in self.attributesByName {
+        for (name, description) in self.attributesByName {
             
             guard let attribute = description.toAttribute() else { return nil }
             
-            attributes.append(attribute)
+            attributes[name] = attribute
         }
         
-        var relationships = [Relationship]()
+        var relationships = [String: Relationship]()
         
-        for (_, description) in self.relationshipsByName {
+        for (name, description) in self.relationshipsByName {
             
             guard let relationship = description.toRelationship() else { return nil }
             
-            relationships.append(relationship)
+            relationships[name] = relationship
         }
         
         guard let entityName = self.name else { return nil }
         
-        var entity = Entity(entityName: entityName)
+        var entity = Entity()
         
         entity.attributes = attributes
         
@@ -124,7 +124,7 @@ public extension NSRelationshipDescription {
         
         guard let inverseRelationshipName = self.inverseRelationship?.name else { return nil }
         
-        return Relationship(name: self.name, propertyType: RelationshipType(toMany: self.toMany), destinationEntityName: destinationEntityName, inverseRelationshipName: inverseRelationshipName)
+        return Relationship(type: RelationshipType(toMany: self.toMany), destinationEntityName: destinationEntityName, inverseRelationshipName: inverseRelationshipName)
     }
 }
 
@@ -134,7 +134,7 @@ public extension NSAttributeDescription {
         
         guard let attributeType = self.attributeType.toAttributeType() else { return nil }
         
-        return Attribute(name: name, propertyType: attributeType, optional: self.optional)
+        return Attribute(type: attributeType, optional: self.optional)
     }
 }
 

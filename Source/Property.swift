@@ -10,54 +10,45 @@ public protocol Property {
     
     typealias PropertyType
     
-    var name: String { get }
-    
     var optional: Bool { get }
     
-    var propertyType: PropertyType { get }
+    var type: PropertyType { get }
 }
 
 public struct Attribute: Property, Equatable {
     
-    public var name: String
-    
     public var optional: Bool
     
-    public var propertyType: AttributeType
+    public var type: AttributeType
     
-    public init(name: String, propertyType: AttributeType, optional: Bool = false) {
+    public init(type: AttributeType, optional: Bool = false) {
         
-        self.name = name
-        self.propertyType = propertyType
+        self.type = type
         self.optional = optional
     }
 }
 
 public func == (lhs: Attribute, rhs: Attribute) -> Bool {
     
-    return lhs.name == rhs.name && lhs.optional == rhs.optional && lhs.propertyType == rhs.propertyType
+    return lhs.optional == rhs.optional && lhs.type == rhs.type
 }
 
 public struct Relationship: Property, Equatable {
     
-    public var name: String
-    
     public var optional: Bool
     
-    public var propertyType: RelationshipType
+    public var type: RelationshipType
     
     public var destinationEntityName: String
     
     public var inverseRelationshipName: String
     
-    public init(name: String,
-        propertyType: RelationshipType,
+    public init(type: RelationshipType,
         optional: Bool = false,
         destinationEntityName: String,
         inverseRelationshipName: String) {
         
-        self.name = name
-        self.propertyType = propertyType
+        self.type = type
         self.optional = optional
         self.destinationEntityName = destinationEntityName
         self.inverseRelationshipName = inverseRelationshipName
@@ -66,9 +57,8 @@ public struct Relationship: Property, Equatable {
 
 public func == (lhs: Relationship, rhs: Relationship) -> Bool {
     
-    return lhs.name == rhs.name
-        && lhs.optional == rhs.optional
-        && lhs.propertyType == rhs.propertyType
+    return lhs.optional == rhs.optional
+        && lhs.type == rhs.type
         && lhs.destinationEntityName == rhs.destinationEntityName
         && lhs.inverseRelationshipName == rhs.inverseRelationshipName
 }

@@ -22,17 +22,9 @@ public extension Entity {
         
         for (key, jsonValue) in values {
             
-            let attribute = self.attributes.filter({ (element) -> Bool in
-                
-                return (element.name == key)
-                
-            }).first
+            let attribute = self.attributes[key]
             
-            let relationship = self.relationships.filter({ (element) -> Bool in
-                
-                return (element.name == key)
-                
-            }).first
+            let relationship = self.relationships[key]
             
             guard !(attribute == nil && relationship == nil) else { return nil }
             
@@ -47,7 +39,7 @@ public extension Entity {
                 
                 var attributeValue: AttributeValue!
                 
-                switch (jsonValue, attribute.propertyType) {
+                switch (jsonValue, attribute.type) {
                     
                 case let (JSON.Value.String(value), AttributeType.String):
                     attributeValue = AttributeValue.String(value)
@@ -88,7 +80,7 @@ public extension Entity {
                 
                 var relationshipValue: RelationshipValue!
                 
-                switch (relationship.propertyType, jsonValue) {
+                switch (relationship.type, jsonValue) {
                     
                 case let (.ToOne, JSON.Value.String(value)):
                     
