@@ -10,7 +10,7 @@
 public protocol Store {
     
     /// The model the persistent store will handle.
-    var model: [String: Entity] { get }
+    var model: Model { get }
     
     /// Queries the store for entities matching the fetch request.
     func fetch(fetchRequest: FetchRequest) throws -> [Resource]

@@ -15,15 +15,15 @@ public extension NSManagedObjectModel {
     /// 
     /// -Note: The managed object model should not include the attribute that will be used for storing the
     /// resource ID. That attribute should be added later (programatically) for the **CoreData** stack.
-    func toModel() -> [Entity]? {
+    func toModel() -> Model? {
         
-        var model = [Entity]()
+        var model = Model()
         
-        for entityDescription in self.entities {
+        for (name, entityDescription) in self.entitiesByName {
             
             guard let entity = entityDescription.toEntity() else { return nil }
             
-            model.append(entity)
+            model[name] = entity
         }
         
         return model
@@ -103,8 +103,6 @@ public extension NSEntityDescription {
             
             relationships[name] = relationship
         }
-        
-        guard let entityName = self.name else { return nil }
         
         var entity = Entity()
         

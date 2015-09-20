@@ -6,6 +6,9 @@
 //  Copyright © 2015 PureSwift. All rights reserved.
 //
 
+/// **CoreModel** Model
+public typealias Model = [String: Entity]
+
 /// Defines the model for an entity
 public struct Entity: Equatable {
     
