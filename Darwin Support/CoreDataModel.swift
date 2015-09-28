@@ -122,7 +122,7 @@ public extension NSRelationshipDescription {
         
         guard let inverseRelationshipName = self.inverseRelationship?.name else { return nil }
         
-        return Relationship(type: RelationshipType(toMany: self.toMany), optional: self.optional, destinationEntityName: destinationEntityName, inverseRelationshipName: inverseRelationshipName)
+        return Relationship(type: RelationshipType(toMany: self.toMany), destinationEntityName: destinationEntityName, inverseRelationshipName: inverseRelationshipName)
     }
 }
 
@@ -132,7 +132,7 @@ public extension NSAttributeDescription {
         
         guard let attributeType = self.attributeType.toAttributeType() else { return nil }
         
-        return Attribute(type: attributeType, optional: self.optional)
+        return Attribute(type: attributeType)
     }
 }
 
