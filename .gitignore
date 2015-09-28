@@ -1,6 +1,6 @@
 
-CoreModel/CoreModel.xcodeproj/project.xcworkspace/*
+Carthage/*
+
+CoreModel/CoreModel.xcodeproj/project.xcworkspace/xcuserdata/*
 
 CoreModel/CoreModel.xcodeproj/xcuserdata/*
-
-Carthage/*
