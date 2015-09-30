@@ -22,7 +22,7 @@ public enum Value: JSONEncodable {
         
         switch self {
             
-        case Null: return Null()
+        case Null: return SwiftFoundation.Null()
         case let .Attribute(value): return value.rawValue
         case let .Relationship(value): return value.rawValue
         }
