@@ -20,7 +20,7 @@ public struct FetchRequest: JSONEncodable, JSONParametrizedDecodable {
     
     public var fetchOffset: Int = 0
     
-    public init(entityName: String, sortDescriptors: [SortDescriptor]) {
+    public init(entityName: String, sortDescriptors: [SortDescriptor] = []) {
         
         self.entityName = entityName
         self.sortDescriptors = sortDescriptors
