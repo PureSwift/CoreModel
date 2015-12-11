@@ -18,6 +18,7 @@ public extension Entity {
         
         var convertedValues = ValuesObject()
         
+        /*
         // convert attributes
         for (key, attribute) in self.attributes {
             
@@ -64,40 +65,39 @@ public extension Entity {
             
             convertedValues[key] = value
         }
+        */
         
         // convert relationships
         for (key, relationship) in self.relationships {
             
-            let value: Value
-            
             if let jsonValue = JSONObject[key] {
                 
-                let relationshipValue: RelationshipValue
+                let convertedValue: Value
                 
-                switch (relationship.type, jsonValue) {
+                switch relationship.type {
                     
-                case let (.ToOne, JSON.Value.String(value)):
+                case .ToOne:
                     
-                    relationshipValue = RelationshipValue.ToOne(value)
+                    guard case let .String(value) = jsonValue
+                        else { return nil }
                     
-                case let (.ToMany, JSON.Value.Array(value)):
+                    convertedValue = .Relationship(.ToOne(value))
                     
-                    guard let resourceIDs = value.rawValues as? [String] else { return nil }
+                case .ToMany:
                     
-                    relationshipValue = RelationshipValue.ToMany(resourceIDs)
+                    guard let jsonArray = jsonValue.arrayValue,
+                        let resourceIDs = String.fromJSON(jsonArray)
+                        else { return nil }
                     
-                default: return nil
-                    
+                    convertedValue = .Relationship(.ToMany(resourceIDs))
                 }
                 
-                value = .Relationship(relationshipValue)
+                convertedValues[key] = convertedValue
             }
             
-            else { value = .Null }
-            
-            convertedValues[key] = value
+            else { convertedValues[key] = .Null }
         }
-        
+
         return convertedValues
     }
 }
