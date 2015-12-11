@@ -27,13 +27,13 @@ public extension SortDescriptor {
     
     init?(JSONValue: JSON.Value) {
         
-        guard let jsonObject = (JSONValue.rawValue as? [String: Any]) as? [String: Bool]
-            where jsonObject.count == 1,
-            let (key, value) = jsonObject.first
+        guard let jsonObject = JSONValue.objectValue where jsonObject.count == 1,
+            let (key, jsonValue) = jsonObject.first,
+            let ascending = jsonValue.rawValue as? Bool
             else { return nil }
         
         self.propertyName = key
-        self.ascending = value
+        self.ascending = ascending
     }
     
     func toJSON() -> JSON.Value {
