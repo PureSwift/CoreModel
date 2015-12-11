@@ -6,6 +6,8 @@
 //  Copyright © 2015 PureSwift. All rights reserved.
 //
 
+#if os(OSX)
+
 import Foundation
 import CoreData
 
@@ -216,3 +218,5 @@ public extension CompoundPredicateType {
         }
     }
 }
+
+#endif

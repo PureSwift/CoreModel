@@ -6,6 +6,8 @@
 //  Copyright © 2015 PureSwift. All rights reserved.
 //
 
+#if os(OSX)
+
 import Foundation
 import CoreData
 
@@ -188,6 +190,6 @@ public final class CoreDataStore: Store {
     }
 }
 
-
+#endif
 
 

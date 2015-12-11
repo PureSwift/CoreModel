@@ -6,6 +6,8 @@
 //  Copyright © 2015 PureSwift. All rights reserved.
 //
 
+#if os(OSX)
+
 import Foundation
 import CoreData
 
@@ -116,4 +118,6 @@ public extension NSPredicate {
         return (comparisonPredicates as NSArray) as! [NSComparisonPredicate]
     }
 }
+
+#endif
 

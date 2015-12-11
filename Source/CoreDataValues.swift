@@ -6,6 +6,8 @@
 //  Copyright © 2015 PureSwift. All rights reserved.
 //
 
+#if os(OSX)
+
 import Foundation
 import CoreData
 import SwiftFoundation
@@ -215,4 +217,4 @@ public extension AttributeValue {
     }
 }
 
-
+#endif
