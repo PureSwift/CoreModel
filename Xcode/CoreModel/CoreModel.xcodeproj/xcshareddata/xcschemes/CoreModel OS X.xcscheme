@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "0700"
+   LastUpgradeVersion = "0720"
    version = "1.3">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -14,9 +14,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "6E933E741BACCCBD00454193"
-               BuildableName = "CoreModel.framework"
-               BlueprintName = "CoreModel WatchOS"
+               BlueprintIdentifier = "6EC90CBD1C1A68530068944A"
+               BuildableName = "CoreModel OS X.framework"
+               BlueprintName = "CoreModel OS X"
                ReferencedContainer = "container:CoreModel.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -45,9 +45,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "6E933E741BACCCBD00454193"
-            BuildableName = "CoreModel.framework"
-            BlueprintName = "CoreModel WatchOS"
+            BlueprintIdentifier = "6EC90CBD1C1A68530068944A"
+            BuildableName = "CoreModel OS X.framework"
+            BlueprintName = "CoreModel OS X"
             ReferencedContainer = "container:CoreModel.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
@@ -63,9 +63,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "6E933E741BACCCBD00454193"
-            BuildableName = "CoreModel.framework"
-            BlueprintName = "CoreModel WatchOS"
+            BlueprintIdentifier = "6EC90CBD1C1A68530068944A"
+            BuildableName = "CoreModel OS X.framework"
+            BlueprintName = "CoreModel OS X"
             ReferencedContainer = "container:CoreModel.xcodeproj">
          </BuildableReference>
       </MacroExpansion>

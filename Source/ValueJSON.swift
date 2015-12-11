@@ -7,9 +7,6 @@
 //
 
 import SwiftFoundation
-import SwiftCF
-
-private let ISO8601DateFormatter = DateFormatter(format: "yyyy-MM-dd'T'HH:mm:ssZZZZ")
 
 /// Converts the values object to JSON
 public extension Entity {
@@ -53,10 +50,10 @@ public extension Entity {
                     
                 case let (JSON.Value.Number(.Double(value)), AttributeType.Number(.Double)):
                     attributeValue = AttributeValue.Number(.Double(value))
+                
+                case let (JSON.Value.Number(.Double(value)), AttributeType.Date):
                     
-                case let (JSON.Value.String(value), AttributeType.Date):
-                    
-                    guard let date = ISO8601DateFormatter.valueFromString(value) else { return nil }
+                    let date = Date(timeIntervalSince1970: value)
                     
                     attributeValue = AttributeValue.Date(date)
                     
@@ -169,9 +166,7 @@ public extension Value {
             
         case let .Attribute(.Date(value)):
             
-            let dateString = ISO8601DateFormatter.stringFromValue(value)
-            
-            return JSON.Value.String(dateString)
+            return JSON.Value.Number(.Double(value.timeIntervalSince1970))
             
         case let .Relationship(.ToOne(value)):
             

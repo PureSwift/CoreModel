@@ -87,12 +87,12 @@ public extension FetchRequest {
         
         if self.fetchLimit > 0 {
             
-            jsonObject[JSONKey.FetchLimit.rawValue] = JSON.Value.Number(.Integer(self.fetchLimit))
+            jsonObject[JSONKey.FetchLimit.rawValue] = JSON.Value.Number(.Integer(Int64(self.fetchLimit)))
         }
         
         if self.fetchOffset > 0 {
             
-            jsonObject[JSONKey.FetchOffset.rawValue] = JSON.Value.Number(.Integer(self.fetchOffset))
+            jsonObject[JSONKey.FetchOffset.rawValue] = JSON.Value.Number(.Integer(Int64(self.fetchOffset)))
         }
         
         return JSON.Value.Object(jsonObject)

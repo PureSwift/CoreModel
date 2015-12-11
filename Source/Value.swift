@@ -55,7 +55,7 @@ public enum NumberValue {
     
     case Boolean(Bool)
     
-    case Integer(Int)
+    case Integer(Int64)
     
     case Double(DoubleValue)
     

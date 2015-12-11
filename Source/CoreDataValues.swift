@@ -174,7 +174,7 @@ public extension AttributeValue {
             self = .Number(.Boolean(value))
         }
         
-        else if let value = CoreDataValue as? Int {
+        else if let value = CoreDataValue as? Int64 {
             
             self = .Number(.Integer(value))
         }
@@ -208,7 +208,7 @@ public extension AttributeValue {
             switch number {
                 
             case .Boolean(let value): return NSNumber(bool: value)
-            case .Integer(let value): return NSNumber(integer: value)
+            case .Integer(let value): return NSNumber(integer: Int(value))
             case .Double(let value): return NSNumber(double: value)
             }
         }
