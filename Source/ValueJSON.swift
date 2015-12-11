@@ -18,7 +18,6 @@ public extension Entity {
         
         var convertedValues = ValuesObject()
         
-        /*
         // convert attributes
         for (key, attribute) in self.attributes {
             
@@ -65,14 +64,13 @@ public extension Entity {
             
             convertedValues[key] = value
         }
-        */
         
         // convert relationships
         for (key, relationship) in self.relationships {
             
+            let convertedValue: Value
+            
             if let jsonValue = JSONObject[key] {
-                
-                let convertedValue: Value
                 
                 switch relationship.type {
                     
@@ -91,11 +89,11 @@ public extension Entity {
                     
                     convertedValue = .Relationship(.ToMany(resourceIDs))
                 }
-                
-                convertedValues[key] = convertedValue
             }
             
-            else { convertedValues[key] = .Null }
+            else { convertedValue = .Null }
+            
+            convertedValues[key] = convertedValue
         }
 
         return convertedValues
