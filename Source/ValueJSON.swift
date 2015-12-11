@@ -14,43 +14,33 @@ public extension Entity {
     /// Converts ```JSON``` to **CoreModel** values.
     ///
     /// - returns: The converted values or ```nil``` if the provided values do not match the entity's properties.
-    func convert(values: JSONObject) -> ValuesObject? {
+    func convert(JSONObject: JSON.Object) -> ValuesObject? {
         
         var convertedValues = ValuesObject()
         
-        for (key, jsonValue) in values {
+        // convert attributes
+        for (key, attribute) in self.attributes {
             
-            let attribute = self.attributes[key]
+            let value: Value
             
-            let relationship = self.relationships[key]
-            
-            guard !(attribute == nil && relationship == nil) else { return nil }
-            
-            guard jsonValue != JSON.Value.Null else {
+            if let jsonValue = JSONObject[key] {
                 
-                convertedValues[key] = Value.Null
-                
-                continue
-            }
-            
-            if let attribute = attribute {
-                
-                var attributeValue: AttributeValue!
+                let attributeValue: AttributeValue
                 
                 switch (jsonValue, attribute.type) {
                     
                 case let (JSON.Value.String(value), AttributeType.String):
-                    attributeValue = AttributeValue.String(value)
+                    attributeValue = .String(value)
                     
                 case let (JSON.Value.Number(.Boolean(value)), AttributeType.Number(.Boolean)):
-                    attributeValue = AttributeValue.Number(.Boolean(value))
+                    attributeValue = .Number(.Boolean(value))
                     
                 case let (JSON.Value.Number(.Integer(value)), AttributeType.Number(.Integer)):
-                    attributeValue = AttributeValue.Number(.Integer(value))
+                    attributeValue = .Number(.Integer(value))
                     
                 case let (JSON.Value.Number(.Double(value)), AttributeType.Number(.Double)):
-                    attributeValue = AttributeValue.Number(.Double(value))
-                
+                    attributeValue = .Number(.Double(value))
+                    
                 case let (JSON.Value.Number(.Double(value)), AttributeType.Date):
                     
                     let date = Date(timeIntervalSince1970: value)
@@ -59,24 +49,30 @@ public extension Entity {
                     
                 case let (JSON.Value.String(value), AttributeType.Data):
                     
-                    let stringData = value.utf8.map({ (element) -> Byte in return element })
+                    let stringData = value.utf8.map { (element) -> Byte in return element }
                     
                     let data = Base64.decode(stringData)
                     
                     attributeValue = AttributeValue.Data(data)
                     
                 default: return nil
-                    
                 }
                 
-                assert(attributeValue != nil)
-                
-                convertedValues[key] = Value.Attribute(attributeValue)
+                value = .Attribute(attributeValue)
             }
+            else { value = .Null }
             
-            if let relationship = relationship {
+            convertedValues[key] = value
+        }
+        
+        // convert relationships
+        for (key, relationship) in self.relationships {
+            
+            let value: Value
+            
+            if let jsonValue = JSONObject[key] {
                 
-                var relationshipValue: RelationshipValue!
+                let relationshipValue: RelationshipValue
                 
                 switch (relationship.type, jsonValue) {
                     
@@ -91,16 +87,15 @@ public extension Entity {
                     relationshipValue = RelationshipValue.ToMany(resourceIDs)
                     
                 default: return nil
-                
+                    
                 }
                 
-                assert(relationshipValue != nil)
-                
-                convertedValues[key] = Value.Relationship(relationshipValue)
+                value = .Relationship(relationshipValue)
             }
             
-            // check that converted value was added
-            assert(convertedValues[key] != nil)
+            else { value = .Null }
+            
+            convertedValues[key] = value
         }
         
         return convertedValues
