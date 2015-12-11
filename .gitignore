@@ -1,6 +1,4 @@
-
+.build
+Packages
 Carthage/*
-
-CoreModel/CoreModel.xcodeproj/project.xcworkspace/xcuserdata/*
-
-CoreModel/CoreModel.xcodeproj/xcuserdata/*
+Xcode/CoreModel/CoreModel.xcodeproj/project.xcworkspace/xcuserdata
