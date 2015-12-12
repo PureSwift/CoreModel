@@ -6,11 +6,8 @@
 //  Copyright © 2015 PureSwift. All rights reserved.
 //
 
-/// Defines the interface for **CoreModel**'s ```Store``` type.
+/// Defines the interface for **CoreModel**'s ```StoreType```.
 public protocol StoreType {
-    
-    /// The model the persistent store will handle.
-    var model: Model { get }
     
     /// Queries the store for entities matching the fetch request.
     func fetch(fetchRequest: FetchRequest) throws -> [Resource]
