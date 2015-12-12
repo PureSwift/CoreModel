@@ -7,7 +7,7 @@
 //
 
 /// Defines the interface for **CoreModel**'s ```Store``` type.
-public protocol Store {
+public protocol StoreType {
     
     /// The model the persistent store will handle.
     var model: Model { get }

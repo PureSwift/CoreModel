@@ -12,7 +12,7 @@ import Foundation
 import CoreData
 
 /// **CoreData**-backed **CoreModel** ```Store``` implementation.
-public final class CoreDataStore: Store {
+public final class CoreDataStore: StoreType {
     
     // MARK: - Properties
     
