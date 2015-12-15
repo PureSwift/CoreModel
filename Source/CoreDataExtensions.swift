@@ -30,9 +30,9 @@ public extension NSManagedObjectContext {
             }
         }
         
-        if blockError != nil {
+        if let blockError = blockError {
             
-            throw blockError!
+            throw blockError
         }
         
         return
@@ -119,5 +119,37 @@ public extension NSPredicate {
     }
 }
 
+extension NSAttributeType: CustomDebugStringConvertible {
+    public var debugDescription: String {
+        switch self {
+        case .UndefinedAttributeType:
+            return "UndefinedAttributeType (Transient)"
+        case .Integer16AttributeType:
+            return "Integer16AttributeType"
+        case .Integer32AttributeType:
+            return "Integer32AttributeType"
+        case .Integer64AttributeType:
+            return "Integer64AttributeType"
+        case .DecimalAttributeType:
+            return "DecimalAttributeType"
+        case .DoubleAttributeType:
+            return "DoubleAttributeType"
+        case .FloatAttributeType:
+            return "FloatAttributeType"
+        case .StringAttributeType:
+            return "StringAttributeType"
+        case .BooleanAttributeType:
+            return "BooleanAttributeType"
+        case .DateAttributeType:
+            return "DateAttributeType"
+        case .BinaryDataAttributeType:
+            return "BinaryDataAttributeType"
+        case .TransformableAttributeType:
+            return "TransformableAttributeType"
+        case .ObjectIDAttributeType:
+            return "ObjectIDAttributeType"
+        }
+    }
+}
 #endif
 

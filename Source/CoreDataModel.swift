@@ -161,6 +161,8 @@ public extension NSAttributeType {
             
         case .BinaryDataAttributeType: return .Data
             
+        case .TransformableAttributeType: return .Transformable
+            
         default: return nil
         }
     }

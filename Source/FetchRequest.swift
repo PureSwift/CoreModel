@@ -16,9 +16,9 @@ public struct FetchRequest: JSONEncodable, JSONParametrizedDecodable {
     
     public var predicate: Predicate?
     
-    public var fetchLimit: Int = 0
+    public var fetchLimit = 0
     
-    public var fetchOffset: Int = 0
+    public var fetchOffset = 0
     
     public init(entityName: String, sortDescriptors: [SortDescriptor] = []) {
         
@@ -87,12 +87,12 @@ public extension FetchRequest {
         
         if self.fetchLimit > 0 {
             
-            jsonObject[JSONKey.FetchLimit.rawValue] = JSON.Value.Number(.Integer(Int64(self.fetchLimit)))
+            jsonObject[JSONKey.FetchLimit.rawValue] = JSON.Value.Number(.Integer(self.fetchLimit))
         }
         
         if self.fetchOffset > 0 {
             
-            jsonObject[JSONKey.FetchOffset.rawValue] = JSON.Value.Number(.Integer(Int64(self.fetchOffset)))
+            jsonObject[JSONKey.FetchOffset.rawValue] = JSON.Value.Number(.Integer(self.fetchOffset))
         }
         
         return JSON.Value.Object(jsonObject)
