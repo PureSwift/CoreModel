@@ -18,7 +18,7 @@ public extension NSManagedObject {
         
         var values = ValuesObject()
         
-        for (attributeName, _) in self.entity.attributesByName {
+        for (attributeName, attributeDescription) in self.entity.attributesByName {
             
             // skip resource ID value
             if attributeName == store.resourceIDAttributeName { continue }
@@ -26,7 +26,7 @@ public extension NSManagedObject {
             guard let CoreDataValue = self.valueForKey(attributeName)
                 else { values[attributeName] = Value.Null; continue }
             
-            guard let value = AttributeValue(CoreDataValue: CoreDataValue)
+            guard let value = AttributeValue(CoreDataValue: CoreDataValue, attributeDescription: attributeDescription)
                 else { fatalError("Could not convert Core Data attribute value \(CoreDataValue)") }
             
             values[attributeName] = Value.Attribute(value)
@@ -148,55 +148,78 @@ public extension NSManagedObject {
 
 public extension AttributeValue {
     
-    init?(CoreDataValue: AnyObject) {
+    init?(CoreDataValue: AnyObject, attributeDescription: NSAttributeDescription) {
         
-        if let value = CoreDataValue as? NSString {
+        switch attributeDescription.attributeType {
+        case .StringAttributeType:
+            guard let value = CoreDataValue as? NSString else {
+                fatalError("Attribute is \(attributeDescription.attributeType), but couldn't cast to NSString")
+            }
             
             self = .String(value as StringValue)
-        }
-        
-        else if let value = CoreDataValue as? NSDate {
+            
+        case .DateAttributeType:
+            guard let value = CoreDataValue as? NSDate else {
+                fatalError("Attribute is \(attributeDescription.attributeType), but couldn't cast to NSDate")
+            }
             
             let date = SwiftFoundation.Date(foundation: value)
-            
             self = .Date(date)
-        }
-        
-        else if let value = CoreDataValue as? NSData {
+            
+        case .BinaryDataAttributeType:
+            guard let value = CoreDataValue as? NSData else {
+                fatalError("Attribute is \(attributeDescription.attributeType), but couldn't cast to NSData")
+            }
             
             let data = value.arrayOfBytes()
             
             self = .Data(data)
-        }
-        
-        // number types
-        
-        else if let value = CoreDataValue as? Bool {
+            
+        case .BooleanAttributeType:
+            guard let value = CoreDataValue as? Bool else {
+                fatalError("Attribute is \(attributeDescription.attributeType), but couldn't cast to Bool")
+            }
             
             self = .Number(.Boolean(value))
-        }
-        
-        else if let value = CoreDataValue as? Int64 {
+
+        case .Integer16AttributeType, .Integer32AttributeType, .Integer64AttributeType:
+            guard let value = CoreDataValue as? NSNumber else {
+                fatalError("Attribute is \(attributeDescription.attributeType), but couldn't cast to Int")
+            }
             
-            self = .Number(.Integer(value))
-        }
-        
-        else if let value = CoreDataValue as? Float {
+            self = .Number(.Integer(value.integerValue))
             
-            self = .Number(.Double(Double(value)))
-        }
-        
-        else if let value = CoreDataValue as? Double {
+        case .FloatAttributeType:
+            guard let value = CoreDataValue as? NSNumber else {
+                fatalError("Attribute is \(attributeDescription.attributeType), but couldn't cast to Float")
+            }
             
-            self = .Number(.Double(value))
-        }
-        
-        else if let _ = CoreDataValue as? NSDecimalNumber {
+            self = .Number(.Float(value.floatValue))
             
+        case .DoubleAttributeType:
+            guard let value = CoreDataValue as? NSNumber else {
+                fatalError("Attribute is \(attributeDescription.attributeType), but couldn't cast to Double")
+            }
+            
+            self = .Number(.Double(value.doubleValue))
+
+        case .DecimalAttributeType:
             fatalError("Decimal conversion not implemented")
+            
+        case .TransformableAttributeType:
+            guard let value = CoreDataValue as? DataConvertible else {
+                fatalError("CoreDataValue is Transformable, but couldn't cast to DataConvertible")
+            }
+            
+            print("\(value)")
+            self = .Transformable(value)
+            
+        case .UndefinedAttributeType:
+            fatalError("Transient / Undefined attribute conversion not implemented")
+            
+        default:
+            return nil
         }
-        
-        else { return nil }
     }
     
     func toCoreDataValue() -> AnyObject {
@@ -206,12 +229,14 @@ public extension AttributeValue {
         case .String(let value): return value
         case .Date(let value): return value.toFoundation()
         case .Data(let value): return NSData(bytes: value)
+        case .Transformable(let value): return value.toFoundation()
         case .Number(let number):
             switch number {
                 
             case .Boolean(let value): return NSNumber(bool: value)
             case .Integer(let value): return NSNumber(integer: Int(value))
             case .Double(let value): return NSNumber(double: value)
+            case .Float(let value): return NSNumber(float: value)
             }
         }
     }

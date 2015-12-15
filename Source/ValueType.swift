@@ -25,6 +25,9 @@ public enum AttributeType: Equatable {
     
     /// Attribute is a date.
     case Date
+    
+    /// Attribute is transformable
+    case Transformable
 }
 
 public func == (lhs: AttributeType, rhs: AttributeType) -> Bool {
@@ -34,6 +37,7 @@ public func == (lhs: AttributeType, rhs: AttributeType) -> Bool {
     case .String: switch rhs { case .String: return true; default: return false }
     case .Data: switch rhs { case .Data: return true; default: return false }
     case .Date: switch rhs { case .Date: return true; default: return false }
+    case .Transformable: switch rhs { case .Transformable: return true; default: return false }
     case .Number(let number):
         
         switch rhs {

@@ -55,6 +55,14 @@ public extension Entity {
                     
                     attributeValue = AttributeValue.Data(data)
                     
+                case (_, AttributeType.Transformable):
+                    
+                    if let value = jsonValue.parseTransformable() {
+                        attributeValue = AttributeValue.Transformable(value)
+                    } else {
+                        return nil
+                    }
+                    
                 default: return nil
                 }
                 
@@ -120,6 +128,22 @@ public extension JSON {
 
 public extension Value {
     
+    private func dataToEncodedString(d: Data) -> String {
+        
+        let encodedData = Base64.encode(d)
+        
+        var encodedString = ""
+        
+        for byte in encodedData {
+            
+            let unicodeScalar = UnicodeScalar(byte)
+            
+            encodedString.append(unicodeScalar)
+        }
+
+        return encodedString
+    }
+    
     func toJSON() -> JSON.Value {
         
         switch self {
@@ -141,6 +165,12 @@ public extension Value {
             
         case let .Attribute(.Number(.Double(value))):
             return JSON.Value.Number(.Double(value))
+            
+        case let .Attribute(.Number(.Float(value))):
+            return JSON.Value.Number(.Double(Double(value)))
+
+        case let .Attribute(.Transformable(value)):
+            return value.toJSON()
             
         case let .Attribute(.Data(value)):
             

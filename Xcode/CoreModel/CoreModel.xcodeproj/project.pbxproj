@@ -7,6 +7,16 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4479AFCF1C1FC895000255CB /* CoreDataModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 449BBF921C1F2B800001D7BE /* CoreDataModel.xcdatamodeld */; };
+		4479AFD01C1FC898000255CB /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 448799E31C1FC01C002D2B40 /* CoreData.framework */; };
+		4479AFD11C1FC89B000255CB /* SwiftFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 448799E11C1FAF6B002D2B40 /* SwiftFoundation.framework */; };
+		4479AFD21C1FC89F000255CB /* TestCocoaExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 449BBF941C1F2B800001D7BE /* TestCocoaExtensions.swift */; };
+		4479AFD31C1FC8A3000255CB /* TestEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 449BBF951C1F2B800001D7BE /* TestEntity.swift */; };
+		4479AFD41C1FC8A7000255CB /* TestEntity+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 449BBF961C1F2B800001D7BE /* TestEntity+CoreDataProperties.swift */; };
+		448799EF1C1FC20E002D2B40 /* CoreModel.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6EC90CBE1C1A68530068944A /* CoreModel.framework */; };
+		448799FC1C1FC2F6002D2B40 /* CoreModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 449BBF891C1F28D70001D7BE /* CoreModelTests.swift */; };
+		449BBF9C1C1F2BEE0001D7BE /* TransformableValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 449BBF9B1C1F2BEE0001D7BE /* TransformableValue.swift */; };
+		449BBF9E1C1F97190001D7BE /* FoundationExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 449BBF9D1C1F97190001D7BE /* FoundationExtensions.swift */; };
 		6EC90CC21C1A68530068944A /* CoreModel.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EC90CC11C1A68530068944A /* CoreModel.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		6EC90CDF1C1A68830068944A /* ComparisonPredicate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EC90CCA1C1A68830068944A /* ComparisonPredicate.swift */; };
 		6EC90CE01C1A68830068944A /* ComparisonPredicateModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EC90CCB1C1A68830068944A /* ComparisonPredicateModifier.swift */; };
@@ -31,7 +41,28 @@
 		6EC90CF31C1A68830068944A /* ValueType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EC90CDE1C1A68830068944A /* ValueType.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		448799F01C1FC20E002D2B40 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 6EC90CB51C1A68530068944A /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 6EC90CBD1C1A68530068944A;
+			remoteInfo = "CoreModel OS X";
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
+		448799E11C1FAF6B002D2B40 /* SwiftFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftFoundation.framework; path = ../../../Carthage/Build/Mac/SwiftFoundation.framework; sourceTree = "<group>"; };
+		448799E31C1FC01C002D2B40 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
+		448799EA1C1FC20E002D2B40 /* CoreModelTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CoreModelTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		449BBF891C1F28D70001D7BE /* CoreModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreModelTests.swift; sourceTree = "<group>"; };
+		449BBF8B1C1F28D70001D7BE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		449BBF931C1F2B800001D7BE /* CoreDataModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = CoreDataModel.xcdatamodel; sourceTree = "<group>"; };
+		449BBF941C1F2B800001D7BE /* TestCocoaExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestCocoaExtensions.swift; sourceTree = "<group>"; };
+		449BBF951C1F2B800001D7BE /* TestEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestEntity.swift; sourceTree = "<group>"; };
+		449BBF961C1F2B800001D7BE /* TestEntity+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "TestEntity+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		449BBF9B1C1F2BEE0001D7BE /* TransformableValue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransformableValue.swift; sourceTree = "<group>"; };
+		449BBF9D1C1F97190001D7BE /* FoundationExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FoundationExtensions.swift; sourceTree = "<group>"; };
 		6EC90CBE1C1A68530068944A /* CoreModel.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CoreModel.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		6EC90CC11C1A68530068944A /* CoreModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CoreModel.h; sourceTree = "<group>"; };
 		6EC90CC31C1A68530068944A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -60,6 +91,16 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		448799E71C1FC20E002D2B40 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4479AFD11C1FC89B000255CB /* SwiftFoundation.framework in Frameworks */,
+				448799EF1C1FC20E002D2B40 /* CoreModel.framework in Frameworks */,
+				4479AFD01C1FC898000255CB /* CoreData.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		6EC90CBA1C1A68530068944A /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -70,20 +111,47 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		448799EB1C1FC20E002D2B40 /* CoreModelTests */ = {
+			isa = PBXGroup;
+			children = (
+				448799E11C1FAF6B002D2B40 /* SwiftFoundation.framework */,
+				448799E31C1FC01C002D2B40 /* CoreData.framework */,
+				449BBF921C1F2B800001D7BE /* CoreDataModel.xcdatamodeld */,
+				449BBF941C1F2B800001D7BE /* TestCocoaExtensions.swift */,
+				449BBF951C1F2B800001D7BE /* TestEntity.swift */,
+				449BBF961C1F2B800001D7BE /* TestEntity+CoreDataProperties.swift */,
+				449BBF891C1F28D70001D7BE /* CoreModelTests.swift */,
+				449BBF8B1C1F28D70001D7BE /* Info.plist */,
+			);
+			path = CoreModelTests;
+			sourceTree = "<group>";
+		};
+		449BBF9F1C1F97240001D7BE /* Darwin Support */ = {
+			isa = PBXGroup;
+			children = (
+				449BBF9D1C1F97190001D7BE /* FoundationExtensions.swift */,
+			);
+			name = "Darwin Support";
+			sourceTree = "<group>";
+		};
 		6EC90CB41C1A68530068944A = {
 			isa = PBXGroup;
 			children = (
 				6EC90CF51C1A6DD10068944A /* Package.swift */,
 				6EC90CC91C1A68830068944A /* Source */,
 				6EC90CC01C1A68530068944A /* CoreModel */,
+				448799EB1C1FC20E002D2B40 /* CoreModelTests */,
 				6EC90CBF1C1A68530068944A /* Products */,
 			);
+			indentWidth = 4;
 			sourceTree = "<group>";
+			tabWidth = 4;
 		};
 		6EC90CBF1C1A68530068944A /* Products */ = {
 			isa = PBXGroup;
 			children = (
 				6EC90CBE1C1A68530068944A /* CoreModel.framework */,
+				448799EA1C1FC20E002D2B40 /* CoreModelTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -112,10 +180,12 @@
 				6EC90CD81C1A68830068944A /* Property.swift */,
 				6EC90CD91C1A68830068944A /* Resource.swift */,
 				6EC90CDA1C1A68830068944A /* SortDescriptor.swift */,
+				449BBF9B1C1F2BEE0001D7BE /* TransformableValue.swift */,
 				6EC90CDB1C1A68830068944A /* Store.swift */,
 				6EC90CDC1C1A68830068944A /* Value.swift */,
 				6EC90CDD1C1A68830068944A /* ValueJSON.swift */,
 				6EC90CDE1C1A68830068944A /* ValueType.swift */,
+				449BBF9F1C1F97240001D7BE /* Darwin Support */,
 				6EC90CF41C1A68AE0068944A /* Core Data Support */,
 			);
 			name = Source;
@@ -148,6 +218,25 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
+		448799E91C1FC20E002D2B40 /* CoreModelTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 448799F21C1FC20E002D2B40 /* Build configuration list for PBXNativeTarget "CoreModelTests" */;
+			buildPhases = (
+				448799E61C1FC20E002D2B40 /* Sources */,
+				4479AFCE1C1FC858000255CB /* Run Carthage Copy Script */,
+				448799E71C1FC20E002D2B40 /* Frameworks */,
+				448799E81C1FC20E002D2B40 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				448799F11C1FC20E002D2B40 /* PBXTargetDependency */,
+			);
+			name = CoreModelTests;
+			productName = CoreModelTests;
+			productReference = 448799EA1C1FC20E002D2B40 /* CoreModelTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		6EC90CBD1C1A68530068944A /* CoreModel OS X */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 6EC90CC61C1A68530068944A /* Build configuration list for PBXNativeTarget "CoreModel OS X" */;
@@ -172,9 +261,13 @@
 		6EC90CB51C1A68530068944A /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastSwiftUpdateCheck = 0720;
 				LastUpgradeCheck = 0720;
 				ORGANIZATIONNAME = PureSwift;
 				TargetAttributes = {
+					448799E91C1FC20E002D2B40 = {
+						CreatedOnToolsVersion = 7.2;
+					};
 					6EC90CBD1C1A68530068944A = {
 						CreatedOnToolsVersion = 7.2;
 					};
@@ -193,11 +286,19 @@
 			projectRoot = "";
 			targets = (
 				6EC90CBD1C1A68530068944A /* CoreModel OS X */,
+				448799E91C1FC20E002D2B40 /* CoreModelTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		448799E81C1FC20E002D2B40 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		6EC90CBC1C1A68530068944A /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -207,7 +308,37 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		4479AFCE1C1FC858000255CB /* Run Carthage Copy Script */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/../../Carthage/Build/Mac/SwiftFoundation.framework",
+			);
+			name = "Run Carthage Copy Script";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "/usr/local/bin/carthage copy-frameworks";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
+		448799E61C1FC20E002D2B40 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4479AFD31C1FC8A3000255CB /* TestEntity.swift in Sources */,
+				4479AFD21C1FC89F000255CB /* TestCocoaExtensions.swift in Sources */,
+				4479AFCF1C1FC895000255CB /* CoreDataModel.xcdatamodeld in Sources */,
+				4479AFD41C1FC8A7000255CB /* TestEntity+CoreDataProperties.swift in Sources */,
+				448799FC1C1FC2F6002D2B40 /* CoreModelTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		6EC90CB91C1A68530068944A /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -226,11 +357,13 @@
 				6EC90CE61C1A68830068944A /* CoreDataFetchRequest.swift in Sources */,
 				6EC90CE31C1A68830068944A /* CompoundPredicate.swift in Sources */,
 				6EC90CEC1C1A68830068944A /* Predicate.swift in Sources */,
+				449BBF9C1C1F2BEE0001D7BE /* TransformableValue.swift in Sources */,
 				6EC90CEA1C1A68830068944A /* Entity.swift in Sources */,
 				6EC90CF31C1A68830068944A /* ValueType.swift in Sources */,
 				6EC90CE01C1A68830068944A /* ComparisonPredicateModifier.swift in Sources */,
 				6EC90CF11C1A68830068944A /* Value.swift in Sources */,
 				6EC90CE51C1A68830068944A /* CoreDataExtensions.swift in Sources */,
+				449BBF9E1C1F97190001D7BE /* FoundationExtensions.swift in Sources */,
 				6EC90CE21C1A68830068944A /* ComparisonPredicateOption.swift in Sources */,
 				6EC90CEF1C1A68830068944A /* SortDescriptor.swift in Sources */,
 			);
@@ -238,7 +371,41 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		448799F11C1FC20E002D2B40 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 6EC90CBD1C1A68530068944A /* CoreModel OS X */;
+			targetProxy = 448799F01C1FC20E002D2B40 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		448799F31C1FC20E002D2B40 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = "$(SRCROOT)/../../Carthage/Build/Mac";
+				INFOPLIST_FILE = CoreModelTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				PRODUCT_BUNDLE_IDENTIFIER = org.pureswift.CoreModelTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		448799F41C1FC20E002D2B40 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = "$(SRCROOT)/../../Carthage/Build/Mac";
+				INFOPLIST_FILE = CoreModelTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				PRODUCT_BUNDLE_IDENTIFIER = org.pureswift.CoreModelTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
 		6EC90CC41C1A68530068944A /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -368,6 +535,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		448799F21C1FC20E002D2B40 /* Build configuration list for PBXNativeTarget "CoreModelTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				448799F31C1FC20E002D2B40 /* Debug */,
+				448799F41C1FC20E002D2B40 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		6EC90CB81C1A68530068944A /* Build configuration list for PBXProject "CoreModel" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -387,6 +563,19 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCVersionGroup section */
+		449BBF921C1F2B800001D7BE /* CoreDataModel.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				449BBF931C1F2B800001D7BE /* CoreDataModel.xcdatamodel */,
+			);
+			currentVersion = 449BBF931C1F2B800001D7BE /* CoreDataModel.xcdatamodel */;
+			path = CoreDataModel.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
 	};
 	rootObject = 6EC90CB51C1A68530068944A /* Project object */;
 }
