@@ -9,35 +9,17 @@
 /* Begin PBXBuildFile section */
 		4479AFCF1C1FC895000255CB /* CoreDataModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 449BBF921C1F2B800001D7BE /* CoreDataModel.xcdatamodeld */; };
 		4479AFD01C1FC898000255CB /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 448799E31C1FC01C002D2B40 /* CoreData.framework */; };
-		4479AFD11C1FC89B000255CB /* SwiftFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 448799E11C1FAF6B002D2B40 /* SwiftFoundation.framework */; };
 		4479AFD21C1FC89F000255CB /* TestCocoaExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 449BBF941C1F2B800001D7BE /* TestCocoaExtensions.swift */; };
 		4479AFD31C1FC8A3000255CB /* TestEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 449BBF951C1F2B800001D7BE /* TestEntity.swift */; };
 		4479AFD41C1FC8A7000255CB /* TestEntity+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 449BBF961C1F2B800001D7BE /* TestEntity+CoreDataProperties.swift */; };
 		448799EF1C1FC20E002D2B40 /* CoreModel.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6EC90CBE1C1A68530068944A /* CoreModel.framework */; };
 		448799FC1C1FC2F6002D2B40 /* CoreModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 449BBF891C1F28D70001D7BE /* CoreModelTests.swift */; };
-		449BBF9C1C1F2BEE0001D7BE /* TransformableValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 449BBF9B1C1F2BEE0001D7BE /* TransformableValue.swift */; };
-		449BBF9E1C1F97190001D7BE /* FoundationExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 449BBF9D1C1F97190001D7BE /* FoundationExtensions.swift */; };
 		6EC90CC21C1A68530068944A /* CoreModel.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EC90CC11C1A68530068944A /* CoreModel.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		6EC90CDF1C1A68830068944A /* ComparisonPredicate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EC90CCA1C1A68830068944A /* ComparisonPredicate.swift */; };
-		6EC90CE01C1A68830068944A /* ComparisonPredicateModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EC90CCB1C1A68830068944A /* ComparisonPredicateModifier.swift */; };
-		6EC90CE11C1A68830068944A /* ComparisonPredicateOperator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EC90CCC1C1A68830068944A /* ComparisonPredicateOperator.swift */; };
-		6EC90CE21C1A68830068944A /* ComparisonPredicateOption.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EC90CCD1C1A68830068944A /* ComparisonPredicateOption.swift */; };
-		6EC90CE31C1A68830068944A /* CompoundPredicate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EC90CCE1C1A68830068944A /* CompoundPredicate.swift */; };
-		6EC90CE41C1A68830068944A /* CompoundPredicateType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EC90CCF1C1A68830068944A /* CompoundPredicateType.swift */; };
-		6EC90CE51C1A68830068944A /* CoreDataExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EC90CD01C1A68830068944A /* CoreDataExtensions.swift */; };
-		6EC90CE61C1A68830068944A /* CoreDataFetchRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EC90CD11C1A68830068944A /* CoreDataFetchRequest.swift */; };
-		6EC90CE71C1A68830068944A /* CoreDataModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EC90CD21C1A68830068944A /* CoreDataModel.swift */; };
-		6EC90CE81C1A68830068944A /* CoreDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EC90CD31C1A68830068944A /* CoreDataStore.swift */; };
-		6EC90CE91C1A68830068944A /* CoreDataValues.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EC90CD41C1A68830068944A /* CoreDataValues.swift */; };
 		6EC90CEA1C1A68830068944A /* Entity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EC90CD51C1A68830068944A /* Entity.swift */; };
 		6EC90CEB1C1A68830068944A /* FetchRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EC90CD61C1A68830068944A /* FetchRequest.swift */; };
-		6EC90CEC1C1A68830068944A /* Predicate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EC90CD71C1A68830068944A /* Predicate.swift */; };
 		6EC90CED1C1A68830068944A /* Property.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EC90CD81C1A68830068944A /* Property.swift */; };
-		6EC90CEE1C1A68830068944A /* Resource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EC90CD91C1A68830068944A /* Resource.swift */; };
 		6EC90CEF1C1A68830068944A /* SortDescriptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EC90CDA1C1A68830068944A /* SortDescriptor.swift */; };
 		6EC90CF01C1A68830068944A /* Store.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EC90CDB1C1A68830068944A /* Store.swift */; };
-		6EC90CF11C1A68830068944A /* Value.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EC90CDC1C1A68830068944A /* Value.swift */; };
-		6EC90CF21C1A68830068944A /* ValueJSON.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EC90CDD1C1A68830068944A /* ValueJSON.swift */; };
 		6EC90CF31C1A68830068944A /* ValueType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EC90CDE1C1A68830068944A /* ValueType.swift */; };
 /* End PBXBuildFile section */
 
@@ -52,7 +34,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		448799E11C1FAF6B002D2B40 /* SwiftFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftFoundation.framework; path = ../../../Carthage/Build/Mac/SwiftFoundation.framework; sourceTree = "<group>"; };
 		448799E31C1FC01C002D2B40 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
 		448799EA1C1FC20E002D2B40 /* CoreModelTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CoreModelTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		449BBF891C1F28D70001D7BE /* CoreModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreModelTests.swift; sourceTree = "<group>"; };
@@ -61,31 +42,14 @@
 		449BBF941C1F2B800001D7BE /* TestCocoaExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestCocoaExtensions.swift; sourceTree = "<group>"; };
 		449BBF951C1F2B800001D7BE /* TestEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestEntity.swift; sourceTree = "<group>"; };
 		449BBF961C1F2B800001D7BE /* TestEntity+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "TestEntity+CoreDataProperties.swift"; sourceTree = "<group>"; };
-		449BBF9B1C1F2BEE0001D7BE /* TransformableValue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransformableValue.swift; sourceTree = "<group>"; };
-		449BBF9D1C1F97190001D7BE /* FoundationExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FoundationExtensions.swift; sourceTree = "<group>"; };
 		6EC90CBE1C1A68530068944A /* CoreModel.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CoreModel.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		6EC90CC11C1A68530068944A /* CoreModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CoreModel.h; sourceTree = "<group>"; };
 		6EC90CC31C1A68530068944A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		6EC90CCA1C1A68830068944A /* ComparisonPredicate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ComparisonPredicate.swift; sourceTree = "<group>"; };
-		6EC90CCB1C1A68830068944A /* ComparisonPredicateModifier.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ComparisonPredicateModifier.swift; sourceTree = "<group>"; };
-		6EC90CCC1C1A68830068944A /* ComparisonPredicateOperator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ComparisonPredicateOperator.swift; sourceTree = "<group>"; };
-		6EC90CCD1C1A68830068944A /* ComparisonPredicateOption.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ComparisonPredicateOption.swift; sourceTree = "<group>"; };
-		6EC90CCE1C1A68830068944A /* CompoundPredicate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CompoundPredicate.swift; sourceTree = "<group>"; };
-		6EC90CCF1C1A68830068944A /* CompoundPredicateType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CompoundPredicateType.swift; sourceTree = "<group>"; };
-		6EC90CD01C1A68830068944A /* CoreDataExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreDataExtensions.swift; sourceTree = "<group>"; };
-		6EC90CD11C1A68830068944A /* CoreDataFetchRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreDataFetchRequest.swift; sourceTree = "<group>"; };
-		6EC90CD21C1A68830068944A /* CoreDataModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreDataModel.swift; sourceTree = "<group>"; };
-		6EC90CD31C1A68830068944A /* CoreDataStore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreDataStore.swift; sourceTree = "<group>"; };
-		6EC90CD41C1A68830068944A /* CoreDataValues.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreDataValues.swift; sourceTree = "<group>"; };
 		6EC90CD51C1A68830068944A /* Entity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Entity.swift; sourceTree = "<group>"; };
 		6EC90CD61C1A68830068944A /* FetchRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FetchRequest.swift; sourceTree = "<group>"; };
-		6EC90CD71C1A68830068944A /* Predicate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Predicate.swift; sourceTree = "<group>"; };
 		6EC90CD81C1A68830068944A /* Property.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Property.swift; sourceTree = "<group>"; };
-		6EC90CD91C1A68830068944A /* Resource.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Resource.swift; sourceTree = "<group>"; };
 		6EC90CDA1C1A68830068944A /* SortDescriptor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SortDescriptor.swift; sourceTree = "<group>"; };
 		6EC90CDB1C1A68830068944A /* Store.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Store.swift; sourceTree = "<group>"; };
-		6EC90CDC1C1A68830068944A /* Value.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Value.swift; sourceTree = "<group>"; };
-		6EC90CDD1C1A68830068944A /* ValueJSON.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ValueJSON.swift; sourceTree = "<group>"; };
 		6EC90CDE1C1A68830068944A /* ValueType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ValueType.swift; sourceTree = "<group>"; };
 		6EC90CF51C1A6DD10068944A /* Package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Package.swift; path = ../../Package.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -95,7 +59,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4479AFD11C1FC89B000255CB /* SwiftFoundation.framework in Frameworks */,
 				448799EF1C1FC20E002D2B40 /* CoreModel.framework in Frameworks */,
 				4479AFD01C1FC898000255CB /* CoreData.framework in Frameworks */,
 			);
@@ -114,7 +77,6 @@
 		448799EB1C1FC20E002D2B40 /* CoreModelTests */ = {
 			isa = PBXGroup;
 			children = (
-				448799E11C1FAF6B002D2B40 /* SwiftFoundation.framework */,
 				448799E31C1FC01C002D2B40 /* CoreData.framework */,
 				449BBF921C1F2B800001D7BE /* CoreDataModel.xcdatamodeld */,
 				449BBF941C1F2B800001D7BE /* TestCocoaExtensions.swift */,
@@ -124,14 +86,6 @@
 				449BBF8B1C1F28D70001D7BE /* Info.plist */,
 			);
 			path = CoreModelTests;
-			sourceTree = "<group>";
-		};
-		449BBF9F1C1F97240001D7BE /* Darwin Support */ = {
-			isa = PBXGroup;
-			children = (
-				449BBF9D1C1F97190001D7BE /* FoundationExtensions.swift */,
-			);
-			name = "Darwin Support";
 			sourceTree = "<group>";
 		};
 		6EC90CB41C1A68530068944A = {
@@ -168,40 +122,15 @@
 		6EC90CC91C1A68830068944A /* Source */ = {
 			isa = PBXGroup;
 			children = (
-				6EC90CCA1C1A68830068944A /* ComparisonPredicate.swift */,
-				6EC90CCB1C1A68830068944A /* ComparisonPredicateModifier.swift */,
-				6EC90CCC1C1A68830068944A /* ComparisonPredicateOperator.swift */,
-				6EC90CCD1C1A68830068944A /* ComparisonPredicateOption.swift */,
-				6EC90CCE1C1A68830068944A /* CompoundPredicate.swift */,
-				6EC90CCF1C1A68830068944A /* CompoundPredicateType.swift */,
 				6EC90CD51C1A68830068944A /* Entity.swift */,
 				6EC90CD61C1A68830068944A /* FetchRequest.swift */,
-				6EC90CD71C1A68830068944A /* Predicate.swift */,
 				6EC90CD81C1A68830068944A /* Property.swift */,
-				6EC90CD91C1A68830068944A /* Resource.swift */,
 				6EC90CDA1C1A68830068944A /* SortDescriptor.swift */,
-				449BBF9B1C1F2BEE0001D7BE /* TransformableValue.swift */,
 				6EC90CDB1C1A68830068944A /* Store.swift */,
-				6EC90CDC1C1A68830068944A /* Value.swift */,
-				6EC90CDD1C1A68830068944A /* ValueJSON.swift */,
 				6EC90CDE1C1A68830068944A /* ValueType.swift */,
-				449BBF9F1C1F97240001D7BE /* Darwin Support */,
-				6EC90CF41C1A68AE0068944A /* Core Data Support */,
 			);
 			name = Source;
 			path = ../../Source;
-			sourceTree = "<group>";
-		};
-		6EC90CF41C1A68AE0068944A /* Core Data Support */ = {
-			isa = PBXGroup;
-			children = (
-				6EC90CD01C1A68830068944A /* CoreDataExtensions.swift */,
-				6EC90CD11C1A68830068944A /* CoreDataFetchRequest.swift */,
-				6EC90CD21C1A68830068944A /* CoreDataModel.swift */,
-				6EC90CD31C1A68830068944A /* CoreDataStore.swift */,
-				6EC90CD41C1A68830068944A /* CoreDataValues.swift */,
-			);
-			name = "Core Data Support";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -344,27 +273,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				6EC90CED1C1A68830068944A /* Property.swift in Sources */,
-				6EC90CEE1C1A68830068944A /* Resource.swift in Sources */,
-				6EC90CE41C1A68830068944A /* CompoundPredicateType.swift in Sources */,
 				6EC90CF01C1A68830068944A /* Store.swift in Sources */,
-				6EC90CE11C1A68830068944A /* ComparisonPredicateOperator.swift in Sources */,
-				6EC90CF21C1A68830068944A /* ValueJSON.swift in Sources */,
-				6EC90CDF1C1A68830068944A /* ComparisonPredicate.swift in Sources */,
-				6EC90CE71C1A68830068944A /* CoreDataModel.swift in Sources */,
-				6EC90CE81C1A68830068944A /* CoreDataStore.swift in Sources */,
-				6EC90CE91C1A68830068944A /* CoreDataValues.swift in Sources */,
 				6EC90CEB1C1A68830068944A /* FetchRequest.swift in Sources */,
-				6EC90CE61C1A68830068944A /* CoreDataFetchRequest.swift in Sources */,
-				6EC90CE31C1A68830068944A /* CompoundPredicate.swift in Sources */,
-				6EC90CEC1C1A68830068944A /* Predicate.swift in Sources */,
-				449BBF9C1C1F2BEE0001D7BE /* TransformableValue.swift in Sources */,
 				6EC90CEA1C1A68830068944A /* Entity.swift in Sources */,
 				6EC90CF31C1A68830068944A /* ValueType.swift in Sources */,
-				6EC90CE01C1A68830068944A /* ComparisonPredicateModifier.swift in Sources */,
-				6EC90CF11C1A68830068944A /* Value.swift in Sources */,
-				6EC90CE51C1A68830068944A /* CoreDataExtensions.swift in Sources */,
-				449BBF9E1C1F97190001D7BE /* FoundationExtensions.swift in Sources */,
-				6EC90CE21C1A68830068944A /* ComparisonPredicateOption.swift in Sources */,
 				6EC90CEF1C1A68830068944A /* SortDescriptor.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -1,0 +1,16 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "Predicate",
+        "repositoryURL": "https://github.com/PureSwift/Predicate.git",
+        "state": {
+          "branch": "master",
+          "revision": "fba9f50880fee0a1912cff158939011917d537d8",
+          "version": null
+        }
+      }
+    ]
+  },
+  "version": 1
+}
