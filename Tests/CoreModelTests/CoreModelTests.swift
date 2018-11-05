@@ -72,79 +72,37 @@ final class CoreModelTests: XCTestCase {
             let person2 = try store.create("Person")
             person2.setAttribute(.string("Person2"), for: "name")
             
-            do {
-                person1.setRelationship(.toMany([event]), for: "events")
-                
-                guard case let .toMany(attendees) = event.relationship(for: "people")
-                    else { XCTFail(); return }
-                
-                XCTAssertEqual(attendees, [person1])
-                
-                guard case let .toMany(events) = person1.relationship(for: "events")
-                    else { XCTFail(); return }
-                
-                XCTAssertEqual(events, [event])
-            }
+            person1.setRelationship(.toMany([event]), for: "events")
+            XCTAssertEqual(event.relationship(for: "people"), .toMany([person1]))
+            XCTAssertEqual(person1.relationship(for: "events"), .toMany([event]))
+            XCTAssertEqual(person2.relationship(for: "events"), .null)
+            XCTAssertNotEqual(person2.relationship(for: "events"), .toMany([]))
             
-            do {
-                event.setRelationship(.toMany([person1, person2]), for: "people")
-                
-                guard case let .toMany(attendees) = event.relationship(for: "people")
-                    else { XCTFail(); return }
-                
-                XCTAssertEqual(attendees, [person1, person2])
-                
-                do {
-                    guard case let .toMany(events) = person1.relationship(for: "events")
-                        else { XCTFail(); return }
-                    
-                    XCTAssertEqual(events, [event])
-                }
-                
-                do {
-                    guard case let .toMany(events) = person2.relationship(for: "events")
-                        else { XCTFail(); return }
-                    
-                    XCTAssertEqual(events, [event])
-                }
-            }
+            event.setRelationship(.toMany([person1, person2]), for: "people")
+            XCTAssertEqual(event.relationship(for: "people"), .toMany([person1, person2]))
+            XCTAssertEqual(person1.relationship(for: "events"), .toMany([event]))
+            XCTAssertEqual(person2.relationship(for: "events"), .toMany([event]))
             
-            do {
-                event.setRelationship(.toMany([]), for: "people")
-                
-                guard case let .toMany(attendees) = event.relationship(for: "people")
-                    else { XCTFail(); return }
-                
-                XCTAssertEqual(attendees, [])
-                
-                do {
-                    guard case let .toMany(events) = person1.relationship(for: "events")
-                        else { XCTFail(); return }
-                    
-                    XCTAssertEqual(events, [])
-                }
-                
-                do {
-                    guard case let .toMany(events) = person2.relationship(for: "events")
-                        else { XCTFail(); return }
-                    
-                    XCTAssertEqual(events, [])
-                }
-            }
+            event.setRelationship(.toMany([]), for: "people")
+            XCTAssertEqual(event.relationship(for: "people"), .toMany([]))
+            XCTAssertEqual(person1.relationship(for: "events"), .toMany([]))
+            XCTAssertEqual(person2.relationship(for: "events"), .toMany([]))
             
-            do {
-                event.setRelationship(.toMany([person1]), for: "people")
-                
-                guard case let .toMany(attendees) = event.relationship(for: "people")
-                    else { XCTFail(); return }
-                
-                XCTAssertEqual(attendees, [person1])
-                
-                guard case let .toMany(events) = person1.relationship(for: "events")
-                    else { XCTFail(); return }
-                
-                XCTAssertEqual(events, [event])
-            }
+            event.setRelationship(.toMany([person1]), for: "people")
+            XCTAssertEqual(event.relationship(for: "people"), .toMany([person1]))
+            XCTAssertEqual(person1.relationship(for: "events"), .toMany([event]))
+            XCTAssertEqual(person2.relationship(for: "events"), .toMany([]))
+            
+            event.setRelationship(.toMany([person1, person2]), for: "people")
+            XCTAssertEqual(person1.relationship(for: "events"), .toMany([event]))
+            XCTAssertEqual(person2.relationship(for: "events"), .toMany([event]))
+            store.delete(event)
+            
+            XCTAssert(event.isDeleted)
+            XCTAssertFalse(person1.isDeleted)
+            XCTAssertFalse(person2.isDeleted)
+            XCTAssertEqual(person1.relationship(for: "events"), .toMany([]))
+            XCTAssertEqual(person2.relationship(for: "events"), .toMany([]))
         }
         
         catch { XCTFail("\(error)") }

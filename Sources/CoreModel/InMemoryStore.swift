@@ -40,6 +40,16 @@ public final class InMemoryStore: StoreProtocol {
     /// Delete the specified managed object.
     public func delete(_ managedObject: ManagedObject) {
         
+        let entityName = managedObject.identifier.entity
+        
+        guard let entity = model[entityName]
+            else { fatalError() }
+        
+        for relationship in entity.relationships {
+            
+            managedObject.setRelationship(.null, for: relationship.name)
+        }
+        
         // remove and release object
         data[managedObject.identifier] = nil
     }
@@ -128,7 +138,7 @@ public extension InMemoryStore {
             switch relationshipValue {
             case .null:
                 break
-            case let .toOne(inverseManagedObject):
+            case .toOne:
                 setRelationship(.null,
                                 for: key,
                                 applyInverse: false)
