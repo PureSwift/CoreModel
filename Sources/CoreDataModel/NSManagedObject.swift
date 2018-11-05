@@ -10,16 +10,91 @@
 import Foundation
 import CoreData
 import CoreModel
-import Predicate
 
-extension NSManagedObject: CoreModel.ManagedObject {
+public final class CoreDataManagedObject: CoreModel.ManagedObject {
+    
+    internal let managedObject: NSManagedObject
+    
+    internal init(_ managedObject: NSManagedObject) {
+        
+        self.managedObject = managedObject
+    }
     
     public var store: NSManagedObjectContext? {
         
-        return managedObjectContext
+        return managedObject.managedObjectContext
+    }
+    
+    public var isDeleted: Bool {
+        
+        return managedObject.isDeleted
     }
     
     public func attribute(for key: String) -> AttributeValue {
+        
+        return managedObject.attribute(for: key)
+    }
+    
+    public func setAttribute(_ newValue: AttributeValue, for key: String) {
+        
+        managedObject.setAttribute(newValue, for: key)
+    }
+    
+    public func relationship(for key: String) -> RelationshipValue<CoreDataManagedObject> {
+        
+        guard let objectValue = managedObject.value(forKey: key)
+            else { return .null }
+        
+        if let managedObject = objectValue as? NSManagedObject {
+            
+            return .toOne(CoreDataManagedObject(managedObject))
+            
+        } else if let managedObjects = objectValue as? Set<NSManagedObject> {
+            
+            return .toMany(Set(managedObjects.map { CoreDataManagedObject($0) }))
+            
+        } else {
+            
+            fatalError("Invalid CoreData relationship value \(objectValue)")
+        }
+    }
+    
+    public func setRelationship(_ newValue: RelationshipValue<CoreDataManagedObject>, for key: String) {
+        
+        let objectValue: AnyObject?
+        
+        switch newValue {
+        case .null:
+            objectValue = nil
+        case let .toOne(value):
+            objectValue = value.managedObject
+        case let .toMany(value):
+            objectValue = Set(value.map({ $0.managedObject })) as NSSet
+        }
+        
+        managedObject.setValue(objectValue, forKey: key)
+    }
+}
+
+public extension CoreDataManagedObject {
+    
+    public static func == (lhs: CoreDataManagedObject, rhs: CoreDataManagedObject) -> Bool {
+        
+        return lhs.managedObject == rhs.managedObject
+    }
+}
+
+public extension CoreDataManagedObject {
+    
+    public var hashValue: Int {
+        
+        return managedObject.hashValue
+    }
+}
+
+internal extension NSManagedObject {
+    
+    func attribute(for key: String) -> AttributeValue {
         
         guard let objectValue = self.value(forKey: key)
             else { return .null }
@@ -66,7 +141,7 @@ extension NSManagedObject: CoreModel.ManagedObject {
         }
     }
     
-    public func setAttribute(_ newValue: AttributeValue, for key: String) {
+    func setAttribute(_ newValue: AttributeValue, for key: String) {
         
         let objectValue: AnyObject?
         
@@ -91,41 +166,6 @@ extension NSManagedObject: CoreModel.ManagedObject {
             objectValue = value as NSNumber
         case let .double(value):
             objectValue = value as NSNumber
-        }
-        
-        self.setValue(objectValue, forKey: key)
-    }
-    
-    public func relationship(for key: String) -> RelationshipValue<NSManagedObject> {
-        
-        guard let objectValue = self.value(forKey: key)
-            else { return .null }
-        
-        if let managedObject = objectValue as? NSManagedObject {
-            
-            return .toOne(managedObject)
-            
-        } else if let managedObjects = objectValue as? Set<NSManagedObject> {
-            
-            return .toMany(managedObjects)
-        
-        } else {
-            
-            fatalError("Invalid CoreData relationship value \(objectValue)")
-        }
-    }
-    
-    public func setRelationship(_ newValue: RelationshipValue<NSManagedObject>, for key: String) {
-        
-        let objectValue: AnyObject?
-        
-        switch newValue {
-        case .null:
-            objectValue = nil
-        case let .toOne(managedObject):
-            objectValue = managedObject
-        case let .toMany(managedObjects):
-            objectValue = managedObjects as NSSet
         }
         
         self.setValue(objectValue, forKey: key)

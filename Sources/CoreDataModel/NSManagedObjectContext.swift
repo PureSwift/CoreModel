@@ -12,14 +12,61 @@ import CoreData
 import CoreModel
 import Predicate
 
-extension NSManagedObjectContext: StoreProtocol {
+public final class CoreDataStore: StoreProtocol {
     
-    public func fetch(_ fetchRequest: FetchRequest) throws -> [NSManagedObject] {
+    public let context: NSManagedObjectContext
+    
+    public init(context: NSManagedObjectContext) {
+        
+        self.context = context
+    }
+    
+    /// Fetch managed objects.
+    public func fetch(_ fetchRequest: FetchRequest) throws -> [CoreDataManagedObject] {
+        
+        return try context.fetch(fetchRequest).map { CoreDataManagedObject($0) }
+    }
+    
+    /// Fetch and return result count.
+    public func count(for fetchRequest: FetchRequest) throws -> Int {
+        
+        return try context.count(for: fetchRequest)
+    }
+    
+    /// Create new managed object.
+    public func create(_ entity: String) throws -> CoreDataManagedObject {
+        
+        let managedObject = try context.create(entity)
+        
+        return CoreDataManagedObject(managedObject)
+    }
+    
+    /// Delete the specified managed object.
+    public func delete(_ managedObject: CoreDataManagedObject) {
+        
+        context.delete(managedObject.managedObject)
+    }
+    
+    /// Flush the store's pending changes to the underlying storage format.
+    public func save() throws {
+        
+        try context.save()
+    }
+}
+
+internal extension NSManagedObjectContext {
+    
+    func fetch(_ fetchRequest: FetchRequest) throws -> [NSManagedObject] {
         
         return try self.fetch(fetchRequest.toFoundation())
     }
     
-    public func create(_ entityName: String) throws -> NSManagedObject {
+    func count(for fetchRequest: FetchRequest) throws -> Int {
+        
+        return try self.count(for: fetchRequest.toFoundation())
+    }
+    
+    func create(_ entityName: String) throws -> NSManagedObject {
         
         guard let model = self.persistentStoreCoordinator?.managedObjectModel
             else { fatalError("Invalid \(self)") }
