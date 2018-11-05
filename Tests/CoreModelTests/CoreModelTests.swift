@@ -103,6 +103,9 @@ final class CoreModelTests: XCTestCase {
             XCTAssertFalse(person2.isDeleted)
             XCTAssertEqual(person1.relationship(for: "events"), .toMany([]))
             XCTAssertEqual(person2.relationship(for: "events"), .toMany([]))
+            
+            XCTAssertEqual(try store.fetch(FetchRequest(entity: "Person")), [person1, person2])
+            XCTAssertEqual(try store.fetch(FetchRequest(entity: "Event")), [event])
         }
         
         catch { XCTFail("\(error)") }

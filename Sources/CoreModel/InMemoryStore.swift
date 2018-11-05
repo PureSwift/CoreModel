@@ -23,7 +23,36 @@ public final class InMemoryStore: StoreProtocol {
     /// Fetch managed objects.
     public func fetch(_ fetchRequest: FetchRequest) throws -> [ManagedObject] {
         
-        fatalError()
+        var identifiers = data.keys.filter { $0.entity == fetchRequest.entity }
+        
+        if fetchRequest.fetchOffset > 0 {
+            
+            identifiers = Array(identifiers.suffix(fetchRequest.fetchOffset))
+        }
+        
+        if fetchRequest.fetchLimit > 0 {
+            
+            identifiers = Array(identifiers.prefix(fetchRequest.fetchLimit))
+        }
+        
+        var managedObjects = identifiers.map { ManagedObject(identifier: $0, store: self) }
+        
+        if let predicate = fetchRequest.predicate {
+            
+            managedObjects = try managedObjects.filter {
+                try $0.evaluate(with: predicate)
+            }
+        }
+        
+        if fetchRequest.sortDescriptors.isEmpty == false {
+            
+            for sort in fetchRequest.sortDescriptors.reversed() {
+                
+                //managedObjects.sort(by: { $0. })
+            }
+        }
+        
+        return managedObjects
     }
     
     /// Create new managed object.
@@ -273,5 +302,13 @@ private extension InMemoryStore {
         case null
         case toOne(Identifier)
         case toMany(Set<Identifier>)
+    }
+}
+
+extension InMemoryStore.ManagedObject: PredicateEvaluatable {
+    
+    public func evaluate(with predicate: Predicate) throws -> Bool {
+        
+        
     }
 }
