@@ -6,42 +6,38 @@
 //  Copyright © 2015 PureSwift. All rights reserved.
 //
 
-/*
-/// Defines the interface for **CoreModel**'s ```StoreType```.
-public protocol StoreType {
+/// CoreModel Store Protocol
+public protocol StoreProtocol: class {
     
-    /// Queries the store for entities matching the fetch request.
-    func fetch(fetchRequest: FetchRequest) throws -> [Resource]
+    associatedtype ManagedObject: CoreModel.ManagedObject
     
-    /// Determines whether the specified resource exists.
-    func exists(resource: Resource) throws -> Bool
+    /// Fetch managed objects.
+    func fetch(_ fetchRequest: FetchRequest) throws -> [ManagedObject]
     
-    /// Determines whether the specified resources exist.
-    func exist(resources: [Resource]) throws -> Bool
+    /// Fetch and return result count.
+    func count(_ fetchRequest: FetchRequest) throws -> Int
     
-    /// Creates an entity with the specified values.
-    func create(resource: Resource, initialValues: ValuesObject) throws
+    /// Create new managed object.
+    func create(_ entity: String) throws -> ManagedObject
     
-    /// Deletes the specified entity.
-    func delete(resource: Resource) throws
+    /// Delete the specified managed object. 
+    func delete(_ managedObject: ManagedObject)
     
-    /// Edits the specified entity.
-    func edit(resource: Resource, changes: ValuesObject) throws
-    
-    /// Returns the entity's values as a JSON object.
-    func values(resource: Resource) throws -> ValuesObject
+    /// Flush the store's pending changes to the underlying storage format.
+    func save() throws
 }
 
-/// Common errors for ```Store```.
-public enum StoreError: ErrorType {
+public extension StoreProtocol {
     
-    /// The entity provided doesn't belong to the ```Store```'s schema.
-    case InvalidEntity
-    
-    /// Invalid ```ValuesObject``` was given to the ```Store```.
-    case InvalidValues
-    
-    /// The specified resource could not be found.
-    case NotFound
+    func count(_ fetchRequest: FetchRequest) throws -> Int {
+        
+        return try fetch(fetchRequest).count
+    }
 }
-*/
+
+/// CoreModel Store Error
+public enum StoreError: Error {
+    
+    /// Invalid or unknown entity
+    case invalidEntity(String)
+}

@@ -9,6 +9,7 @@
 import Foundation
 import Predicate
 
+/// CoreModel Fetch Request
 public struct FetchRequest: Equatable, Codable {
     
     public var entity: String

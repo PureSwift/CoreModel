@@ -9,6 +9,18 @@ let package = Package(
             targets: [
                 "CoreModel"
             ]
+        ),
+        .library(
+            name: "CoreDataModel",
+            targets: [
+                "CoreDataModel"
+            ]
+        ),
+        .library(
+            name: "SQLiteModel",
+            targets: [
+                "SQLiteModel"
+            ]
         )
     ],
     dependencies: [
@@ -19,6 +31,18 @@ let package = Package(
             name: "CoreModel",
             dependencies: [
                 "Predicate"
+            ]
+        ),
+        .target(
+            name: "CoreDataModel",
+            dependencies: [
+                "CoreModel"
+            ]
+        ),
+        .target(
+            name: "SQLiteModel",
+            dependencies: [
+                "CoreModel"
             ]
         ),
         .testTarget(
