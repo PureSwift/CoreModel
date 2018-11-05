@@ -9,11 +9,9 @@ import Foundation
 
 /// CoreModel Managed Object
 public protocol ManagedObject: class, Hashable {
-    
-    associatedtype Store: StoreProtocol
-    
-    /// The store this managed object belongs to.
-    var store: Store? { get }
+        
+    /// Whether the object has been deleted.
+    var isDeleted: Bool { get }
     
     func attribute(for key: String) -> AttributeValue
     

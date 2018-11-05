@@ -36,8 +36,14 @@ public enum AttributeType: String, Codable {
     /// Boolean number type.
     case boolean
     
+    /// 16 bit Integer number type.
+    case int16
+    
     /// Integer number type.
-    case integer
+    case int32
+    
+    /// Integer number type.
+    case int64
     
     /// Floating point number type.
     case float

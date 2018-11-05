@@ -13,7 +13,7 @@ public final class InMemoryStore: StoreProtocol {
     
     public let model: Model
     
-    private var managedObjects = [Identifier: Cache]()
+    private var data = [Identifier: Cache]()
     
     public init(model: Model) {
         
@@ -23,20 +23,25 @@ public final class InMemoryStore: StoreProtocol {
     /// Fetch managed objects.
     public func fetch(_ fetchRequest: FetchRequest) throws -> [ManagedObject] {
         
-        
+        fatalError()
     }
     
     /// Create new managed object.
     public func create(_ entity: String) throws -> ManagedObject {
         
+        let identifier = Identifier(entity: entity, uuid: UUID())
         
+        self.data[identifier] = Cache(attributes: [:],
+                                      relationships: [:])
+        
+        return ManagedObject(identifier: identifier, store: self)
     }
     
     /// Delete the specified managed object.
     public func delete(_ managedObject: ManagedObject) {
         
         // remove and release object
-        managedObjects[managedObject.identifier] = nil
+        data[managedObject.identifier] = nil
     }
     
     /// Flush the store's pending changes to the underlying storage format.
@@ -44,29 +49,17 @@ public final class InMemoryStore: StoreProtocol {
         
         // does nothing
     }
-    
-    // MARK: - Private Methods
-    
-    fileprivate subscript (identifier: Identifier) -> ManagedObject {
-        
-        guard let cache = managedObjects[identifier]
-            else { fatalError("Invalid identifier") }
-        
-        return ManagedObject(store: <#T##InMemoryStore#>)
-    }
 }
 
 // MARK: - ManagedObject
 
 public extension InMemoryStore {
     
-    public struct Identifier: RawRepresentable, Equatable, Hashable {
+    public struct Identifier: Equatable, Hashable {
         
-        public let rawValue: UUID
+        public let entity: String
         
-        public init(rawValue: UUID = UUID()) {
-            self.rawValue = rawValue
-        }
+        public let uuid: UUID
     }
     
     public final class ManagedObject: CoreModel.ManagedObject {
@@ -81,56 +74,168 @@ public extension InMemoryStore {
             self.store = store
         }
         
+        public var isDeleted: Bool {
+            
+            guard let store = self.store
+                else { fatalError() }
+            
+            return store.data[identifier] == nil
+        }
+        
         public func attribute(for key: String) -> AttributeValue {
             
-            return attributes[key] ?? .null
+            guard let store = self.store
+                else { fatalError() }
+            
+            return store.data[identifier]?.attributes[key] ?? .null
         }
         
         public func setAttribute(_ newValue: AttributeValue, for key: String) {
             
-            attributes[key] = newValue
+            guard let store = self.store
+                else { fatalError() }
+            
+            store.data[identifier]?.attributes[key] = newValue
         }
         
         public func relationship(for key: String) -> RelationshipValue<ManagedObject> {
             
-            guard let relationshipValue = relationships[key]
+            guard let store = self.store
+                else { fatalError() }
+            
+            guard let relationshipValue = store.data[identifier]?.relationships[key]
                 else { return .null }
             
-            fatalError()
+            switch relationshipValue {
+            case .null:
+                return .null
+            case let .toOne(identifier):
+                return .toOne(ManagedObject(identifier: identifier, store: store))
+            case let .toMany(identifiers):
+                return .toMany(Set(identifiers.map { ManagedObject(identifier: $0, store: store) }))
+            }
         }
         
-        public func setRelationship(_ newValue: RelationshipValue<ManagedObject>, for key: String) {
+        public func setRelationship(_ newValue: RelationshipValue<ManagedObject>,
+                                    for key: String) {
+            
+            setRelationship(newValue, for: key, applyInverse: true)
+        }
+        
+        private func clearInverseRelationship(for key: String, inverse: ManagedObject) {
+            
+            let relationshipValue = self.relationship(for: key)
+            switch relationshipValue {
+            case .null:
+                break
+            case let .toOne(inverseManagedObject):
+                setRelationship(.null,
+                                for: key,
+                                applyInverse: false)
+            case let .toMany(inverseManagedObjects):
+                var newValue = inverseManagedObjects
+                newValue.remove(inverse)
+                setRelationship(.toMany(newValue),
+                                for: key,
+                                applyInverse: false)
+            }
+        }
+                
+        private func setRelationship(_ newValue: RelationshipValue<ManagedObject>,
+                                    for key: String,
+                                    applyInverse: Bool) {
             
             guard let store = self.store
-                else { fatalError("Store released") }
+                else { fatalError() }
             
-            let oldValue = relationships[key] ?? .null
+            guard let entity = store.model[identifier.entity],
+                let relationshipDescription = entity[relationship: key],
+                let inverseEntity = store.model[relationshipDescription.destinationEntity],
+                let inverseRelationship = inverseEntity[relationship: relationshipDescription.inverseRelationship]
+                else { fatalError() }
             
-            switch newValue {
+            let oldValue = self.relationship(for: key)
+            
+            // clear inverse relationship
+            if applyInverse {
                 
-            case .null:
-                
-                // also clear inverse relationship
                 switch oldValue {
                 case .null:
                     break // already null
-                case let .toOne(identifier):
-                    store.managedObjects.
-                case let .toMany(identifier):
-                    
+                case let .toOne(managedObject):
+                    managedObject.clearInverseRelationship(for: inverseRelationship.name,
+                                                           inverse: self)
+                case let .toMany(managedObjects):
+                    for managedObject in managedObjects {
+                        managedObject.clearInverseRelationship(for: inverseRelationship.name,
+                                                               inverse: self)
+                    }
                 }
-                
-                // set new valuye
-                relationships[key] = .null
-                
-            case let .toOne(managedObject):
-                
-                
-                
-            case let .toMany(managedObjects):
-                
-                
             }
+            
+            let newRelationship: Relationship
+            
+            switch newValue {
+            case .null:
+                newRelationship = .null
+            case let .toOne(managedObject):
+                newRelationship = .toOne(managedObject.identifier)
+                if applyInverse {
+                    switch inverseRelationship.type {
+                    case .toOne:
+                        managedObject.setRelationship(.toOne(self),
+                                                      for: inverseRelationship.name,
+                                                      applyInverse: false)
+                    case .toMany:
+                        var newSet: Set<ManagedObject>
+                        let currentValue = managedObject.relationship(for: inverseRelationship.name)
+                        switch currentValue {
+                        case .null:
+                            newSet = []
+                        case let .toMany(oldSet):
+                            newSet = oldSet
+                        case .toOne:
+                            fatalError("Invalid")
+                        }
+                        newSet.insert(self)
+                        managedObject.setRelationship(.toMany(newSet),
+                                                      for: inverseRelationship.name,
+                                                      applyInverse: false)
+                    }
+                }
+            case let .toMany(managedObjects):
+                newRelationship = .toMany(Set(managedObjects.map { $0.identifier }))
+                if applyInverse {
+                    for managedObject in managedObjects {
+                        switch inverseRelationship.type {
+                        case .toOne:
+                            managedObject.setRelationship(.toOne(self),
+                                                          for: inverseRelationship.name,
+                                                          applyInverse: false)
+                        case .toMany:
+                            var newSet: Set<ManagedObject>
+                            let currentValue = managedObject.relationship(for: inverseRelationship.name)
+                            switch currentValue {
+                            case .null:
+                                newSet = []
+                            case let .toMany(oldSet):
+                                newSet = oldSet
+                            case .toOne:
+                                fatalError("Invalid")
+                            }
+                            newSet.insert(self)
+                            managedObject.setRelationship(.toMany(newSet),
+                                                          for: inverseRelationship.name,
+                                                          applyInverse: false)
+                        }
+                    }
+                }
+            }
+            
+            store.data[identifier]?.relationships[key] = newRelationship
+            
+            // set inverse
+            
         }
         
         public var hashValue: Int {
@@ -160,5 +265,3 @@ private extension InMemoryStore {
         case toMany(Set<Identifier>)
     }
 }
-
-
