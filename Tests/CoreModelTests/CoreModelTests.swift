@@ -131,6 +131,20 @@ final class CoreModelTests: XCTestCase {
                     XCTAssertEqual(events, [])
                 }
             }
+            
+            do {
+                event.setRelationship(.toMany([person1]), for: "people")
+                
+                guard case let .toMany(attendees) = event.relationship(for: "people")
+                    else { XCTFail(); return }
+                
+                XCTAssertEqual(attendees, [person1])
+                
+                guard case let .toMany(events) = person1.relationship(for: "events")
+                    else { XCTFail(); return }
+                
+                XCTAssertEqual(events, [event])
+            }
         }
         
         catch { XCTFail("\(error)") }
