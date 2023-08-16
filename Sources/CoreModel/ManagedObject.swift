@@ -8,8 +8,8 @@
 import Foundation
 
 /// CoreModel Managed Object
-public protocol ManagedObject: class, Hashable {
-        
+public protocol ManagedObject: AnyObject, Hashable {
+    
     /// Whether the object has been deleted.
     var isDeleted: Bool { get }
     

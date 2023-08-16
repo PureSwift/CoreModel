@@ -7,7 +7,7 @@
 //
 
 /// CoreModel Store Protocol
-public protocol StoreProtocol: class {
+public protocol StoreProtocol: AnyObject {
     
     associatedtype ManagedObject: CoreModel.ManagedObject
     

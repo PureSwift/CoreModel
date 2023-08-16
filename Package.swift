@@ -1,4 +1,4 @@
-// swift-tools-version:4.1
+// swift-tools-version:5.7
 import PackageDescription
 
 let package = Package(
@@ -15,16 +15,10 @@ let package = Package(
             targets: [
                 "CoreDataModel"
             ]
-        ),
-        .library(
-            name: "SQLiteModel",
-            targets: [
-                "SQLiteModel"
-            ]
         )
     ],
     dependencies: [
-        .package(url: "https://github.com/PureSwift/Predicate.git", .branch("master"))
+        .package(url: "https://github.com/PureSwift/Predicate.git", branch: "master")
     ],
     targets: [
         .target(
@@ -39,18 +33,11 @@ let package = Package(
                 "CoreModel"
             ]
         ),
-        .target(
-            name: "SQLiteModel",
-            dependencies: [
-                "CoreModel"
-            ]
-        ),
         .testTarget(
             name: "CoreModelTests",
             dependencies: [
                 "CoreModel"
             ]
         )
-    ],
-    swiftLanguageVersions: [4]
+    ]
 )

@@ -16,7 +16,6 @@ public final class InMemoryStore: StoreProtocol {
     private var data = [Identifier: Cache]()
     
     public init(model: Model) {
-        
         self.model = model
     }
     
@@ -26,12 +25,10 @@ public final class InMemoryStore: StoreProtocol {
         var identifiers = data.keys.filter { $0.entity == fetchRequest.entity }
         
         if fetchRequest.fetchOffset > 0 {
-            
             identifiers = Array(identifiers.suffix(fetchRequest.fetchOffset))
         }
         
         if fetchRequest.fetchLimit > 0 {
-            
             identifiers = Array(identifiers.prefix(fetchRequest.fetchLimit))
         }
         
@@ -94,14 +91,14 @@ public final class InMemoryStore: StoreProtocol {
 
 public extension InMemoryStore {
     
-    public struct Identifier: Equatable, Hashable {
+    struct Identifier: Equatable, Hashable {
         
         public let entity: String
         
         public let uuid: UUID
     }
     
-    public final class ManagedObject: CoreModel.ManagedObject {
+    final class ManagedObject: CoreModel.ManagedObject {
         
         public private(set) weak var store: InMemoryStore?
         
@@ -277,9 +274,8 @@ public extension InMemoryStore {
             
         }
         
-        public var hashValue: Int {
-            
-            return identifier.hashValue
+        public func hash(into hasher: inout Hasher) {
+            identifier.hash(into: &hasher)
         }
         
         public static func == (lhs: ManagedObject, rhs: ManagedObject) -> Bool {
@@ -308,7 +304,6 @@ private extension InMemoryStore {
 extension InMemoryStore.ManagedObject: PredicateEvaluatable {
     
     public func evaluate(with predicate: Predicate) throws -> Bool {
-        
-        
+        false
     }
 }

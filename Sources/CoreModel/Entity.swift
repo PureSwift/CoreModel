@@ -15,10 +15,11 @@ public struct Entity: Codable, Equatable {
     
     public var relationships: [Relationship]
     
-    public init(name: String,
-                attributes: [Attribute],
-                relationships: [Relationship]) {
-        
+    public init(
+        name: String,
+        attributes: [Attribute],
+        relationships: [Relationship]
+    ) {
         self.name = name
         self.attributes = attributes
         self.relationships = relationships
@@ -28,12 +29,10 @@ public struct Entity: Codable, Equatable {
 public extension Entity {
     
     subscript (attribute propertyName: String) -> Attribute? {
-        
         return attributes.first { $0.name == propertyName }
     }
     
     subscript (relationship propertyName: String) -> Relationship? {
-        
         return relationships.first { $0.name == propertyName }
     }
 }
