@@ -12,6 +12,7 @@ public enum AttributeValue: Equatable {
     
     case null
     case string(String)
+    case uuid(UUID)
     case data(Data)
     case date(Date)
     case bool(Bool)

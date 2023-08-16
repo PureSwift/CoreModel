@@ -16,27 +16,22 @@ public final class CoreDataManagedObject: CoreModel.ManagedObject {
     internal let managedObject: NSManagedObject
     
     internal init(_ managedObject: NSManagedObject) {
-        
         self.managedObject = managedObject
     }
     
     public var store: NSManagedObjectContext? {
-        
         return managedObject.managedObjectContext
     }
     
     public var isDeleted: Bool {
-        
         return managedObject.isDeleted
     }
     
     public func attribute(for key: String) -> AttributeValue {
-        
         return managedObject.attribute(for: key)
     }
     
     public func setAttribute(_ newValue: AttributeValue, for key: String) {
-        
         managedObject.setAttribute(newValue, for: key)
     }
     
@@ -46,15 +41,10 @@ public final class CoreDataManagedObject: CoreModel.ManagedObject {
             else { return .null }
         
         if let managedObject = objectValue as? NSManagedObject {
-            
             return .toOne(CoreDataManagedObject(managedObject))
-            
         } else if let managedObjects = objectValue as? Set<NSManagedObject> {
-            
             return .toMany(Set(managedObjects.map { CoreDataManagedObject($0) }))
-            
         } else {
-            
             fatalError("Invalid CoreData relationship value \(objectValue)")
         }
     }
@@ -78,17 +68,15 @@ public final class CoreDataManagedObject: CoreModel.ManagedObject {
 
 public extension CoreDataManagedObject {
     
-    public static func == (lhs: CoreDataManagedObject, rhs: CoreDataManagedObject) -> Bool {
-        
+    static func == (lhs: CoreDataManagedObject, rhs: CoreDataManagedObject) -> Bool {
         return lhs.managedObject == rhs.managedObject
     }
 }
 
 public extension CoreDataManagedObject {
     
-    public var hashValue: Int {
-        
-        return managedObject.hashValue
+    func hash(into hasher: inout Hasher) {
+        managedObject.hash(into: &hasher)
     }
 }
 
@@ -100,43 +88,26 @@ internal extension NSManagedObject {
             else { return .null }
         
         if let string = objectValue as? String {
-            
             return .string(string)
-            
+        } else if let uuid = objectValue as? UUID {
+            return .uuid(uuid)
         } else if let data = objectValue as? Data {
-            
             return .data(data)
-            
         } else if let date = objectValue as? Date {
-            
             return .date(date)
-            
         } else if let value = objectValue as? Bool {
-            
             return .bool(value)
-            
         } else if let value = objectValue as? Int16 {
-            
             return .int16(value)
-            
         } else if let value = objectValue as? Int32 {
-            
             return .int32(value)
-            
         } else if let value = objectValue as? Int64 {
-            
             return .int64(value)
-            
         } else if let value = objectValue as? Float {
-            
             return .float(value)
-            
         } else if let value = objectValue as? Double {
-            
             return .double(value)
-            
         } else {
-            
             fatalError("Invalid CoreData attribute value \(objectValue)")
         }
     }
@@ -150,6 +121,8 @@ internal extension NSManagedObject {
             objectValue = nil
         case let .string(value):
             objectValue = value as NSString
+        case let .uuid(value):
+            objectValue = value as NSUUID
         case let .data(value):
             objectValue = value as NSData
         case let .date(value):

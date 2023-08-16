@@ -30,7 +30,6 @@ public protocol StoreProtocol: AnyObject {
 public extension StoreProtocol {
     
     func count(_ fetchRequest: FetchRequest) throws -> Int {
-        
         return try fetch(fetchRequest).count
     }
 }
