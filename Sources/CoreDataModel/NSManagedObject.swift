@@ -128,18 +128,14 @@ internal extension NSManagedObject {
         in context: NSManagedObjectContext
     ) throws {
         
-        guard let entityName = self.entity.name.map({ EntityName(rawValue: $0) }) else {
-            assertionFailure("Missing entity name")
-            throw CocoaError(.coreData)
-        }
-        
-        guard let relationship = self.entity.relationshipsByName[key.rawValue] else {
+        guard let relationship = self.entity.relationshipsByName[key.rawValue],
+              let destinationEntity = relationship.destinationEntity?.name.map({ EntityName(rawValue: $0) }) else {
             assertionFailure("Invalid relationship for \"\(key)\"")
             throw CocoaError(.coreData)
         }
         
         let model = self.entity.managedObjectModel
-        
+                
         let objectValue: AnyObject?
         
         switch newValue {
@@ -151,7 +147,7 @@ internal extension NSManagedObject {
                 throw CocoaError(.coreData)
             }
             // find managed object
-            let managedObject = try context.find(entityName, for: value, in: model)
+            let managedObject = try context.find(destinationEntity, for: value)
             objectValue = managedObject
         case let .toMany(value):
             guard relationship.isToMany else {
@@ -160,7 +156,7 @@ internal extension NSManagedObject {
             }
             // find or create
             let managedObjects = try value
-                .map { try context.find(entityName, for: $0, in: model) ?? context.create(entityName, for: $0, in: model) }
+                .map { try context.find(destinationEntity, for: $0) ?? context.create(destinationEntity, for: $0, in: model) }
             if relationship.isOrdered {
                 objectValue = NSOrderedSet(array: managedObjects)
             } else {

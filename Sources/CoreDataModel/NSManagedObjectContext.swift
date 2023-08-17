@@ -9,18 +9,13 @@
 import Foundation
 import CoreData
 import CoreModel
+import Predicate
 
 extension NSManagedObjectContext: ModelStorage {
     
     public func fetch(_ entity: EntityName, for id: ObjectID) throws -> ModelInstance? {
-        guard let model = self.persistentStoreCoordinator?.managedObjectModel else {
-            assertionFailure("Missing model")
-            throw CocoaError(.coreData)
-        }
-        guard let managedObject = try self.find(entity, for: id, in: model) else {
-            return nil
-        }
-        return try ModelInstance(managedObject: managedObject)
+        try self.find(entity, for: id)
+            .flatMap { try ModelInstance(managedObject: $0) }
     }
     
     public func fetch(_ fetchRequest: FetchRequest) throws -> [ModelInstance] {
@@ -41,35 +36,18 @@ extension NSManagedObjectContext: ModelStorage {
     }
     
     public func delete(_ entity: EntityName, for id: ObjectID) throws {
-        guard let model = self.persistentStoreCoordinator?.managedObjectModel else {
-            assertionFailure("Missing model")
-            throw CocoaError(.coreData)
-        }
-        guard try delete(entity, for: id, model: model) else {
+        guard let managedObject = try self.find(entity, for: id) else {
             assertionFailure("Object not found for \(id)")
             throw CocoaError(.coreData)
         }
+        self.delete(managedObject)
     }
 }
 
 internal extension NSManagedObjectContext {
     
-    func fetch(_ entity: EntityName, for id: ObjectID, model: NSManagedObjectModel) throws -> ModelInstance? {
-        try self.find(entity, for: id, in: model)
-            .flatMap { try ModelInstance(managedObject: $0) }
-    }
-    
     func fetchObjects(_ fetchRequest: FetchRequest) throws -> [NSManagedObject] {
         return try self.fetch(fetchRequest.toFoundation())
-    }
-    
-    @discardableResult
-    func delete(_ entity: EntityName, for id: ObjectID, model: NSManagedObjectModel) throws -> Bool {
-        guard let managedObject = try self.find(entity, for: id, in: model) else {
-            return false
-        }
-        self.delete(managedObject)
-        return true
     }
     
     func create(
@@ -85,12 +63,14 @@ internal extension NSManagedObjectContext {
     
     func find(
         _ entityName: EntityName,
-        for id: ObjectID,
-        in model: NSManagedObjectModel
+        for id: ObjectID
     ) throws -> NSManagedObject? {
-        let entity = try model[entityName]
-        // TODO: 
-        return nil
+        let fetchRequest = FetchRequest(
+            entity: entityName,
+            predicate: NSManagedObject.BuiltInProperty.id.rawValue == id.rawValue,
+            fetchLimit: 1
+        )
+        return try fetchObjects(fetchRequest).first
     }
     
     func insert(
@@ -98,7 +78,7 @@ internal extension NSManagedObjectContext {
         model: NSManagedObjectModel
     ) throws {
         // find or create
-        let managedObject = try find(value.entity, for: value.id, in: model) ?? create(value.entity, for: value.id, in: model)
+        let managedObject = try find(value.entity, for: value.id) ?? create(value.entity, for: value.id, in: model)
         // apply attributes
         for (key, value) in value.attributes {
             managedObject.setAttribute(value, for: key)

@@ -14,12 +14,8 @@ import CoreModel
 extension NSPersistentContainer: ModelStorage {
     
     public func fetch(_ entity: EntityName, for id: ObjectID) async throws -> ModelInstance? {
-        let model = self.managedObjectModel
         return try await performBackgroundTask { context in
-            guard let managedObject = try context.find(entity, for: id, in: model) else {
-                return nil
-            }
-            return try ModelInstance(managedObject: managedObject)
+            try context.fetch(entity, for: id)
         }
     }
     
@@ -43,12 +39,8 @@ extension NSPersistentContainer: ModelStorage {
     }
     
     public func delete(_ entity: EntityName, for id: ObjectID) async throws {
-        let model = self.managedObjectModel
         try await performBackgroundTask { context in
-            guard try context.delete(entity, for: id, model: model) else {
-                assertionFailure("Object not found for \(id)")
-                throw CocoaError(.coreData)
-            }
+            try context.delete(entity, for: id)
         }
     }
 }
