@@ -10,7 +10,7 @@
 public protocol ModelStorage: AnyObject {
     
     /// Fetch managed object.
-    func fetch(_ entity: EntityName, for id: ObjectID) async throws -> ModelInstance
+    func fetch(_ entity: EntityName, for id: ObjectID) async throws -> ModelInstance?
     
     /// Fetch managed objects.
     func fetch(_ fetchRequest: FetchRequest) async throws -> [ModelInstance]
