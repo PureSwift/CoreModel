@@ -38,3 +38,38 @@ extension ObjectID: CustomStringConvertible, CustomDebugStringConvertible {
         rawValue
     }
 }
+
+// MARK: - Supporting Types
+
+public protocol ObjectIDConvertible: CustomStringConvertible {
+    
+    init?(objectID: ObjectID)
+}
+
+public extension ObjectID {
+    
+    init<T>(_ value: T) where T: ObjectIDConvertible {
+        self.init(rawValue: value.description)
+    }
+}
+
+extension UUID: ObjectIDConvertible {
+    
+    public init?(objectID: ObjectID) {
+        self.init(uuidString: objectID.rawValue)
+    }
+}
+
+extension String: ObjectIDConvertible {
+    
+    public init(objectID: ObjectID) {
+        self = objectID.rawValue
+    }
+}
+
+extension ObjectIDConvertible where Self: RawRepresentable, Self.RawValue == String {
+    
+    public init?(objectID: ObjectID) {
+        self.init(rawValue: objectID.rawValue)
+    }
+}
