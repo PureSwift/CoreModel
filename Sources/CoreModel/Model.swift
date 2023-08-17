@@ -10,20 +10,31 @@ import Foundation
 /**
  The model contains one or more `Entity` objects representing the entities in the schema.
  */
-public struct Model: Codable {
+public struct Model: Hashable {
     
-    public var entities: [Entity]
+    public var entities: [EntityDescription]
     
-    public init(entities: [Entity] = []) {
-        
+    public init(entities: [EntityDescription] = []) {
         self.entities = entities
     }
 }
 
 public extension Model {
     
-    subscript (entityName: String) -> Entity? {
-        
-        return entities.first { $0.name == entityName }
+    subscript (id: EntityName) -> EntityDescription? {
+        return entities.first { $0.id == id }
+    }
+}
+
+// MARK: - Codable
+
+extension Model: Codable {
+    
+    public init(from decoder: Decoder) throws {
+        self.entities = try .init(from: decoder)
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        try entities.encode(to: encoder)
     }
 }

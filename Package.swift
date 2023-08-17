@@ -18,7 +18,10 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(url: "https://github.com/PureSwift/Predicate.git", branch: "master")
+        .package(
+            url: "https://github.com/PureSwift/Predicate.git",
+            branch: "master"
+        )
     ],
     targets: [
         .target(
