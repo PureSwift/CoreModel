@@ -10,9 +10,9 @@ import Foundation
 import Predicate
 
 /// CoreModel Fetch Request
-public struct FetchRequest: Equatable, Codable {
+public struct FetchRequest: Codable, Equatable, Hashable {
     
-    public var entity: String
+    public var entity: EntityName
     
     public var sortDescriptors: [SortDescriptor]
     
@@ -22,7 +22,7 @@ public struct FetchRequest: Equatable, Codable {
     
     public var fetchOffset: Int
     
-    public init(entity: String,
+    public init(entity: EntityName,
                 sortDescriptors: [SortDescriptor] = [],
                 predicate: Predicate? = nil,
                 fetchLimit: Int = 0,

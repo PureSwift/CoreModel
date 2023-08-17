@@ -13,6 +13,7 @@ public enum AttributeValue: Equatable {
     case null
     case string(String)
     case uuid(UUID)
+    case url(URL)
     case data(Data)
     case date(Date)
     case bool(Bool)
@@ -28,5 +29,5 @@ public enum RelationshipValue <T: ManagedObject>: Equatable {
     
     case null
     case toOne(T)
-    case toMany(Set<T>)
+    case toMany([T])
 }

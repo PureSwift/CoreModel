@@ -6,7 +6,6 @@
 //
 
 #if canImport(CoreData)
-
 import Foundation
 import CoreData
 import CoreModel
@@ -42,8 +41,10 @@ public final class CoreDataManagedObject: CoreModel.ManagedObject {
         
         if let managedObject = objectValue as? NSManagedObject {
             return .toOne(CoreDataManagedObject(managedObject))
+        } else if let orderedSet = objectValue as? NSOrderedSet {
+            return .toMany(orderedSet.map { CoreDataManagedObject($0 as! NSManagedObject) })
         } else if let managedObjects = objectValue as? Set<NSManagedObject> {
-            return .toMany(Set(managedObjects.map { CoreDataManagedObject($0) }))
+            return .toMany(managedObjects.map { CoreDataManagedObject($0) })
         } else {
             fatalError("Invalid CoreData relationship value \(objectValue)")
         }
@@ -91,6 +92,8 @@ internal extension NSManagedObject {
             return .string(string)
         } else if let uuid = objectValue as? UUID {
             return .uuid(uuid)
+        } else if let url = objectValue as? URL {
+            return .url(url)
         } else if let data = objectValue as? Data {
             return .data(data)
         } else if let date = objectValue as? Date {
@@ -123,6 +126,8 @@ internal extension NSManagedObject {
             objectValue = value as NSString
         case let .uuid(value):
             objectValue = value as NSUUID
+        case let .url(value):
+            objectValue = value as NSURL
         case let .data(value):
             objectValue = value as NSData
         case let .date(value):
