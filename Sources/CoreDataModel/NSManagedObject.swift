@@ -93,6 +93,7 @@ internal extension NSManagedObject {
             else { return .null }
         
         guard let relationship = self.entity.relationshipsByName[key.rawValue] else {
+            assertionFailure("Invalid relationship \"\(key)\"")
             throw CocoaError(.coreData)
         }
         
@@ -121,23 +122,51 @@ internal extension NSManagedObject {
         }
     }
     
-    func setRelationship(_ newValue: RelationshipValue, for key: PropertyKey) {
-        // TODO: Set relationship value
-        /*
+    func setRelationship(
+        _ newValue: RelationshipValue,
+        for key: PropertyKey,
+        in context: NSManagedObjectContext
+    ) throws {
+        
+        guard let entityName = self.entity.name.map({ EntityName(rawValue: $0) }) else {
+            assertionFailure("Missing entity name")
+            throw CocoaError(.coreData)
+        }
+        
+        guard let relationship = self.entity.relationshipsByName[key.rawValue] else {
+            assertionFailure("Invalid relationship for \"\(key)\"")
+            throw CocoaError(.coreData)
+        }
+        
+        let model = self.entity.managedObjectModel
+        
         let objectValue: AnyObject?
         
         switch newValue {
         case .null:
             objectValue = nil
         case let .toOne(value):
-            objectValue = value.managedObject
+            guard relationship.isToMany == false else {
+                assertionFailure("Invalid value \(newValue) for \"\(key)\"")
+                throw CocoaError(.coreData)
+            }
+            // find managed object
+            let managedObject = try context.find(entityName, for: value, in: model)
+            objectValue = managedObject
         case let .toMany(value):
-            // TODO: Check if ordered
-            objectValue = Set(value.map({ $0.managedObject })) as NSSet
+            guard relationship.isToMany else {
+                assertionFailure("Invalid value \(newValue) for \"\(key)\"")
+                throw CocoaError(.coreData)
+            }
+            let managedObjects = try value.map { try context.find(entityName, for: $0, in: model) }
+            if relationship.isOrdered {
+                objectValue = NSOrderedSet(array: managedObjects)
+            } else {
+                objectValue = NSSet(array: managedObjects)
+            }
         }
         
-        managedObject.setValue(objectValue, forKey: key)
-         */
+        self.setValue(objectValue, forKey: key.rawValue)
     }
 }
 
