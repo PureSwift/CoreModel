@@ -7,29 +7,51 @@
 //
 
 /// CoreModel Store Protocol
-public protocol StoreProtocol: AnyObject {
+public protocol ModelStorage: AnyObject {
     
-    associatedtype ManagedObject: CoreModel.ManagedObject
+    /// Fetch managed object.
+    func fetch(_ entity: EntityName, for id: ObjectID) async throws -> ModelInstance
     
     /// Fetch managed objects.
-    func fetch(_ fetchRequest: FetchRequest) throws -> [ManagedObject]
+    func fetch(_ fetchRequest: FetchRequest) async throws -> [ModelInstance]
     
     /// Fetch and return result count.
-    func count(_ fetchRequest: FetchRequest) throws -> UInt
+    func count(_ fetchRequest: FetchRequest) async throws -> UInt
     
-    /// Create new managed object.
-    func create(_ entity: EntityName) throws -> ManagedObject
+    /// Create or edit a managed object.
+    func insert(_ value: ModelInstance) async throws
     
     /// Delete the specified managed object. 
-    func delete(_ managedObject: ManagedObject)
-    
-    /// Flush the store's pending changes to the underlying storage format.
-    func save() throws
+    func delete(_ entity: EntityName, for id: ObjectID) async throws
 }
 
-public extension StoreProtocol {
+public extension ModelStorage {
     
-    func count(_ fetchRequest: FetchRequest) throws -> UInt {
-        return try UInt(fetch(fetchRequest).count)
+    func count(_ fetchRequest: FetchRequest) async throws -> UInt {
+        return try await UInt(fetch(fetchRequest).count)
+    }
+}
+
+/// CoreModel Object Instance
+public struct ModelInstance: Equatable, Hashable, Identifiable, Codable {
+    
+    public let entity: EntityName
+    
+    public let id: ObjectID
+    
+    public var attributes: [PropertyKey: AttributeValue]
+    
+    public var relationships: [PropertyKey: RelationshipValue]
+    
+    public init(
+        entity: EntityName,
+        id: ObjectID,
+        attributes: [PropertyKey : AttributeValue],
+        relationships: [PropertyKey : RelationshipValue]
+    ) {
+        self.entity = entity
+        self.id = id
+        self.attributes = attributes
+        self.relationships = relationships
     }
 }
