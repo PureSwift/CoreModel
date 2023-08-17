@@ -35,6 +35,14 @@ extension NSManagedObjectContext: ModelStorage {
         try insert(value, model: model)
     }
     
+    public func insert(_ values: [ModelData]) async throws {
+        guard let model = self.persistentStoreCoordinator?.managedObjectModel else {
+            assertionFailure("Missing model")
+            throw CocoaError(.coreData)
+        }
+        try insert(values, model: model)
+    }
+    
     public func delete(_ entity: EntityName, for id: ObjectID) throws {
         guard let managedObject = try self.find(entity, for: id) else {
             assertionFailure("Object not found for \(id)")
@@ -75,7 +83,8 @@ internal extension NSManagedObjectContext {
     
     func insert(
         _ value: ModelData,
-        model: NSManagedObjectModel
+        model: NSManagedObjectModel,
+        shouldSave: Bool = true
     ) throws {
         // find or create
         let managedObject = try find(value.entity, for: value.id) ?? create(value.entity, for: value.id, in: model)
@@ -87,7 +96,19 @@ internal extension NSManagedObjectContext {
         for (key, value) in value.relationships {
             try managedObject.setRelationship(value, for: key, in: self)
         }
-        try save()
+        if shouldSave {
+            try self.save()
+        }
+    }
+    
+    func insert(
+        _ values: [ModelData],
+        model: NSManagedObjectModel
+    ) throws {
+        for value in values {
+            try insert(value, model: model, shouldSave: false)
+        }
+        try self.save()
     }
 }
 

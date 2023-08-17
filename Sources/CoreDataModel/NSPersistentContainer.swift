@@ -38,6 +38,13 @@ extension NSPersistentContainer: ModelStorage {
         }
     }
     
+    public func insert(_ values: [ModelData]) async throws {
+        let model = self.managedObjectModel
+        try await performBackgroundTask { context in
+            try context.insert(values, model: model)
+        }
+    }
+    
     public func delete(_ entity: EntityName, for id: ObjectID) async throws {
         try await performBackgroundTask { context in
             try context.delete(entity, for: id)

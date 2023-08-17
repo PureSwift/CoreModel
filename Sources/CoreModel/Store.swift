@@ -23,6 +23,9 @@ public protocol ModelStorage: AnyObject {
     /// Create or edit a managed object.
     func insert(_ value: ModelData) async throws
     
+    /// Create or edit multiple managed objects.
+    func insert(_ values: [ModelData]) async throws
+    
     /// Delete the specified managed object. 
     func delete(_ entity: EntityName, for id: ObjectID) async throws
 }
@@ -31,6 +34,12 @@ public extension ModelStorage {
     
     func count(_ fetchRequest: FetchRequest) async throws -> UInt {
         return try await UInt(fetch(fetchRequest).count)
+    }
+    
+    func insert(_ values: [ModelData]) async throws {
+        for model in values {
+            try await insert(model)
+        }
     }
 }
 
