@@ -19,50 +19,29 @@ final class CoreDataTests: XCTestCase {
     func testCoreData() async throws {
         
         let model = Model(entities: [
-            EntityDescription(
-                id: "Person",
-                attributes: [
-                    Attribute(
-                        id: "name",
-                        type: .string
-                    )
-                ],
-                relationships: [
-                    Relationship(
-                        id: "events",
-                        type: .toMany,
-                        destinationEntity: "Event",
-                        inverseRelationship: "people"
-                    )
-                ]
-            ),
-            EntityDescription(
-                id: "Event",
-                attributes: [
-                    Attribute(
-                        id: "name",
-                        type: .string
-                    ),
-                    Attribute(
-                        id: "date",
-                        type: .date
-                    )
-                ],
-                relationships: [
-                    Relationship(
-                        id: "people",
-                        type: .toMany,
-                        destinationEntity: "Person",
-                        inverseRelationship: "events"
-                    )
-                ]
-            ),
-            ])
+            EntityDescription(entity: Person.self),
+            EntityDescription(entity: Event.self)
+        ])
         
         let store = NSPersistentContainer(
             name: "Test\(UUID())",
             managedObjectModel: NSManagedObjectModel(model: model)
         )
+        
+        var person1 = Person(
+            name: "John Appleseed",
+            age: 22
+        )
+        
+        //store.insert(person1)
+        
+        var event1 = Event(
+            name: "WWDC",
+            date: Date(timeIntervalSinceNow: 60 * 60 * 24 * 10)
+        )
+        
+        //store.insert(event1)
+        
         /*
         do {
             let event1 = ModelInstance(
