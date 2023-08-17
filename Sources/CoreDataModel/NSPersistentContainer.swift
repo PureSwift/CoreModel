@@ -44,4 +44,24 @@ extension NSPersistentContainer: ModelStorage {
         }
     }
 }
+
+internal extension NSPersistentContainer {
+    
+    func loadPersistentStores() -> AsyncThrowingStream<NSPersistentStoreDescription, Error> {
+        assert(self.persistentStoreDescriptions.isEmpty == false)
+        return AsyncThrowingStream<NSPersistentStoreDescription, Error>.init(NSPersistentStoreDescription.self, bufferingPolicy: .unbounded, { continuation in
+            self.loadPersistentStores { [unowned self] (description, error) in
+                continuation.yield(description)
+                if let error = error {
+                    continuation.finish(throwing: error)
+                    return
+                }
+                if description == self.persistentStoreDescriptions.last {
+                    continuation.finish()
+                }
+            }
+        })
+    }
+}
+
 #endif
