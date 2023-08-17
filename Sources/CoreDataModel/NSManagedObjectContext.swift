@@ -22,18 +22,18 @@ public final class CoreDataStore: StoreProtocol {
     
     /// Fetch managed objects.
     public func fetch(_ fetchRequest: FetchRequest) throws -> [CoreDataManagedObject] {
-        return try context.fetch(fetchRequest).map { CoreDataManagedObject($0) }
+        return try context.fetch(fetchRequest).map { CoreDataManagedObject($0, store: self) }
     }
     
     /// Fetch and return result count.
-    public func count(for fetchRequest: FetchRequest) throws -> Int {
+    public func count(for fetchRequest: FetchRequest) throws -> UInt {
         return try context.count(for: fetchRequest)
     }
     
     /// Create new managed object.
-    public func create(_ entity: String) throws -> CoreDataManagedObject {
-        let managedObject = try context.create(entity)
-        return CoreDataManagedObject(managedObject)
+    public func create(_ entity: EntityName) throws -> CoreDataManagedObject {
+        let managedObject = try context.create(entity.rawValue)
+        return CoreDataManagedObject(managedObject, store: self)
     }
     
     /// Delete the specified managed object.
@@ -53,8 +53,8 @@ internal extension NSManagedObjectContext {
         return try self.fetch(fetchRequest.toFoundation())
     }
     
-    func count(for fetchRequest: FetchRequest) throws -> Int {
-        return try self.count(for: fetchRequest.toFoundation())
+    func count(for fetchRequest: FetchRequest) throws -> UInt {
+        return UInt(try self.count(for: fetchRequest.toFoundation()))
     }
     
     func create(_ entityName: String) throws -> NSManagedObject {

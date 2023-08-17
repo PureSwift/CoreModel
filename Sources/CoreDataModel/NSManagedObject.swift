@@ -14,11 +14,14 @@ public final class CoreDataManagedObject: CoreModel.ManagedObject {
     
     internal let managedObject: NSManagedObject
     
-    internal init(_ managedObject: NSManagedObject) {
+    internal unowned let store: CoreDataStore
+    
+    internal init(_ managedObject: NSManagedObject, store: CoreDataStore) {
         self.managedObject = managedObject
+        self.store = store
     }
     
-    public var store: NSManagedObjectContext? {
+    internal var context: NSManagedObjectContext? {
         return managedObject.managedObjectContext
     }
     
@@ -40,11 +43,11 @@ public final class CoreDataManagedObject: CoreModel.ManagedObject {
             else { return .null }
         
         if let managedObject = objectValue as? NSManagedObject {
-            return .toOne(CoreDataManagedObject(managedObject))
+            return .toOne(CoreDataManagedObject(managedObject, store: store))
         } else if let orderedSet = objectValue as? NSOrderedSet {
-            return .toMany(orderedSet.map { CoreDataManagedObject($0 as! NSManagedObject) })
+            return .toMany(orderedSet.map { CoreDataManagedObject($0 as! NSManagedObject, store: store) })
         } else if let managedObjects = objectValue as? Set<NSManagedObject> {
-            return .toMany(managedObjects.map { CoreDataManagedObject($0) })
+            return .toMany(managedObjects.map { CoreDataManagedObject($0, store: store) })
         } else {
             fatalError("Invalid CoreData relationship value \(objectValue)")
         }
@@ -60,6 +63,7 @@ public final class CoreDataManagedObject: CoreModel.ManagedObject {
         case let .toOne(value):
             objectValue = value.managedObject
         case let .toMany(value):
+            // TODO: Check if ordered
             objectValue = Set(value.map({ $0.managedObject })) as NSSet
         }
         

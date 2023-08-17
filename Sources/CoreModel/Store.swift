@@ -15,10 +15,10 @@ public protocol StoreProtocol: AnyObject {
     func fetch(_ fetchRequest: FetchRequest) throws -> [ManagedObject]
     
     /// Fetch and return result count.
-    func count(_ fetchRequest: FetchRequest) throws -> Int
+    func count(_ fetchRequest: FetchRequest) throws -> UInt
     
     /// Create new managed object.
-    func create(_ entity: String) throws -> ManagedObject
+    func create(_ entity: EntityName) throws -> ManagedObject
     
     /// Delete the specified managed object. 
     func delete(_ managedObject: ManagedObject)
@@ -29,8 +29,8 @@ public protocol StoreProtocol: AnyObject {
 
 public extension StoreProtocol {
     
-    func count(_ fetchRequest: FetchRequest) throws -> Int {
-        return try fetch(fetchRequest).count
+    func count(_ fetchRequest: FetchRequest) throws -> UInt {
+        return try UInt(fetch(fetchRequest).count)
     }
 }
 
