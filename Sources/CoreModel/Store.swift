@@ -33,10 +33,3 @@ public extension StoreProtocol {
         return try UInt(fetch(fetchRequest).count)
     }
 }
-
-/// CoreModel Store Error
-public enum StoreError: Error {
-    
-    /// Invalid or unknown entity
-    case invalidEntity(String)
-}

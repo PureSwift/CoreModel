@@ -32,7 +32,7 @@ public final class CoreDataStore: StoreProtocol {
     
     /// Create new managed object.
     public func create(_ entity: EntityName) throws -> CoreDataManagedObject {
-        let managedObject = try context.create(entity.rawValue)
+        let managedObject = try context.create(entity)
         return CoreDataManagedObject(managedObject, store: self)
     }
     
@@ -57,13 +57,15 @@ internal extension NSManagedObjectContext {
         return UInt(try self.count(for: fetchRequest.toFoundation()))
     }
     
-    func create(_ entityName: String) throws -> NSManagedObject {
+    func create(_ entityName: EntityName) throws -> NSManagedObject {
         
-        guard let model = self.persistentStoreCoordinator?.managedObjectModel
-            else { fatalError("Invalid \(self)") }
+        guard let model = self.persistentStoreCoordinator?.managedObjectModel else {
+            assertionFailure()
+            throw CocoaError(.coreData)
+        }
         
-        guard let entity = model.entitiesByName[entityName]
-            else { throw StoreError.invalidEntity(entityName) }
+        guard let entity = model.entitiesByName[entityName.rawValue]
+            else { throw CoreModelError.invalidEntity(entityName) }
         
         let managedObject = NSManagedObject(entity: entity, insertInto: self)
         return managedObject
