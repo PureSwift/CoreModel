@@ -45,7 +45,11 @@ let package = Package(
         .testTarget(
             name: "CoreModelTests",
             dependencies: [
-                "CoreModel"
+                "CoreModel",
+                .byName(
+                    name: "CoreDataModel",
+                    condition: .when(platforms: [.macOS, .iOS, .macCatalyst, .watchOS, .tvOS])
+                )
             ]
         )
     ]
