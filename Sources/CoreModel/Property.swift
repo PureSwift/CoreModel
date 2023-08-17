@@ -7,7 +7,7 @@
 //
 
 /// CoreModel Property
-public protocol Property {
+public protocol Property: Identifiable {
     
     associatedtype PropertyType
     

@@ -15,7 +15,6 @@ public extension FetchRequest {
         public var ascending: Bool
         
         public init(property: PropertyKey, ascending: Bool = true) {
-            
             self.property = property
             self.ascending = ascending
         }

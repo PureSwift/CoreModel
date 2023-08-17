@@ -8,7 +8,7 @@
 import Foundation
 
 /// CoreModel Attribute Value
-public enum AttributeValue: Equatable {
+public enum AttributeValue: Equatable, Hashable, Codable {
     
     case null
     case string(String)
@@ -25,9 +25,9 @@ public enum AttributeValue: Equatable {
 }
 
 /// CoreModel Relationship Value
-public enum RelationshipValue <T: ManagedObject>: Equatable {
+public enum RelationshipValue: Equatable, Hashable, Codable {
     
     case null
-    case toOne(T)
-    case toMany([T])
+    case toOne(ObjectID)
+    case toMany([ObjectID])
 }
