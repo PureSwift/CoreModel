@@ -11,42 +11,42 @@ import Predicate
 @testable import CoreModel
 
 final class CoreModelTests: XCTestCase {
-    /*
+    
     func testInMemoryStore() {
-        
+        /*
         let model = Model(entities: [
-            Entity(
-                name: "Person",
+            EntityDescription(
+                id: "Person",
                 attributes: [
                     Attribute(
-                        name: "name",
+                        id: "name",
                         type: .string
                     )
                 ],
                 relationships: [
                     Relationship(
-                        name: "events",
+                        id: "events",
                         type: .toMany,
                         destinationEntity: "Event",
                         inverseRelationship: "people"
                     )
                 ]
             ),
-            Entity(
+            EntityDescription(
                 name: "Event",
                 attributes: [
                     Attribute(
-                        name: "name",
+                        id: "name",
                         type: .string
                     ),
                     Attribute(
-                        name: "date",
+                        id: "date",
                         type: .date
                     )
                 ],
                 relationships: [
                     Relationship(
-                        name: "people",
+                        id: "people",
                         type: .toMany,
                         destinationEntity: "Person",
                         inverseRelationship: "events"
@@ -103,6 +103,6 @@ final class CoreModelTests: XCTestCase {
             XCTAssertEqual(try store.fetch(FetchRequest(entity: "Person")), [person1, person2])
             XCTAssertEqual(try store.fetch(FetchRequest(entity: "Event")), [event])
         }
-        
-    }*/
+         */
+    }
 }
