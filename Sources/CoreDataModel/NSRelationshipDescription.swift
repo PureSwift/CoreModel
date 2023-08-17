@@ -14,6 +14,7 @@ internal extension NSRelationshipDescription {
     
     convenience init(relationship: Relationship) {
         self.init()
+        self.name = relationship.id.rawValue
         self.deleteRule = .nullifyDeleteRule
         switch relationship.type {
         case .toOne:

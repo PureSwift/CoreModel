@@ -7,8 +7,8 @@
 
 #if canImport(CoreData)
 import Foundation
-import CoreData
-import CoreModel
+@_exported import CoreData
+@_exported import CoreModel
 
 internal extension NSManagedObject {
     

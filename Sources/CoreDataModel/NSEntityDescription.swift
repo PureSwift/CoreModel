@@ -16,14 +16,17 @@ internal extension NSEntityDescription {
         self.init()
         self.name = entity.id.rawValue
         // add id attribute
-        let id = Attribute(
-            id: PropertyKey(rawValue: NSManagedObject.BuiltInProperty.id.rawValue),
-            type: .string
+        let id = NSAttributeDescription(
+            attribute: Attribute(
+                id: PropertyKey(rawValue: NSManagedObject.BuiltInProperty.id.rawValue),
+                type: .string
+            ),
+            isOptional: false
         )
         // append properties
         var properties = [NSPropertyDescription]()
         properties.reserveCapacity(entity.attributes.count + entity.relationships.count + 1)
-        properties.append(NSAttributeDescription(attribute: id))
+        properties.append(id)
         properties += entity.attributes.map { NSAttributeDescription(attribute: $0) }
         properties += entity.relationships.map { NSRelationshipDescription(relationship: $0) }
         self.properties = properties
