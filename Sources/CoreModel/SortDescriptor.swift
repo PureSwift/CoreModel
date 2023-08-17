@@ -6,15 +6,18 @@
 //  Copyright © 2015 PureSwift. All rights reserved.
 //
 
-public struct SortDescriptor: Codable, Equatable {
+public extension FetchRequest {
     
-    public var ascending: Bool
-    
-    public var property: String
-    
-    public init(property: String, ascending: Bool = true) {
+    struct SortDescriptor: Codable, Equatable, Hashable {
         
-        self.property = property
-        self.ascending = ascending
+        public var property: PropertyKey
+        
+        public var ascending: Bool
+        
+        public init(property: PropertyKey, ascending: Bool = true) {
+            
+            self.property = property
+            self.ascending = ascending
+        }
     }
 }
