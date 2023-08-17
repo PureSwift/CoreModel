@@ -87,6 +87,7 @@ internal extension NSManagedObjectContext {
         for (key, value) in value.relationships {
             try managedObject.setRelationship(value, for: key, in: self)
         }
+        try save()
     }
 }
 
