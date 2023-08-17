@@ -7,6 +7,8 @@
 
 import Foundation
 
+// MARK: - ModelData Decoding
+
 public extension ModelData {
     
     func decode<T, K>(_ type: T.Type, forKey key: K) throws -> T where T: AttributeDecodable, K: CodingKey {
@@ -67,10 +69,14 @@ public extension ModelData {
     }
 }
 
+// MARK: - Default Codable Implementation
+
 extension Entity where Self: Decodable, Self.ID: Decodable {
     
     // TODO: Default implementation for Decodable
 }
+
+// MARK: - AttributeDecodable
 
 public protocol AttributeDecodable {
     

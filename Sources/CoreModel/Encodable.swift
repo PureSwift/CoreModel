@@ -7,6 +7,8 @@
 
 import Foundation
 
+// MARK: - ModelData Encoding
+
 public extension ModelData {
     
     mutating func encode<T, K>(_ value: T, forKey key: K) where T: AttributeEncodable, K: CodingKey {
@@ -30,19 +32,14 @@ public extension ModelData {
     }
 }
 
+// MARK: - Default Codable Implementation
+
 extension Entity where Self: Encodable, Self.ID: Encodable {
     
     // TODO: Default implementation for Encodable
 }
 
-public extension ModelStorage {
-    
-    /// Create or edit a managed object.
-    func insert<T>(_ value: T) async throws where T: Entity, T: Encodable {
-        let model = value.encode()
-        try await insert(model)
-    }
-}
+// MARK: - AttributeEncodable
 
 public protocol AttributeEncodable {
     
