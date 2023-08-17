@@ -13,11 +13,11 @@ public protocol ManagedObject: AnyObject, Hashable {
     /// Whether the object has been deleted.
     var isDeleted: Bool { get }
     
-    func attribute(for key: String) -> AttributeValue
+    func attribute(for key: PropertyKey) -> AttributeValue
     
-    func setAttribute(_ newValue: AttributeValue, for key: String)
+    func setAttribute(_ newValue: AttributeValue, for key: PropertyKey)
     
-    func relationship(for key: String) -> RelationshipValue<Self>
+    func relationship(for key: PropertyKey) -> RelationshipValue<Self>
     
-    func setRelationship(_ newValue: RelationshipValue<Self>, for key: String)
+    func setRelationship(_ newValue: RelationshipValue<Self>, for key: PropertyKey)
 }

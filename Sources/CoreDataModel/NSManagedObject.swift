@@ -10,7 +10,7 @@ import Foundation
 import CoreData
 import CoreModel
 
-public final class CoreDataManagedObject: CoreModel.ManagedObject {
+public final class CoreDataManagedObject: ManagedObject {
     
     internal let managedObject: NSManagedObject
     
@@ -29,17 +29,17 @@ public final class CoreDataManagedObject: CoreModel.ManagedObject {
         return managedObject.isDeleted
     }
     
-    public func attribute(for key: String) -> AttributeValue {
+    public func attribute(for key: PropertyKey) -> AttributeValue {
         return managedObject.attribute(for: key)
     }
     
-    public func setAttribute(_ newValue: AttributeValue, for key: String) {
+    public func setAttribute(_ newValue: AttributeValue, for key: PropertyKey) {
         managedObject.setAttribute(newValue, for: key)
     }
     
-    public func relationship(for key: String) -> RelationshipValue<CoreDataManagedObject> {
+    public func relationship(for key: PropertyKey) -> RelationshipValue<CoreDataManagedObject> {
         
-        guard let objectValue = managedObject.value(forKey: key)
+        guard let objectValue = managedObject.value(forKey: key.rawValue)
             else { return .null }
         
         if let managedObject = objectValue as? NSManagedObject {
@@ -53,7 +53,7 @@ public final class CoreDataManagedObject: CoreModel.ManagedObject {
         }
     }
     
-    public func setRelationship(_ newValue: RelationshipValue<CoreDataManagedObject>, for key: String) {
+    public func setRelationship(_ newValue: RelationshipValue<CoreDataManagedObject>, for key: PropertyKey) {
         
         let objectValue: AnyObject?
         
@@ -67,7 +67,7 @@ public final class CoreDataManagedObject: CoreModel.ManagedObject {
             objectValue = Set(value.map({ $0.managedObject })) as NSSet
         }
         
-        managedObject.setValue(objectValue, forKey: key)
+        managedObject.setValue(objectValue, forKey: key.rawValue)
     }
 }
 
@@ -87,9 +87,9 @@ public extension CoreDataManagedObject {
 
 internal extension NSManagedObject {
     
-    func attribute(for key: String) -> AttributeValue {
+    func attribute(for key: PropertyKey) -> AttributeValue {
         
-        guard let objectValue = self.value(forKey: key)
+        guard let objectValue = self.value(forKey: key.rawValue)
             else { return .null }
         
         if let string = objectValue as? String {
@@ -119,7 +119,7 @@ internal extension NSManagedObject {
         }
     }
     
-    func setAttribute(_ newValue: AttributeValue, for key: String) {
+    func setAttribute(_ newValue: AttributeValue, for key: PropertyKey) {
         
         let objectValue: AnyObject?
         
@@ -150,7 +150,7 @@ internal extension NSManagedObject {
             objectValue = value as NSNumber
         }
         
-        self.setValue(objectValue, forKey: key)
+        self.setValue(objectValue, forKey: key.rawValue)
     }
 }
 

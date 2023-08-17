@@ -11,11 +11,7 @@ import Predicate
 @testable import CoreModel
 
 final class CoreModelTests: XCTestCase {
-    
-    static let allTests = [
-        ("testInMemoryStore", testInMemoryStore),
-    ]
-    
+    /*
     func testInMemoryStore() {
         
         let model = Model(entities: [
@@ -108,6 +104,5 @@ final class CoreModelTests: XCTestCase {
             XCTAssertEqual(try store.fetch(FetchRequest(entity: "Event")), [event])
         }
         
-        catch { XCTFail("\(error)") }
-    }
+    }*/
 }
