@@ -10,84 +10,17 @@ import Foundation
 import CoreData
 import CoreModel
 
-public final class CoreDataManagedObject: ManagedObject {
+internal extension NSManagedObject {
     
-    internal let managedObject: NSManagedObject
-    
-    internal unowned let store: CoreDataStore
-    
-    internal init(_ managedObject: NSManagedObject, store: CoreDataStore) {
-        self.managedObject = managedObject
-        self.store = store
-    }
-    
-    internal var context: NSManagedObjectContext? {
-        return managedObject.managedObjectContext
-    }
-    
-    public var isDeleted: Bool {
-        return managedObject.isDeleted
-    }
-    
-    public func attribute(for key: PropertyKey) -> AttributeValue {
-        return managedObject.attribute(for: key)
-    }
-    
-    public func setAttribute(_ newValue: AttributeValue, for key: PropertyKey) {
-        managedObject.setAttribute(newValue, for: key)
-    }
-    
-    public func relationship(for key: PropertyKey) -> RelationshipValue<CoreDataManagedObject> {
+    enum BuiltInProperty: String {
         
-        guard let objectValue = managedObject.value(forKey: key.rawValue)
-            else { return .null }
-        
-        if let managedObject = objectValue as? NSManagedObject {
-            return .toOne(CoreDataManagedObject(managedObject, store: store))
-        } else if let orderedSet = objectValue as? NSOrderedSet {
-            return .toMany(orderedSet.map { CoreDataManagedObject($0 as! NSManagedObject, store: store) })
-        } else if let managedObjects = objectValue as? Set<NSManagedObject> {
-            return .toMany(managedObjects.map { CoreDataManagedObject($0, store: store) })
-        } else {
-            fatalError("Invalid CoreData relationship value \(objectValue)")
-        }
-    }
-    
-    public func setRelationship(_ newValue: RelationshipValue<CoreDataManagedObject>, for key: PropertyKey) {
-        
-        let objectValue: AnyObject?
-        
-        switch newValue {
-        case .null:
-            objectValue = nil
-        case let .toOne(value):
-            objectValue = value.managedObject
-        case let .toMany(value):
-            // TODO: Check if ordered
-            objectValue = Set(value.map({ $0.managedObject })) as NSSet
-        }
-        
-        managedObject.setValue(objectValue, forKey: key.rawValue)
-    }
-}
-
-public extension CoreDataManagedObject {
-    
-    static func == (lhs: CoreDataManagedObject, rhs: CoreDataManagedObject) -> Bool {
-        return lhs.managedObject == rhs.managedObject
-    }
-}
-
-public extension CoreDataManagedObject {
-    
-    func hash(into hasher: inout Hasher) {
-        managedObject.hash(into: &hasher)
+        case id = "_id"
     }
 }
 
 internal extension NSManagedObject {
     
-    func attribute(for key: PropertyKey) -> AttributeValue {
+    func attribute(for key: PropertyKey) throws -> AttributeValue {
         
         guard let objectValue = self.value(forKey: key.rawValue)
             else { return .null }
@@ -115,7 +48,8 @@ internal extension NSManagedObject {
         } else if let value = objectValue as? Double {
             return .double(value)
         } else {
-            fatalError("Invalid CoreData attribute value \(objectValue)")
+            assertionFailure("Invalid CoreData attribute value \(objectValue)")
+            throw CocoaError(.coreData)
         }
     }
     
@@ -151,6 +85,118 @@ internal extension NSManagedObject {
         }
         
         self.setValue(objectValue, forKey: key.rawValue)
+    }
+    
+    func relationship(for key: PropertyKey) throws -> RelationshipValue {
+        
+        guard let objectValue = self.value(forKey: key.rawValue)
+            else { return .null }
+        
+        guard let relationship = self.entity.relationshipsByName[key.rawValue] else {
+            throw CocoaError(.coreData)
+        }
+        
+        if relationship.isToMany {
+            if relationship.isOrdered {
+                guard let orderedSet = objectValue as? NSOrderedSet else {
+                    assertionFailure("Invalid type \(objectValue)")
+                    throw CocoaError(.coreData)
+                }
+                let objectIDs = try orderedSet.map { try ($0 as! NSManagedObject).modelObjectID }
+                return .toMany(objectIDs)
+            } else {
+                guard let managedObjects = objectValue as? Set<NSManagedObject> else {
+                    assertionFailure("Invalid type \(objectValue)")
+                    throw CocoaError(.coreData)
+                }
+                let objectIDs = try managedObjects.map { try $0.modelObjectID }
+                return .toMany(objectIDs)
+            }
+        } else {
+            guard let managedObject = self.value(forKey: key.rawValue) as? NSManagedObject else {
+                assertionFailure("Invalid type \(objectValue)")
+                throw CocoaError(.coreData)
+            }
+            return try .toOne(managedObject.modelObjectID)
+        }
+    }
+    
+    func setRelationship(_ newValue: RelationshipValue, for key: PropertyKey) {
+        // TODO: Set relationship value
+        /*
+        let objectValue: AnyObject?
+        
+        switch newValue {
+        case .null:
+            objectValue = nil
+        case let .toOne(value):
+            objectValue = value.managedObject
+        case let .toMany(value):
+            // TODO: Check if ordered
+            objectValue = Set(value.map({ $0.managedObject })) as NSSet
+        }
+        
+        managedObject.setValue(objectValue, forKey: key)
+         */
+    }
+}
+
+internal extension NSManagedObject {
+    
+    var modelObjectID: ObjectID {
+        get throws {
+            guard let string = self.value(forKey: BuiltInProperty.id.rawValue) as? String else {
+                assertionFailure("Missing id value")
+                throw CocoaError(.coreData)
+            }
+            return ObjectID(rawValue: string)
+        }
+    }
+    
+    var modelAttributes: [PropertyKey: AttributeValue] {
+        get throws {
+            let attributesByName = self.entity.attributesByName
+            var attributes = [PropertyKey: AttributeValue]()
+            attributes.reserveCapacity(attributesByName.count)
+            for (key, attribute) in attributesByName {
+                guard NSManagedObject.BuiltInProperty(rawValue: key) == nil,
+                    let _ = AttributeType(attributeType: attribute.attributeType) else {
+                    continue
+                }
+                let property = PropertyKey(rawValue: key)
+                attributes[property] = try self.attribute(for: property)
+            }
+            return attributes
+        }
+    }
+    
+    var modelRelationships: [PropertyKey: RelationshipValue] {
+        get throws {
+            let relationshipsByName = self.entity.relationshipsByName
+            var relationships = [PropertyKey: RelationshipValue]()
+            relationships.reserveCapacity(relationshipsByName.count)
+            for key in relationshipsByName.keys {
+                let property = PropertyKey(rawValue: key)
+                relationships[property] = try self.relationship(for: property)
+            }
+            return relationships
+        }
+    }
+}
+
+internal extension ModelInstance {
+    
+    init(managedObject: NSManagedObject) throws {
+        guard let entityName = managedObject.entity.name.map({ EntityName(rawValue: $0) }) else {
+            assertionFailure("Missing entity name")
+            throw CocoaError(.coreData)
+        }
+        try self.init(
+            entity: entityName,
+            id: managedObject.modelObjectID,
+            attributes: managedObject.modelAttributes,
+            relationships: managedObject.modelRelationships
+        )
     }
 }
 
