@@ -99,6 +99,16 @@ extension UInt64: AttributeEncodable {
     public var attributeValue: AttributeValue { .int64(numericCast(self)) }
 }
 
+extension Float: AttributeEncodable {
+    
+    public var attributeValue: AttributeValue { .float(self) }
+}
+
+extension Double: AttributeEncodable {
+    
+    public var attributeValue: AttributeValue { .double(self) }
+}
+
 extension String: AttributeEncodable {
     
     public var attributeValue: AttributeValue { .string(self) }
