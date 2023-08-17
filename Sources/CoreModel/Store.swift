@@ -10,16 +10,16 @@
 public protocol ModelStorage: AnyObject {
     
     /// Fetch managed object.
-    func fetch(_ entity: EntityName, for id: ObjectID) async throws -> ModelInstance?
+    func fetch(_ entity: EntityName, for id: ObjectID) async throws -> ModelData?
     
     /// Fetch managed objects.
-    func fetch(_ fetchRequest: FetchRequest) async throws -> [ModelInstance]
+    func fetch(_ fetchRequest: FetchRequest) async throws -> [ModelData]
     
     /// Fetch and return result count.
     func count(_ fetchRequest: FetchRequest) async throws -> UInt
     
     /// Create or edit a managed object.
-    func insert(_ value: ModelInstance) async throws
+    func insert(_ value: ModelData) async throws
     
     /// Delete the specified managed object. 
     func delete(_ entity: EntityName, for id: ObjectID) async throws
@@ -33,7 +33,7 @@ public extension ModelStorage {
 }
 
 /// CoreModel Object Instance
-public struct ModelInstance: Equatable, Hashable, Identifiable, Codable {
+public struct ModelData: Equatable, Hashable, Identifiable, Codable {
     
     public let entity: EntityName
     
@@ -46,8 +46,8 @@ public struct ModelInstance: Equatable, Hashable, Identifiable, Codable {
     public init(
         entity: EntityName,
         id: ObjectID,
-        attributes: [PropertyKey : AttributeValue],
-        relationships: [PropertyKey : RelationshipValue]
+        attributes: [PropertyKey : AttributeValue] = [:],
+        relationships: [PropertyKey : RelationshipValue] = [:]
     ) {
         self.entity = entity
         self.id = id

@@ -13,13 +13,13 @@ import CoreModel
 @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
 extension NSPersistentContainer: ModelStorage {
     
-    public func fetch(_ entity: EntityName, for id: ObjectID) async throws -> ModelInstance? {
+    public func fetch(_ entity: EntityName, for id: ObjectID) async throws -> ModelData? {
         return try await performBackgroundTask { context in
             try context.fetch(entity, for: id)
         }
     }
     
-    public func fetch(_ fetchRequest: FetchRequest) async throws -> [ModelInstance] {
+    public func fetch(_ fetchRequest: FetchRequest) async throws -> [ModelData] {
         try await performBackgroundTask { context in
             try context.fetch(fetchRequest)
         }
@@ -31,7 +31,7 @@ extension NSPersistentContainer: ModelStorage {
         }
     }
     
-    public func insert(_ value: ModelInstance) async throws {
+    public func insert(_ value: ModelData) async throws {
         let model = self.managedObjectModel
         try await performBackgroundTask { context in
             try context.insert(value, model: model)

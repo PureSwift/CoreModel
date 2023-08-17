@@ -9,7 +9,7 @@
 import Foundation
 
 /// CoreModel Entity for Codable types
-public protocol Entity: Codable, Identifiable where Self.ID: Codable, Self.ID: CustomStringConvertible, CodingKeys: Hashable {
+public protocol Entity: Identifiable where Self.ID: CustomStringConvertible, CodingKeys: Hashable {
     
     static var entityName: EntityName { get }
     
@@ -18,6 +18,10 @@ public protocol Entity: Codable, Identifiable where Self.ID: Codable, Self.ID: C
     static var relationships: [CodingKeys: Relationship] { get }
     
     associatedtype CodingKeys: CodingKey
+    
+    init(from model: ModelData) throws
+    
+    func encode() -> ModelData
 }
 
 public extension EntityDescription {

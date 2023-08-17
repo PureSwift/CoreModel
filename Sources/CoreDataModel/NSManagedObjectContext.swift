@@ -13,21 +13,21 @@ import Predicate
 
 extension NSManagedObjectContext: ModelStorage {
     
-    public func fetch(_ entity: EntityName, for id: ObjectID) throws -> ModelInstance? {
+    public func fetch(_ entity: EntityName, for id: ObjectID) throws -> ModelData? {
         try self.find(entity, for: id)
-            .flatMap { try ModelInstance(managedObject: $0) }
+            .flatMap { try ModelData(managedObject: $0) }
     }
     
-    public func fetch(_ fetchRequest: FetchRequest) throws -> [ModelInstance] {
+    public func fetch(_ fetchRequest: FetchRequest) throws -> [ModelData] {
         try self.fetchObjects(fetchRequest)
-            .map { try ModelInstance(managedObject: $0) }
+            .map { try ModelData(managedObject: $0) }
     }
     
     public func count(_ fetchRequest: FetchRequest) throws -> UInt {
         return UInt(try self.count(for: fetchRequest.toFoundation()))
     }
     
-    public func insert(_ value: ModelInstance) throws {
+    public func insert(_ value: ModelData) throws {
         guard let model = self.persistentStoreCoordinator?.managedObjectModel else {
             assertionFailure("Missing model")
             throw CocoaError(.coreData)
@@ -74,7 +74,7 @@ internal extension NSManagedObjectContext {
     }
     
     func insert(
-        _ value: ModelInstance,
+        _ value: ModelData,
         model: NSManagedObjectModel
     ) throws {
         // find or create

@@ -211,7 +211,7 @@ internal extension NSManagedObject {
     }
 }
 
-internal extension ModelInstance {
+internal extension ModelData {
     
     init(managedObject: NSManagedObject) throws {
         guard let entityName = managedObject.entity.name.map({ EntityName(rawValue: $0) }) else {
