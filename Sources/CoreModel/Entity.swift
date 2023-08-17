@@ -6,18 +6,31 @@
 //  Copyright © 2015 PureSwift. All rights reserved.
 //
 
-/// Defines the model for an entity
-public struct EntityDescription: Codable, Identifiable, Hashable {
+import Foundation
+
+/// CoreModel Entity for Codable types
+public protocol Entity: Codable, Identifiable where Self.ID: Codable, Self.ID: CustomStringConvertible, CodingKeys: Hashable {
     
-    public let id: EntityName
+    static var entityName: EntityName { get }
     
-    public var attributes: [Attribute]
+    static var attributes: [CodingKeys: AttributeType] { get }
     
-    public var relationships: [Relationship]
+    static var relationships: [CodingKeys: Relationship] { get }
     
-    public init(id: EntityName, attributes: [Attribute], relationships: [Relationship]) {
-        self.id = id
-        self.attributes = attributes
-        self.relationships = relationships
+    associatedtype CodingKeys: CodingKey
+}
+
+public extension EntityDescription {
+    
+    init<T: Entity>(entity: T.Type) {
+        let attributes = T.attributes
+            .lazy
+            .sorted { $0.key.stringValue < $1.key.stringValue }
+            .map { Attribute(id: .init($0.key), type: $0.value) }
+        let relationships = T.relationships
+            .lazy
+            .sorted { $0.key.stringValue < $1.key.stringValue }
+            .map { $0.value }
+        self.init(id: T.entityName, attributes: attributes, relationships: relationships)
     }
 }
