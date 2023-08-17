@@ -12,8 +12,9 @@ import CoreModel
 
 public extension NSAttributeDescription {
     
-    convenience init(attribute: Attribute) {
+    convenience init(attribute: Attribute, isOptional: Bool = true) {
         self.init()
+        self.isOptional = isOptional
         self.attributeType = .init(attributeType: attribute.type)
     }
 }
