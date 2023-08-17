@@ -158,7 +158,9 @@ internal extension NSManagedObject {
                 assertionFailure("Invalid value \(newValue) for \"\(key)\"")
                 throw CocoaError(.coreData)
             }
-            let managedObjects = try value.map { try context.find(entityName, for: $0, in: model) }
+            // find or create
+            let managedObjects = try value
+                .map { try context.find(entityName, for: $0, in: model) ?? context.create(entityName, for: $0, in: model) }
             if relationship.isOrdered {
                 objectValue = NSOrderedSet(array: managedObjects)
             } else {
