@@ -65,8 +65,9 @@ public struct ModelData: Equatable, Hashable, Identifiable, Codable {
 public extension ModelStorage {
     
     /// Fetch managed object.
-    func fetch<T>(_ entity: T.Type, for id: ObjectID) async throws -> T? where T: Entity {
-        guard let model = try await fetch(T.entityName, for: id) else {
+    func fetch<T>(_ entity: T.Type, for id: T.ID) async throws -> T? where T: Entity {
+        let objectID = ObjectID(rawValue: id.description)
+        guard let model = try await fetch(T.entityName, for: objectID) else {
             return nil
         }
         return try T.init(from: model)
@@ -115,7 +116,8 @@ public extension ModelStorage {
     }
     
     /// Delete the specified managed object.
-    func delete<T>(_ entity: T.Type, for id: ObjectID) async throws where T: Entity {
-        try await delete(T.entityName, for: id)
+    func delete<T>(_ entity: T.Type, for id: T.ID) async throws where T: Entity {
+        let objectID = ObjectID(rawValue: id.description)
+        try await delete(T.entityName, for: objectID)
     }
 }
