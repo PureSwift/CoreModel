@@ -14,6 +14,7 @@ import Predicate
 @testable import CoreModel
 @testable import CoreDataModel
 
+@available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
 final class CoreDataTests: XCTestCase {
     
     func testCoreData() async throws {

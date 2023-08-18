@@ -52,6 +52,7 @@ extension NSPersistentContainer: ModelStorage {
     }
 }
 
+@available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
 public extension NSPersistentContainer {
     
     func loadPersistentStores() -> AsyncThrowingStream<NSPersistentStoreDescription, Error> {
