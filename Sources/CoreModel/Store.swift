@@ -9,7 +9,7 @@
 import Predicate
 
 /// CoreModel Store Protocol
-public protocol ModelStorage: AnyObject {
+public protocol ModelStorage {
     
     /// Fetch managed object.
     func fetch(_ entity: EntityName, for id: ObjectID) async throws -> ModelData?
