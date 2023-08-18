@@ -32,18 +32,16 @@ public extension ModelData {
     }
 }
 
-// MARK: - Default Codable Implementation
-
-extension Entity where Self: Encodable, Self.ID: Encodable {
-    
-    // TODO: Default implementation for Encodable
-}
-
 // MARK: - AttributeEncodable
 
 public protocol AttributeEncodable {
     
     var attributeValue: AttributeValue { get }
+}
+
+extension Bool: AttributeEncodable {
+    
+    public var attributeValue: AttributeValue { .bool(self) }
 }
 
 extension Int: AttributeEncodable {
