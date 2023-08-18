@@ -94,19 +94,6 @@ extension Person: Entity {
         self.age = try container.decode(UInt.self, forKey: Person.CodingKeys.age)
         self.events = try container.decodeRelationship([Event.ID].self, forKey: Person.CodingKeys.events)
     }
-    
-    func encode() -> ModelData {
-        
-        var container = ModelData(
-            entity: Self.entityName,
-            id: ObjectID(rawValue: self.id.description)
-        )
-        container.encode(self.name, forKey: Person.CodingKeys.name)
-        container.encode(self.created, forKey: Person.CodingKeys.created)
-        container.encode(self.age, forKey: Person.CodingKeys.age)
-        container.encodeRelationship(self.events, forKey: Person.CodingKeys.events)
-        return container
-    }
 }
 
 struct Event: Equatable, Hashable, Codable, Identifiable {
@@ -189,17 +176,5 @@ extension Event: Entity {
         self.name = try container.decode(String.self, forKey: Event.CodingKeys.name)
         self.date = try container.decode(Date.self, forKey: Event.CodingKeys.date)
         self.people = try container.decodeRelationship([Person.ID].self, forKey: Event.CodingKeys.people)
-    }
-    
-    func encode() -> ModelData {
-        
-        var container = ModelData(
-            entity: Self.entityName,
-            id: ObjectID(rawValue: self.id.description)
-        )
-        container.encode(self.name, forKey: Event.CodingKeys.name)
-        container.encode(self.date, forKey: Event.CodingKeys.date)
-        container.encodeRelationship(self.people, forKey: Event.CodingKeys.people)
-        return container
     }
 }
