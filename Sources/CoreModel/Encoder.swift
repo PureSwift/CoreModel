@@ -55,8 +55,19 @@ internal final class ModelDataEncoder: Encoder {
         self.userInfo = userInfo
         self.log = log
         self.data = ModelData(entity: entity.id, id: id)
-        self.attributes = .init(grouping: entity.attributes, by: { $0.id.rawValue })
-        self.relationships = .init(grouping: entity.relationships, by: { $0.id.rawValue })
+        // properties cache
+        var attributes = [PropertyKey: Attribute]()
+        attributes.reserveCapacity(entity.attributes.count)
+        for attribute in entity.attributes {
+            attributes[attribute.id] = attribute
+        }
+        self.attributes = attributes //.init(grouping: entity.attributes, by: { $0.id })
+        var relationships = [PropertyKey: Relationship]()
+        relationships.reserveCapacity(entity.relationships.count)
+        for relationship in entity.relationships {
+            relationships[relationship.id] = relationship
+        }
+        self.relationships = relationships //.init(grouping: entity.relationships, by: { $0.id })
     }
     
     func container<Key>(keyedBy type: Key.Type) -> Swift.KeyedEncodingContainer<Key> where Key : CodingKey {
@@ -67,13 +78,13 @@ internal final class ModelDataEncoder: Encoder {
     
     func unkeyedContainer() -> Swift.UnkeyedEncodingContainer {
         log?("Requested unkeyed container for path \"\(codingPath.path)\"")
-        return ModelUnkeyedEncodingContainer(encoder: self)
+        return ModelUnkeyedEncodingContainer(referencing: self)
     }
     
     func singleValueContainer() -> Swift.SingleValueEncodingContainer {
         log?("Requested single value container for path \"\(codingPath.path)\"")
         assert(self.codingPath.last != nil)
-        return ModelSingleValueEncodingContainer(encoder: self)
+        return ModelSingleValueEncodingContainer(referencing: self)
     }
 }
 
@@ -272,7 +283,7 @@ struct ModelKeyedEncodingContainer<K : CodingKey> : KeyedEncodingContainerProtoc
 
 // MARK: - SingleValueEncodingContainer
 
-internal final class ModelSingleValueEncodingContainer: SingleValueEncodingContainer {
+struct ModelSingleValueEncodingContainer: SingleValueEncodingContainer {
     
     // MARK: Properties
     
@@ -370,5 +381,144 @@ internal final class ModelSingleValueEncodingContainer: SingleValueEncodingConta
     private func writeAttribute<T: AttributeEncodable>(_ value: T) throws {
         let key = try self.propertyKey()
         try encoder.setAttribute(value.attributeValue, forKey: key)
+    }
+}
+
+
+// MARK: - UnkeyedEncodingContainer
+
+internal final class ModelUnkeyedEncodingContainer: UnkeyedEncodingContainer {
+        
+    // MARK: Properties
+    
+    /// A reference to the encoder we're writing to.
+    let encoder: ModelDataEncoder
+    
+    /// The path of coding keys taken to get to this point in encoding.
+    let codingPath: [CodingKey]
+    
+    private var objectIDs = [ObjectID]()
+        
+    // MARK: Initialization
+    
+    init(referencing encoder: ModelDataEncoder) {
+        self.encoder = encoder
+        self.codingPath = encoder.codingPath
+    }
+    
+    deinit {
+        writeArray()
+    }
+    
+    // MARK: - Methods
+    
+    var count: Int {
+        objectIDs.count
+    }
+    
+    func encodeNil() throws {
+        throw EncodingError.invalidValue(type(of: Optional<Any>.self), EncodingError.Context(codingPath: codingPath, debugDescription: "Cannot encode to-many relationship of \(Optional<Any>.self)"))
+    }
+    
+    func encode(_ value: String) throws {
+        try encodeRelationship(value)
+    }
+    
+    func encode(_ value: Bool) throws {
+        throw EncodingError.invalidValue(type(of: value), EncodingError.Context(codingPath: codingPath, debugDescription: "Cannot encode to-many relationship of \(type(of: value))"))
+    }
+    
+    func encode(_ value: Double) throws {
+        throw EncodingError.invalidValue(type(of: value), EncodingError.Context(codingPath: codingPath, debugDescription: "Cannot encode to-many relationship of \(type(of: value))"))
+    }
+    
+    func encode(_ value: Float) throws {
+        throw EncodingError.invalidValue(type(of: value), EncodingError.Context(codingPath: codingPath, debugDescription: "Cannot encode to-many relationship of \(type(of: value))"))
+    }
+    
+    func encode(_ value: Int) throws {
+        throw EncodingError.invalidValue(type(of: value), EncodingError.Context(codingPath: codingPath, debugDescription: "Cannot encode to-many relationship of \(type(of: value))"))
+    }
+    
+    func encode(_ value: Int8) throws {
+        throw EncodingError.invalidValue(type(of: value), EncodingError.Context(codingPath: codingPath, debugDescription: "Cannot encode to-many relationship of \(type(of: value))"))
+    }
+    
+    func encode(_ value: Int16) throws {
+        throw EncodingError.invalidValue(type(of: value), EncodingError.Context(codingPath: codingPath, debugDescription: "Cannot encode to-many relationship of \(type(of: value))"))
+    }
+    
+    func encode(_ value: Int32) throws {
+        throw EncodingError.invalidValue(type(of: value), EncodingError.Context(codingPath: codingPath, debugDescription: "Cannot encode to-many relationship of \(type(of: value))"))
+    }
+    
+    func encode(_ value: Int64) throws {
+        throw EncodingError.invalidValue(type(of: value), EncodingError.Context(codingPath: codingPath, debugDescription: "Cannot encode to-many relationship of \(type(of: value))"))
+    }
+    
+    func encode(_ value: UInt) throws {
+        throw EncodingError.invalidValue(type(of: value), EncodingError.Context(codingPath: codingPath, debugDescription: "Cannot encode to-many relationship of \(type(of: value))"))
+    }
+    
+    func encode(_ value: UInt8) throws {
+        throw EncodingError.invalidValue(type(of: value), EncodingError.Context(codingPath: codingPath, debugDescription: "Cannot encode to-many relationship of \(type(of: value))"))
+    }
+    
+    func encode(_ value: UInt16) throws {
+        throw EncodingError.invalidValue(type(of: value), EncodingError.Context(codingPath: codingPath, debugDescription: "Cannot encode to-many relationship of \(type(of: value))"))
+    }
+    
+    func encode(_ value: UInt32) throws {
+        throw EncodingError.invalidValue(type(of: value), EncodingError.Context(codingPath: codingPath, debugDescription: "Cannot encode to-many relationship of \(type(of: value))"))
+    }
+    
+    func encode(_ value: UInt64) throws {
+        throw EncodingError.invalidValue(type(of: value), EncodingError.Context(codingPath: codingPath, debugDescription: "Cannot encode to-many relationship of \(type(of: value))"))
+    }
+    
+    func encode <T: Encodable> (_ value: T) throws {
+        guard let stringConvertible = value as? CustomStringConvertible else {
+            throw EncodingError.invalidValue(type(of: value), EncodingError.Context(codingPath: codingPath, debugDescription: "Cannot encode to-many relationship of \(type(of: value))"))
+        }
+        let string = stringConvertible.description
+        try encodeRelationship(string)
+    }
+    
+    func nestedContainer<NestedKey>(keyedBy keyType: NestedKey.Type) -> KeyedEncodingContainer<NestedKey> where NestedKey : CodingKey {
+        fatalError()
+    }
+    
+    func nestedUnkeyedContainer() -> UnkeyedEncodingContainer {
+        fatalError()
+    }
+    
+    func superEncoder() -> Encoder {
+        encoder
+    }
+    
+    // MARK: Private Methods
+    
+    private func propertyKey() throws -> PropertyKey {
+        guard let key = codingPath.first else {
+            throw EncodingError.invalidValue(Any.self, EncodingError.Context(codingPath: codingPath, debugDescription: "Invalid coding path"))
+        }
+        return PropertyKey(key)
+    }
+    
+    private func encodeRelationship(_ string: String) throws {
+        objectIDs.append(ObjectID(rawValue: string))
+    }
+    
+    private func writeArray() {
+        // set key to be written
+        guard let codingKey = codingPath.first else {
+            //throw EncodingError.invalidValue(Any.self, EncodingError.Context(codingPath: codingPath, debugDescription: "Invalid coding path"))
+            return
+        }
+        let key = PropertyKey(codingKey)
+        // write final value
+        let value = RelationshipValue.toMany(objectIDs)
+        encoder.log?("Will set \(value) for relationship \"\(key)\"")
+        encoder.data.relationships[key] = value
     }
 }
