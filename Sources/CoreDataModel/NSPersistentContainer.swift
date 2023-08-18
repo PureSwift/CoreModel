@@ -52,7 +52,7 @@ extension NSPersistentContainer: ModelStorage {
     }
 }
 
-internal extension NSPersistentContainer {
+public extension NSPersistentContainer {
     
     func loadPersistentStores() -> AsyncThrowingStream<NSPersistentStoreDescription, Error> {
         assert(self.persistentStoreDescriptions.isEmpty == false)
