@@ -120,7 +120,7 @@ public extension ModelStorage {
     
     /// Create or edit a managed object.
     func insert<T>(_ value: T) async throws where T: Entity, T: Encodable {
-        let model = value.encode()
+        let model = try value.encode() // should never fail
         try await insert(model)
     }
     

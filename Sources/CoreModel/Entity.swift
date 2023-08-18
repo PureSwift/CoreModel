@@ -21,7 +21,7 @@ public protocol Entity: Identifiable where Self.ID: CustomStringConvertible, Cod
     
     init(from model: ModelData) throws
     
-    func encode() -> ModelData
+    func encode() throws -> ModelData
 }
 
 public extension Model {
