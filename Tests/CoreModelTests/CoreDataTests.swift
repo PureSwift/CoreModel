@@ -42,7 +42,8 @@ final class CoreDataTests: XCTestCase {
             people: [person1.id]
         )
         
-        try await store.insert(event1)
+        let event1Data = try event1.encode(log: { print("CoreModel Encoder:", $0) })
+        try await store.insert(event1Data)
         person1 = try await store.fetch(Person.self, for: person1.id)!
         XCTAssertEqual(person1.events, [event1.id])
         event1 = try await store.fetch(Event.self, for: event1.id)!
