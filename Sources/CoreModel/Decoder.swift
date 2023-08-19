@@ -9,7 +9,7 @@ import Foundation
 
 // MARK: - Default Codable Implementation
 
-extension Entity where Self: Decodable, Self.ID: Decodable, Self.ID: ObjectIDConvertible {
+extension Entity where Self: Decodable {
     
     public init(
         from model: ModelData

@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension Entity where Self: Encodable, Self.ID: Encodable {
+extension Entity where Self: Encodable {
         
     public func encode() throws -> ModelData {
         try encode(log: nil)
