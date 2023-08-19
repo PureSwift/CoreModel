@@ -19,7 +19,13 @@ final class CoreDataTests: XCTestCase {
     
     func testCoreData() async throws {
         
-        let model = Model(entities: Person.self, Event.self)
+        let model = Model(
+            entities:
+                Person.self,
+                Event.self,
+                Campground.self,
+                Campground.RentalUnit.self
+        )
         
         let store = NSPersistentContainer(
             name: "Test\(UUID())",
@@ -50,6 +56,36 @@ final class CoreDataTests: XCTestCase {
         event1Data = try await store.fetch(Event.entityName, for: ObjectID(event1.id))!
         event1 = try .init(from: event1Data, log: { print("Decoder:", $0) })
         XCTAssertEqual(event1.people, [person1.id])
+        
+        var campground = Campground(
+            name: "Fair Play RV Park",
+            address: """
+            243 Fisher Cove Rd,
+            Fair Play, SC
+            """,
+            location: .init(latitude: 34.51446212994721, longitude: -83.01371101951648),
+            descriptionText: """
+            At Fair Play RV Park, we are committed to providing a clean, safe and fun environment for all of our guests, including your fur-babies! We look forward to meeting you and having you stay with us!
+            """,
+            officeHours: Campground.Schedule(start: 60 * 8, end: 60 * 18)
+        )
+        
+        let rentalUnit = Campground.RentalUnit(
+            campground: campground.id,
+            name: "A1",
+            amenities: [.amp50, .water, .mail, .river, .laundry],
+            checkout: campground.officeHours
+        )
+        
+        var campgroundData = try campground.encode(log: { print("Encoder:", $0) })
+        try await store.insert(campgroundData)
+        let rentalUnitData = try rentalUnit.encode(log: { print("Encoder:", $0) })
+        try await store.insert(rentalUnit)
+        campgroundData = try await store.fetch(Campground.entityName, for: ObjectID(campground.id))!
+        campground = try .init(from: campgroundData, log: { print("Decoder:", $0) })
+        XCTAssertEqual(campground.units, [rentalUnit.id])
+        let fetchedRentalUnit = try await store.fetch(Campground.RentalUnit.self, for: rentalUnit.id)
+        XCTAssertEqual(fetchedRentalUnit, rentalUnit)
     }
 }
 
