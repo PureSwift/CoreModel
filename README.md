@@ -7,3 +7,9 @@
 [![SPM compatible](https://img.shields.io/badge/SPM-compatible-4BC51D.svg?style=flat)](https://github.com/apple/swift-package-manager)
 
 Swift Object Graph
+
+## Backends
+
+- CoreData
+- CloudKit ([WIP](https://github.com/PureSwift/CoreModel/issues/10))
+- [MongoDB](https://github.com/PureSwift/CoreModel-MongoDB)
