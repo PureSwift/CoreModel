@@ -89,22 +89,28 @@ internal final class ModelDataDecoder: Decoder {
     // MARK: - Methods
     
     func container <Key: CodingKey> (keyedBy type: Key.Type) throws -> KeyedDecodingContainer<Key> {
-        
         log?("Requested container keyed by \(type.sanitizedName) for path \"\(codingPath.path)\"")
+        guard codingPath.isEmpty else {
+            throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: codingPath, debugDescription: "Can only decode root data with keyed container."))
+        }
         let container = ModelDataKeyedDecodingContainer<Key>(referencing: self)
         return KeyedDecodingContainer(container)
     }
     
     func unkeyedContainer() throws -> UnkeyedDecodingContainer {
-        
         log?("Requested unkeyed container for path \"\(codingPath.path)\"")
+        guard codingPath.isEmpty == false else {
+            throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: codingPath, debugDescription: "Can not decode root data with unkeyed container."))
+        }
         let container = try ModelDataUnkeyedDecodingContainer(referencing: self)
         return container
     }
     
     func singleValueContainer() throws -> SingleValueDecodingContainer {
-        
         log?("Requested single value container for path \"\(codingPath.path)\"")
+        guard codingPath.isEmpty == false else {
+            throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: codingPath, debugDescription: "Can not decode root data with single value container."))
+        }
         let container = ModelDataSingleValueDecodingContainer(referencing: self)
         return container
     }
@@ -127,7 +133,14 @@ fileprivate extension ModelDataDecoder {
     
     func decodeAttribute<T: AttributeDecodable>(_ type: T, forKey key: CodingKey) throws -> T {
         log?("Will decode \(type) at path \"\(codingPath.path)\"")
-        
+        let property = PropertyKey(key)
+        guard let attribute = self.data.attributes[property] else {
+            throw DecodingError.keyNotFound(key, DecodingError.Context(codingPath: codingPath, debugDescription: "Cannot decode \(type) for non-existent property \"\(key.stringValue)\""))
+        }
+        guard let value = T.init(attributeValue: attribute) else {
+            throw DecodingError.typeMismatch(T.self, DecodingError.Context(codingPath: codingPath, debugDescription: "Cannot decode \(type) from \(attribute) for \"\(key.stringValue)\""))
+        }
+        return value
     }
     
     func decodeString(forKey key: CodingKey) throws -> String {
@@ -207,8 +220,7 @@ internal struct ModelDataKeyedDecodingContainer <K: CodingKey> : KeyedDecodingCo
     }
     
     func decode(_ type: Int.Type, forKey key: Key) throws -> Int {
-        let value = try decodeNumeric(Int32.self, forKey: key)
-        return Int(value)
+        return try decodeNumeric(type, forKey: key)
     }
     
     func decode(_ type: Int8.Type, forKey key: Key) throws -> Int8 {
@@ -228,8 +240,7 @@ internal struct ModelDataKeyedDecodingContainer <K: CodingKey> : KeyedDecodingCo
     }
     
     func decode(_ type: UInt.Type, forKey key: Key) throws -> UInt {
-        let value = try decodeNumeric(UInt32.self, forKey: key)
-        return UInt(value)
+        try decodeNumeric(type, forKey: key)
     }
     
     func decode(_ type: UInt8.Type, forKey key: Key) throws -> UInt8 {
@@ -261,7 +272,7 @@ internal struct ModelDataKeyedDecodingContainer <K: CodingKey> : KeyedDecodingCo
         self.decoder.codingPath.append(key)
         defer { self.decoder.codingPath.removeLast() }
         self.decoder.log?("Will read \(type) at path \"\(decoder.codingPath.path)\"")
-        return try self.decoder.readString()
+        return try self.decoder.decodeString(forKey: key)
     }
     
     func decode <T: Decodable> (_ type: T.Type, forKey key: Key) throws -> T {
