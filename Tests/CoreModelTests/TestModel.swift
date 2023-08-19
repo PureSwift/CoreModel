@@ -94,6 +94,18 @@ extension Person: Entity {
         self.age = try container.decode(UInt.self, forKey: Person.CodingKeys.age)
         self.events = try container.decodeRelationship([Event.ID].self, forKey: Person.CodingKeys.events)
     }
+    
+    func encode() -> ModelData {
+        var container = ModelData(
+            entity: Self.entityName,
+            id: ObjectID(rawValue: self.id.description)
+        )
+        container.encode(self.name, forKey: Person.CodingKeys.name)
+        container.encode(self.created, forKey: Person.CodingKeys.created)
+        container.encode(self.age, forKey: Person.CodingKeys.age)
+        container.encodeRelationship(self.events, forKey: Person.CodingKeys.events)
+        return container
+    }
 }
 
 struct Event: Equatable, Hashable, Codable, Identifiable {
@@ -163,18 +175,5 @@ extension Event: Entity {
                 destinationEntity: Person.entityName,
                 inverseRelationship: PropertyKey(Person.CodingKeys.events))
         ]
-    }
-    
-    init(from container: ModelData) throws {
-        guard container.entity == Self.entityName else {
-            throw DecodingError.typeMismatch(Self.self, DecodingError.Context(codingPath: [], debugDescription: "Cannot decode \(String(describing: Self.self)) from \(container.entity)"))
-        }
-        guard let id = UUID(uuidString: container.id.rawValue) else {
-            throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: [], debugDescription: "Cannot decode identifier from \(container.id)"))
-        }
-        self.id = id
-        self.name = try container.decode(String.self, forKey: Event.CodingKeys.name)
-        self.date = try container.decode(Date.self, forKey: Event.CodingKeys.date)
-        self.people = try container.decodeRelationship([Person.ID].self, forKey: Event.CodingKeys.people)
     }
 }
