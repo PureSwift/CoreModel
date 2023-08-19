@@ -137,6 +137,9 @@ internal extension ModelDataDecoder {
     func decodeAttribute<T: AttributeDecodable>(_ type: T.Type, forKey key: CodingKey) throws -> T {
         log?("Will decode \(type) at path \"\(codingPath.path)\"")
         let property = PropertyKey(key)
+        guard attributes.keys.contains(property) else {
+            throw DecodingError.typeMismatch(T.self, DecodingError.Context(codingPath: codingPath, debugDescription: "Unknown attribute for \"\(key.stringValue)\""))
+        }
         guard let attribute = self.data.attributes[property] else {
             throw DecodingError.keyNotFound(key, DecodingError.Context(codingPath: codingPath, debugDescription: "Cannot decode \(type) for non-existent property \"\(key.stringValue)\""))
         }
