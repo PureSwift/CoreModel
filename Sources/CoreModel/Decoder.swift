@@ -170,12 +170,12 @@ internal extension ModelDataDecoder {
         try decodeAttribute(type, forKey: key)
     }
     
-    func decodeDouble(for key: CodingKey) throws -> Double {
+    func decodeDouble(forKey key: CodingKey) throws -> Double {
         // Just default to attribute implementation for now
         try decodeAttribute(Double.self, forKey: key)
     }
     
-    func decodeFloat(for key: CodingKey) throws -> Float {
+    func decodeFloat(forKey key: CodingKey) throws -> Float {
         // Just default to attribute implementation for now
         try decodeAttribute(Float.self, forKey: key)
     }
@@ -299,13 +299,13 @@ internal struct ModelDataKeyedDecodingContainer <K: CodingKey> : KeyedDecodingCo
     func decode(_ type: Float.Type, forKey key: Key) throws -> Float {
         self.decoder.codingPath.append(key)
         defer { self.decoder.codingPath.removeLast() }
-        return try decoder.decodeFloat(for: key)
+        return try decoder.decodeFloat(forKey: key)
     }
     
     func decode(_ type: Double.Type, forKey key: Key) throws -> Double {
         self.decoder.codingPath.append(key)
         defer { self.decoder.codingPath.removeLast() }
-        return try decoder.decodeDouble(for: key)
+        return try decoder.decodeDouble(forKey: key)
     }
     
     func decode(_ type: String.Type, forKey key: Key) throws -> String {
@@ -355,5 +355,122 @@ internal struct ModelDataKeyedDecodingContainer <K: CodingKey> : KeyedDecodingCo
         self.decoder.codingPath.append(key)
         defer { self.decoder.codingPath.removeLast() }
         return try self.decoder.decodeNumeric(type, forKey: key)
+    }
+}
+
+// MARK: - SingleValueDecodingContainer
+
+internal struct ModelDataSingleValueDecodingContainer: SingleValueDecodingContainer {
+    
+    // MARK: Properties
+    
+    /// A reference to the decoder we're reading from.
+    let decoder: ModelDataDecoder
+    
+    /// The path of coding keys taken to get to this point in decoding.
+    let codingPath: [CodingKey]
+    
+    // MARK: Initialization
+    
+    /// Initializes `self` by referencing the given decoder and container.
+    init(referencing decoder: ModelDataDecoder) {
+        assert(decoder.codingPath.isEmpty == false)
+        self.decoder = decoder
+        self.codingPath = decoder.codingPath
+    }
+    
+    // MARK: SingleValueDecodingContainer Protocol
+    
+    func decodeNil() -> Bool {
+        do {
+            let key = try propertyKey()
+            return try decoder.decodeNil(forKey: key)
+        } catch {
+            return true
+        }
+    }
+    
+    func decode(_ type: Bool.Type) throws -> Bool {
+        let key = try propertyKey()
+        return try decoder.decodeAttribute(type, forKey: key)
+    }
+    
+    func decode(_ type: Int.Type) throws -> Int {
+        let key = try propertyKey()
+        return try decoder.decodeNumeric(type, forKey: key)
+    }
+    
+    func decode(_ type: Int8.Type) throws -> Int8 {
+        let key = try propertyKey()
+        return try decoder.decodeNumeric(type, forKey: key)
+    }
+    
+    func decode(_ type: Int16.Type) throws -> Int16 {
+        let key = try propertyKey()
+        return try decoder.decodeNumeric(type, forKey: key)
+    }
+    
+    func decode(_ type: Int32.Type) throws -> Int32 {
+        let key = try propertyKey()
+        return try decoder.decodeNumeric(type, forKey: key)
+    }
+    
+    func decode(_ type: Int64.Type) throws -> Int64 {
+        let key = try propertyKey()
+        return try decoder.decodeNumeric(type, forKey: key)
+    }
+    
+    func decode(_ type: UInt.Type) throws -> UInt {
+        let key = try propertyKey()
+        return try decoder.decodeNumeric(type, forKey: key)
+    }
+    
+    func decode(_ type: UInt8.Type) throws -> UInt8 {
+        let key = try propertyKey()
+        return try decoder.decodeNumeric(type, forKey: key)
+    }
+    
+    func decode(_ type: UInt16.Type) throws -> UInt16 {
+        let key = try propertyKey()
+        return try decoder.decodeNumeric(type, forKey: key)
+    }
+    
+    func decode(_ type: UInt32.Type) throws -> UInt32 {
+        let key = try propertyKey()
+        return try decoder.decodeNumeric(type, forKey: key)
+    }
+    
+    func decode(_ type: UInt64.Type) throws -> UInt64 {
+        let key = try propertyKey()
+        return try decoder.decodeNumeric(type, forKey: key)
+    }
+    
+    func decode(_ type: Float.Type) throws -> Float {
+        let key = try propertyKey()
+        return try decoder.decodeFloat(forKey: key)
+    }
+    
+    func decode(_ type: Double.Type) throws -> Double {
+        let key = try propertyKey()
+        return try decoder.decodeDouble(forKey: key)
+    }
+    
+    func decode(_ type: String.Type) throws -> String {
+        let key = try propertyKey()
+        return try decoder.decodeString(forKey: key)
+    }
+    
+    func decode <T : Decodable> (_ type: T.Type) throws -> T {
+        let key = try propertyKey()
+        return try decoder.decodeDecodable(type, forKey: key)
+    }
+    
+    // MARK: Private Methods
+    
+    private func propertyKey() throws -> CodingKey {
+        guard let key = codingPath.first else {
+            throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: codingPath, debugDescription: "Cannot decode single value from root data."))
+        }
+        return key
     }
 }
