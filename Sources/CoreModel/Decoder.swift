@@ -19,13 +19,15 @@ extension Entity where Self: Decodable, Self.ID: Decodable {
     
     internal init(
         from model: ModelData,
-        log: ((String) -> ())?,
-        userInfo: [CodingUserInfoKey : Any] = [:]
+        userInfo: [CodingUserInfoKey : Any] = [:],
+        log: ((String) -> ())?
     ) throws {
+        let idKey = (userInfo[.identifierCodingKey] as? Self.CodingKeys)?.stringValue ?? "id"
         let entity = EntityDescription(entity: Self.self)
         let decoder = ModelDataDecoder(
             referencing: model,
             entity: entity,
+            identifierKey: idKey,
             userInfo: userInfo,
             log: log
         )
@@ -60,7 +62,7 @@ internal final class ModelDataDecoder: Decoder {
     
     fileprivate init(referencing data: ModelData,
                      entity: EntityDescription,
-                     identifierKey: String = "id",
+                     identifierKey: String,
                      at codingPath: [CodingKey] = [],
                      userInfo: [CodingUserInfoKey : Any],
                      log: ((String) -> ())?) {
@@ -144,22 +146,36 @@ fileprivate extension ModelDataDecoder {
     }
     
     func decodeString(forKey key: CodingKey) throws -> String {
-        return try readLengthPrefixString()
+        log?("Will decode \(String.self) at path \"\(codingPath.path)\"")
+        let property = PropertyKey(key)
+        // determine if objectID, attribute or relationship
+        if key.stringValue == identifierKey {
+            return self.data.id.rawValue
+        } else if let attribute = self.data.attributes[property] {
+            guard let value = String.init(attributeValue: attribute) else {
+                throw DecodingError.typeMismatch(String.self, DecodingError.Context(codingPath: codingPath, debugDescription: "Cannot decode \(String.self) from \(attribute) for \"\(key.stringValue)\""))
+            }
+            return value
+        } else if let relationship = self.data.relationships[property] {
+            guard case let .toOne(objectID) = relationship else {
+                throw DecodingError.typeMismatch(String.self, DecodingError.Context(codingPath: codingPath, debugDescription: "Cannot decode \(String.self) from \(relationship) for \"\(key.stringValue)\""))
+            }
+            return objectID.rawValue
+        } else {
+            throw DecodingError.keyNotFound(key, DecodingError.Context(codingPath: codingPath, debugDescription: "Cannot decode \(String.self) for non-existent property \"\(key.stringValue)\""))
+        }
     }
     
     func decodeNumeric <T: AttributeDecodable & FixedWidthInteger> (_ type: T.Type, forKey key: CodingKey) throws -> T {
-        let value = try read(type)
-        return isLittleEndian ? T.init(littleEndian: value) : T.init(bigEndian: value)
+        
     }
     
-    func decodeDouble(_ data: Data) throws -> Double {
-        let bitPattern = try readNumeric(UInt64.self)
-        return Double(bitPattern: bitPattern)
+    func decodeDouble(_ data: Data, forKey key: CodingKey) throws -> Double {
+        
     }
     
-    func decodeFloat(_ data: Data) throws -> Float {
-        let bitPattern = try readNumeric(UInt32.self)
-        return Float(bitPattern: bitPattern)
+    func decodeFloat(_ data: Data, forKey key: CodingKey) throws -> Float {
+        
     }
 }
 
