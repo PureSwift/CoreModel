@@ -76,6 +76,21 @@ public protocol AttributeDecodable {
     init?(attributeValue: AttributeValue)
 }
 
+extension Optional: AttributeDecodable where Wrapped: AttributeDecodable {
+    
+    public init?(attributeValue: AttributeValue) {
+        switch attributeValue {
+        case .null:
+            self = .none
+        default:
+            guard let value = Wrapped.init(attributeValue: attributeValue) else {
+                return nil
+            }
+            self = .some(value)
+        }
+    }
+}
+
 extension Bool: AttributeDecodable {
     
     public init?(attributeValue: AttributeValue) {
