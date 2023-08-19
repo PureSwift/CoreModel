@@ -31,7 +31,7 @@ extension Entity where Self: Decodable {
             userInfo: userInfo,
             log: log
         )
-        log?("Will decode \(model.entity) \(model.id))")
+        log?("Will decode \(model.entity) \(model.id)")
         try self.init(from: decoder)
     }
 }
@@ -183,16 +183,40 @@ internal extension ModelDataDecoder {
     }
     
     func decodeDecodable<T: Decodable> (_ type: T.Type, forKey key: CodingKey) throws -> T {
+        let property = PropertyKey(key)
         // override for native types and id
         if key.stringValue == identifierKey {
+            log?("Will decode \(type) at path \"\(codingPath.path)\"")
             guard let convertible = type as? ObjectIDConvertible.Type else {
-                throw DecodingError.typeMismatch(ObjectIDConvertible.self, DecodingError.Context(codingPath: codingPath, debugDescription: "Cannot decode identifer from \(type). Types used as identifiers must conform to \(String(describing: ObjectID.self))"))
+                throw DecodingError.typeMismatch(ObjectIDConvertible.self, DecodingError.Context(codingPath: codingPath, debugDescription: "Cannot decode identifer from \(type). Types used as identifiers must conform to \(String(describing: ObjectIDConvertible.self))"))
             }
             let id = self.data.id
             guard let value = convertible.init(objectID: id) else {
                 throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: codingPath, debugDescription: "Cannot decode \(type) from identifier \(id)"))
             }
             return value as! T
+        } else if let relationship = relationships[property] {
+            log?("Will decode \(type) at path \"\(codingPath.path)\"")
+            guard let relationshipValue = self.data.relationships[property] else {
+                throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath, debugDescription: "Missing relationship value for \(key.stringValue)"))
+            }
+            switch (relationship.type, relationshipValue) {
+            case (_, .null):
+                //assertionFailure()
+                throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath, debugDescription: "Expected \(type) value for \(key.stringValue)"))
+            case (.toMany, .toMany):
+                return try T.init(from: self)
+            case (.toOne, .toOne(let objectID)):
+                guard let convertible = type as? ObjectIDConvertible.Type else {
+                    throw DecodingError.typeMismatch(ObjectIDConvertible.self, DecodingError.Context(codingPath: codingPath, debugDescription: "Cannot decode identifer from \(type). Types used as identifiers must conform to \(String(describing: ObjectIDConvertible.self))"))
+                }
+                guard let value = convertible.init(objectID: objectID) else {
+                    throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: codingPath, debugDescription: "Cannot decode \(type) from identifier \(objectID)"))
+                }
+                return value as! T
+            default:
+                throw DecodingError.typeMismatch(type, DecodingError.Context(codingPath: codingPath, debugDescription: "Cannot decode relationship from \(type)."))
+            }
         } else if let decodableType = type as? AttributeDecodable.Type {
             return try decodeAttribute(decodableType, forKey: key) as! T
         } else {
