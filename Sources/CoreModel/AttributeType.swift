@@ -11,7 +11,7 @@ import Foundation
 public enum AttributeType: String, Codable, CaseIterable, Sendable {
     
     /// Boolean number type.
-    case boolean
+    case bool
     
     /// 16 bit Integer number type.
     case int16
