@@ -118,11 +118,10 @@ internal final class ModelDataDecoder: Decoder {
     }
 }
 
-fileprivate extension ModelDataDecoder {
+internal extension ModelDataDecoder {
     
     func decodeNil(forKey key: CodingKey) throws -> Bool {
         log?("Check if nil at path \"\(codingPath.path)\"")
-        
         let property = PropertyKey(key)
         if let value = self.data.attributes[property] {
             return value == .null
@@ -133,7 +132,7 @@ fileprivate extension ModelDataDecoder {
         }
     }
     
-    func decodeAttribute<T: AttributeDecodable>(_ type: T, forKey key: CodingKey) throws -> T {
+    func decodeAttribute<T: AttributeDecodable>(_ type: T.Type, forKey key: CodingKey) throws -> T {
         log?("Will decode \(type) at path \"\(codingPath.path)\"")
         let property = PropertyKey(key)
         guard let attribute = self.data.attributes[property] else {
@@ -167,15 +166,37 @@ fileprivate extension ModelDataDecoder {
     }
     
     func decodeNumeric <T: AttributeDecodable & FixedWidthInteger> (_ type: T.Type, forKey key: CodingKey) throws -> T {
-        
+        // Just default to attribute implementation for now
+        try decodeAttribute(type, forKey: key)
     }
     
-    func decodeDouble(_ data: Data, forKey key: CodingKey) throws -> Double {
-        
+    func decodeDouble(for key: CodingKey) throws -> Double {
+        // Just default to attribute implementation for now
+        try decodeAttribute(Double.self, forKey: key)
     }
     
-    func decodeFloat(_ data: Data, forKey key: CodingKey) throws -> Float {
-        
+    func decodeFloat(for key: CodingKey) throws -> Float {
+        // Just default to attribute implementation for now
+        try decodeAttribute(Float.self, forKey: key)
+    }
+    
+    func decodeDecodable<T: Decodable> (_ type: T.Type, forKey key: CodingKey) throws -> T {
+        log?("Will decode \type) at path \"\(codingPath.path)\"")
+        // override for native types
+        if type == Data.self {
+            return try decodeAttribute(Data.self, forKey: key) as! T
+        } else if type == Date.self {
+            return try decodeAttribute(Date.self, forKey: key) as! T
+        } else if type == UUID.self {
+            return try decodeAttribute(UUID.self, forKey: key) as! T
+        } else if type == URL.self {
+            return try decodeAttribute(URL.self, forKey: key) as! T
+        } else if let decodableType = type as? AttributeDecodable.Type {
+            return try decodeAttribute(decodableType, forKey: key) as! T
+        } else {
+            // decode using Decodable, container should read directly.
+            return try T.init(from: self)
+        }
     }
 }
 
@@ -276,11 +297,15 @@ internal struct ModelDataKeyedDecodingContainer <K: CodingKey> : KeyedDecodingCo
     }
     
     func decode(_ type: Float.Type, forKey key: Key) throws -> Float {
-        try decodeAttribute(type, forKey: key)
+        self.decoder.codingPath.append(key)
+        defer { self.decoder.codingPath.removeLast() }
+        return try decoder.decodeFloat(for: key)
     }
     
     func decode(_ type: Double.Type, forKey key: Key) throws -> Double {
-        try decodeAttribute(type, forKey: key)
+        self.decoder.codingPath.append(key)
+        defer { self.decoder.codingPath.removeLast() }
+        return try decoder.decodeDouble(for: key)
     }
     
     func decode(_ type: String.Type, forKey key: Key) throws -> String {
@@ -296,7 +321,7 @@ internal struct ModelDataKeyedDecodingContainer <K: CodingKey> : KeyedDecodingCo
         self.decoder.codingPath.append(key)
         defer { self.decoder.codingPath.removeLast() }
         self.decoder.log?("Will read \(type) at path \"\(decoder.codingPath.path)\"")
-        return try self.decoder.readDecodable(T.self)
+        return try self.decoder.decodeDecodable(type, forKey: key)
     }
     
     func nestedContainer<NestedKey>(keyedBy type: NestedKey.Type, forKey key: Key) throws -> KeyedDecodingContainer<NestedKey> where NestedKey : CodingKey {
@@ -322,15 +347,13 @@ internal struct ModelDataKeyedDecodingContainer <K: CodingKey> : KeyedDecodingCo
         
         self.decoder.codingPath.append(key)
         defer { self.decoder.codingPath.removeLast() }
-        self.decoder.log?("Will read \(T.self) at path \"\(decoder.codingPath.path)\"")
-        return try self.decoder.read(T.self)
+        return try self.decoder.decodeAttribute(type, forKey: key)
     }
     
-    private func decodeNumeric <T: ModelDataRawDecodable & FixedWidthInteger> (_ type: T.Type, forKey key: Key) throws -> T {
+    private func decodeNumeric <T: AttributeDecodable & FixedWidthInteger> (_ type: T.Type, forKey key: Key) throws -> T {
         
         self.decoder.codingPath.append(key)
         defer { self.decoder.codingPath.removeLast() }
-        self.decoder.log?("Will read \(T.self) at path \"\(decoder.codingPath.path)\"")
-        return try self.decoder.readNumeric(T.self)
+        return try self.decoder.decodeNumeric(type, forKey: key)
     }
 }
