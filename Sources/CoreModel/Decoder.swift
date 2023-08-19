@@ -31,6 +31,7 @@ extension Entity where Self: Decodable {
             userInfo: userInfo,
             log: log
         )
+        log?("Will decode \(model.entity) \(model.id))")
         try self.init(from: decoder)
     }
 }

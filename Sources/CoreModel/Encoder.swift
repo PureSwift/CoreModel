@@ -25,6 +25,7 @@ extension Entity where Self: Encodable {
             userInfo: userInfo,
             log: log
         )
+        log?("Will encode \(Self.entityName) \(self.id)")
         try self.encode(to: encoder)
         return encoder.data
     }
