@@ -91,6 +91,16 @@ extension Optional: AttributeDecodable where Wrapped: AttributeDecodable {
     }
 }
 
+extension AttributeDecodable where Self: RawRepresentable, RawValue: AttributeDecodable {
+    
+    public init?(attributeValue: AttributeValue) {
+        guard let rawValue = RawValue.init(attributeValue: attributeValue) else {
+            return nil
+        }
+        self.init(rawValue: rawValue)
+    }
+}
+
 extension Bool: AttributeDecodable {
     
     public init?(attributeValue: AttributeValue) {

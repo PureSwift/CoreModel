@@ -51,6 +51,13 @@ extension Optional: AttributeEncodable where Wrapped: AttributeEncodable {
     }
 }
 
+extension AttributeEncodable where Self: RawRepresentable, RawValue: AttributeEncodable {
+    
+    public var attributeValue: AttributeValue {
+        rawValue.attributeValue
+    }
+}
+
 extension Bool: AttributeEncodable {
     
     public var attributeValue: AttributeValue { .bool(self) }
