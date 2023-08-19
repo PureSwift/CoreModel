@@ -192,6 +192,7 @@ extension Int: AttributeDecodable {
             .data,
             .date,
             .bool,
+            .decimal,
             .float,
             .double:
             return nil
@@ -216,6 +217,7 @@ extension Int8: AttributeDecodable {
             .data,
             .date,
             .bool,
+            .decimal,
             .float,
             .double:
             return nil
@@ -240,6 +242,7 @@ extension Int16: AttributeDecodable {
             .data,
             .date,
             .bool,
+            .decimal,
             .float,
             .double:
             return nil
@@ -264,6 +267,7 @@ extension Int32: AttributeDecodable {
             .data,
             .date,
             .bool,
+            .decimal,
             .float,
             .double:
             return nil
@@ -288,6 +292,7 @@ extension Int64: AttributeDecodable {
             .data,
             .date,
             .bool,
+            .decimal,
             .float,
             .double:
             return nil
@@ -312,6 +317,7 @@ extension UInt: AttributeDecodable {
             .data,
             .date,
             .bool,
+            .decimal,
             .float,
             .double:
             return nil
@@ -337,6 +343,7 @@ extension UInt8: AttributeDecodable {
             .data,
             .date,
             .bool,
+            .decimal,
             .float,
             .double:
             return nil
@@ -362,6 +369,7 @@ extension UInt16: AttributeDecodable {
             .data,
             .date,
             .bool,
+            .decimal,
             .float,
             .double:
             return nil
@@ -387,6 +395,7 @@ extension UInt32: AttributeDecodable {
             .data,
             .date,
             .bool,
+            .decimal,
             .float,
             .double:
             return nil
@@ -411,6 +420,7 @@ extension UInt64: AttributeDecodable {
             .data,
             .date,
             .bool,
+            .decimal,
             .float,
             .double:
             return nil

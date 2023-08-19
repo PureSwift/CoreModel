@@ -47,6 +47,8 @@ internal extension NSManagedObject {
             return .float(value)
         } else if let value = objectValue as? Double {
             return .double(value)
+        } else if let value = objectValue as? NSDecimalNumber {
+            return .decimal(value as Decimal)
         } else {
             assertionFailure("Invalid CoreData attribute value \(objectValue)")
             throw CocoaError(.coreData)
@@ -82,6 +84,8 @@ internal extension NSManagedObject {
             objectValue = value as NSNumber
         case let .double(value):
             objectValue = value as NSNumber
+        case let .decimal(value):
+            objectValue = value as NSDecimalNumber
         }
         
         self.setValue(objectValue, forKey: key.rawValue)
