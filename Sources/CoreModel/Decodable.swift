@@ -69,18 +69,46 @@ public extension ModelData {
     }
 }
 
-// MARK: - Default Codable Implementation
-
-extension Entity where Self: Decodable, Self.ID: Decodable {
-    
-    // TODO: Default implementation for Decodable
-}
-
 // MARK: - AttributeDecodable
 
 public protocol AttributeDecodable {
     
     init?(attributeValue: AttributeValue)
+}
+
+extension Optional: AttributeDecodable where Wrapped: AttributeDecodable {
+    
+    public init?(attributeValue: AttributeValue) {
+        switch attributeValue {
+        case .null:
+            self = .none
+        default:
+            guard let value = Wrapped.init(attributeValue: attributeValue) else {
+                return nil
+            }
+            self = .some(value)
+        }
+    }
+}
+
+extension AttributeDecodable where Self: RawRepresentable, RawValue: AttributeDecodable {
+    
+    public init?(attributeValue: AttributeValue) {
+        guard let rawValue = RawValue.init(attributeValue: attributeValue) else {
+            return nil
+        }
+        self.init(rawValue: rawValue)
+    }
+}
+
+extension Bool: AttributeDecodable {
+    
+    public init?(attributeValue: AttributeValue) {
+        guard case let .bool(value) = attributeValue else {
+            return nil
+        }
+        self = value
+    }
 }
 
 extension String: AttributeDecodable {

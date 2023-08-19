@@ -7,15 +7,15 @@
 
 import Foundation
 
-extension Entity where Self: Encodable, Self.ID: Encodable, Self.ID: ObjectIDConvertible {
+extension Entity where Self: Encodable, Self.ID: Encodable {
         
     public func encode() throws -> ModelData {
         try encode(log: nil)
     }
     
     internal func encode(
-        log: ((String) -> ())?,
-        userInfo: [CodingUserInfoKey : Any] = [:]
+        userInfo: [CodingUserInfoKey : Any] = [:],
+        log: ((String) -> ())?
     ) throws -> ModelData {
         let entity = EntityDescription(entity: Self.self)
         let id = ObjectID(rawValue: self.id.description)
@@ -88,7 +88,7 @@ internal final class ModelDataEncoder: Encoder {
     }
 }
 
-fileprivate extension ModelDataEncoder {
+internal extension ModelDataEncoder {
     
     func setAttribute(_ value: AttributeValue, forKey key: PropertyKey) throws {
         log?("Will set \(value) for attribute \"\(key)\"")
@@ -131,6 +131,8 @@ fileprivate extension ModelDataEncoder {
             try setAttribute(uuid.attributeValue, forKey: key)
         } else if let url = value as? URL {
             try setAttribute(url.attributeValue, forKey: key)
+        } else if let encodable = value as? AttributeEncodable {
+            try setAttribute(encodable.attributeValue, forKey: key)
         } else {
             // encode using Encodable, container should write directly.
             try value.encode(to: self)
@@ -152,7 +154,7 @@ fileprivate extension ModelDataEncoder {
 
 // MARK: - KeyedEncodingContainer
 
-struct ModelKeyedEncodingContainer<K : CodingKey> : KeyedEncodingContainerProtocol {
+internal struct ModelKeyedEncodingContainer<K : CodingKey> : KeyedEncodingContainerProtocol {
         
     public typealias Key = K
     
@@ -283,7 +285,7 @@ struct ModelKeyedEncodingContainer<K : CodingKey> : KeyedEncodingContainerProtoc
 
 // MARK: - SingleValueEncodingContainer
 
-struct ModelSingleValueEncodingContainer: SingleValueEncodingContainer {
+internal struct ModelSingleValueEncodingContainer: SingleValueEncodingContainer {
     
     // MARK: Properties
     

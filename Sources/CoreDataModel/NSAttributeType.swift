@@ -14,7 +14,7 @@ public extension NSAttributeType {
     
     init(attributeType: AttributeType) {
         switch attributeType {
-        case .boolean:
+        case .bool:
             self = .booleanAttributeType
         case .int16:
             self = .integer16AttributeType
@@ -61,7 +61,7 @@ public extension AttributeType {
         case .stringAttributeType:
             self = .string
         case .booleanAttributeType:
-            self = .boolean
+            self = .bool
         case .dateAttributeType:
             self = .date
         case .binaryDataAttributeType:

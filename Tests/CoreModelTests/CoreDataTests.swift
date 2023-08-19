@@ -43,11 +43,12 @@ final class CoreDataTests: XCTestCase {
             people: [person1.id]
         )
         
-        let event1Data = try event1.encode(log: { print("CoreModel Encoder:", $0) })
+        var event1Data = try event1.encode(log: { print("Encoder:", $0) })
         try await store.insert(event1Data)
         person1 = try await store.fetch(Person.self, for: person1.id)!
         XCTAssertEqual(person1.events, [event1.id])
-        event1 = try await store.fetch(Event.self, for: event1.id)!
+        event1Data = try await store.fetch(Event.entityName, for: ObjectID(event1.id))!
+        event1 = try .init(from: event1Data, log: { print("Decoder:", $0) })
         XCTAssertEqual(event1.people, [person1.id])
     }
 }

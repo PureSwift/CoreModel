@@ -39,6 +39,25 @@ public protocol AttributeEncodable {
     var attributeValue: AttributeValue { get }
 }
 
+extension Optional: AttributeEncodable where Wrapped: AttributeEncodable {
+    
+    public var attributeValue: AttributeValue {
+        switch self {
+        case .none:
+            return .null
+        case .some(let wrapped):
+            return wrapped.attributeValue
+        }
+    }
+}
+
+extension AttributeEncodable where Self: RawRepresentable, RawValue: AttributeEncodable {
+    
+    public var attributeValue: AttributeValue {
+        rawValue.attributeValue
+    }
+}
+
 extension Bool: AttributeEncodable {
     
     public var attributeValue: AttributeValue { .bool(self) }
