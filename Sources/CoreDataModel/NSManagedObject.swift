@@ -25,33 +25,91 @@ internal extension NSManagedObject {
         guard let objectValue = self.value(forKey: key.rawValue)
             else { return .null }
         
-        if let string = objectValue as? String {
-            return .string(string)
-        } else if let uuid = objectValue as? UUID {
-            return .uuid(uuid)
-        } else if let url = objectValue as? URL {
-            return .url(url)
-        } else if let data = objectValue as? Data {
-            return .data(data)
-        } else if let date = objectValue as? Date {
-            return .date(date)
-        } else if let value = objectValue as? Bool {
-            return .bool(value)
-        } else if let value = objectValue as? Int16 {
-            return .int16(value)
-        } else if let value = objectValue as? Int32 {
-            return .int32(value)
-        } else if let value = objectValue as? Int64 {
-            return .int64(value)
-        } else if let value = objectValue as? Float {
-            return .float(value)
-        } else if let value = objectValue as? Double {
-            return .double(value)
-        } else if let value = objectValue as? NSDecimalNumber {
-            return .decimal(value as Decimal)
-        } else {
-            assertionFailure("Invalid CoreData attribute value \(objectValue)")
+        guard let coreDataAttribute = entity.attributesByName[key.rawValue] else {
+            assertionFailure("Unknown CoreData attribute \(key)")
             throw CocoaError(.coreData)
+        }
+        
+        guard let attributeType = AttributeType(attributeType: coreDataAttribute.attributeType) else {
+            assertionFailure("Invalid CoreData attribute \(coreDataAttribute)")
+            throw CocoaError(.coreData)
+        }
+        
+        let value: AttributeValue
+        
+        switch attributeType {
+        case .bool:
+            guard let value = objectValue as? Bool else {
+                assertionFailure("Invalid CoreData attribute value \(objectValue)")
+                throw CocoaError(.coreData)
+            }
+            return .bool(value)
+        case .int16:
+            guard let value = objectValue as? Int16 else {
+                assertionFailure("Invalid CoreData attribute value \(objectValue)")
+                throw CocoaError(.coreData)
+            }
+            return .int16(value)
+        case .int32:
+            guard let value = objectValue as? Int32 else {
+                assertionFailure("Invalid CoreData attribute value \(objectValue)")
+                throw CocoaError(.coreData)
+            }
+            return .int32(value)
+        case .int64:
+            guard let value = objectValue as? Int64 else {
+                assertionFailure("Invalid CoreData attribute value \(objectValue)")
+                throw CocoaError(.coreData)
+            }
+            return .int64(value)
+        case .float:
+            guard let value = objectValue as? Float else {
+                assertionFailure("Invalid CoreData attribute value \(objectValue)")
+                throw CocoaError(.coreData)
+            }
+            return .float(value)
+        case .double:
+            guard let value = objectValue as? Double else {
+                assertionFailure("Invalid CoreData attribute value \(objectValue)")
+                throw CocoaError(.coreData)
+            }
+            return .double(value)
+        case .string:
+            guard let value = objectValue as? String else {
+                assertionFailure("Invalid CoreData attribute value \(objectValue)")
+                throw CocoaError(.coreData)
+            }
+            return .string(value)
+        case .data:
+            guard let value = objectValue as? Data else {
+                assertionFailure("Invalid CoreData attribute value \(objectValue)")
+                throw CocoaError(.coreData)
+            }
+            return .data(value)
+        case .date:
+            guard let value = objectValue as? Date else {
+                assertionFailure("Invalid CoreData attribute value \(objectValue)")
+                throw CocoaError(.coreData)
+            }
+            return .date(value)
+        case .uuid:
+            guard let value = objectValue as? UUID else {
+                assertionFailure("Invalid CoreData attribute value \(objectValue)")
+                throw CocoaError(.coreData)
+            }
+            return .uuid(value)
+        case .url:
+            guard let value = objectValue as? URL else {
+                assertionFailure("Invalid CoreData attribute value \(objectValue)")
+                throw CocoaError(.coreData)
+            }
+            return .url(value)
+        case .decimal:
+            guard let value = objectValue as? NSDecimalNumber else {
+                assertionFailure("Invalid CoreData attribute value \(objectValue)")
+                throw CocoaError(.coreData)
+            }
+            return .decimal(value as Decimal)
         }
     }
     
