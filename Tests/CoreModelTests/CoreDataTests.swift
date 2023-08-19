@@ -82,12 +82,14 @@ final class CoreDataTests: XCTestCase {
         var campgroundData = try campground.encode(log: { print("Encoder:", $0) })
         try await store.insert(campgroundData)
         let rentalUnitData = try rentalUnit.encode(log: { print("Encoder:", $0) })
-        try await store.insert(rentalUnit)
+        XCTAssertEqual(rentalUnitData.relationships[PropertyKey(Campground.RentalUnit.CodingKeys.campground)], .toOne(ObjectID(campground.id)))
+        try await store.insert(rentalUnitData)
         campgroundData = try await store.fetch(Campground.entityName, for: ObjectID(campground.id))!
         campground = try .init(from: campgroundData, log: { print("Decoder:", $0) })
         XCTAssertEqual(campground.units, [rentalUnit.id])
-        //let fetchedRentalUnit = try await store.fetch(Campground.RentalUnit.self, for: rentalUnit.id)
-        //XCTAssertEqual(fetchedRentalUnit, rentalUnit)
+        XCTAssertEqual(campgroundData.relationships[PropertyKey(Campground.CodingKeys.units)], .toMany([ObjectID(rentalUnit.id)]))
+        let fetchedRentalUnit = try await store.fetch(Campground.RentalUnit.self, for: rentalUnit.id)
+        XCTAssertEqual(fetchedRentalUnit, rentalUnit)
     }
 }
 
