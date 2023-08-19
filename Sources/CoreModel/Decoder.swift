@@ -192,14 +192,6 @@ internal extension ModelDataDecoder {
                 throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: codingPath, debugDescription: "Cannot decode \(type) from identifier \(id)"))
             }
             return value as! T
-        } else if type == Data.self {
-            return try decodeAttribute(Data.self, forKey: key) as! T
-        } else if type == Date.self {
-            return try decodeAttribute(Date.self, forKey: key) as! T
-        } else if type == UUID.self {
-            return try decodeAttribute(UUID.self, forKey: key) as! T
-        } else if type == URL.self {
-            return try decodeAttribute(URL.self, forKey: key) as! T
         } else if let decodableType = type as? AttributeDecodable.Type {
             return try decodeAttribute(decodableType, forKey: key) as! T
         } else {

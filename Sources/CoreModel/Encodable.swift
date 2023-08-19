@@ -147,3 +147,8 @@ extension URL: AttributeEncodable {
     
     public var attributeValue: AttributeValue { .url(self) }
 }
+
+extension Decimal: AttributeEncodable {
+    
+    public var attributeValue: AttributeValue { .decimal(self) }
+}

@@ -123,15 +123,7 @@ internal extension ModelDataEncoder {
     
     func setEncodable <T: Encodable> (_ value: T, forKey key: PropertyKey) throws {
         
-        if let data = value as? Data {
-            try setAttribute(data.attributeValue, forKey: key)
-        } else if let date = value as? Date {
-            try setAttribute(date.attributeValue, forKey: key)
-        } else if let uuid = value as? UUID {
-            try setAttribute(uuid.attributeValue, forKey: key)
-        } else if let url = value as? URL {
-            try setAttribute(url.attributeValue, forKey: key)
-        } else if let encodable = value as? AttributeEncodable {
+        if let encodable = value as? AttributeEncodable {
             try setAttribute(encodable.attributeValue, forKey: key)
         } else {
             // encode using Encodable, container should write directly.

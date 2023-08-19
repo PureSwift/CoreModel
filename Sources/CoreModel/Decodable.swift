@@ -161,6 +161,16 @@ extension Data: AttributeDecodable {
     }
 }
 
+extension Decimal: AttributeDecodable {
+    
+    public init?(attributeValue: AttributeValue) {
+        guard case let .decimal(value) = attributeValue else {
+            return nil
+        }
+        self = value
+    }
+}
+
 extension Float: AttributeDecodable {
     
     public init?(attributeValue: AttributeValue) {
