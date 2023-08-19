@@ -161,6 +161,16 @@ extension Data: AttributeDecodable {
     }
 }
 
+extension Decimal: AttributeDecodable {
+    
+    public init?(attributeValue: AttributeValue) {
+        guard case let .decimal(value) = attributeValue else {
+            return nil
+        }
+        self = value
+    }
+}
+
 extension Float: AttributeDecodable {
     
     public init?(attributeValue: AttributeValue) {
@@ -192,6 +202,7 @@ extension Int: AttributeDecodable {
             .data,
             .date,
             .bool,
+            .decimal,
             .float,
             .double:
             return nil
@@ -216,6 +227,7 @@ extension Int8: AttributeDecodable {
             .data,
             .date,
             .bool,
+            .decimal,
             .float,
             .double:
             return nil
@@ -240,6 +252,7 @@ extension Int16: AttributeDecodable {
             .data,
             .date,
             .bool,
+            .decimal,
             .float,
             .double:
             return nil
@@ -264,6 +277,7 @@ extension Int32: AttributeDecodable {
             .data,
             .date,
             .bool,
+            .decimal,
             .float,
             .double:
             return nil
@@ -288,6 +302,7 @@ extension Int64: AttributeDecodable {
             .data,
             .date,
             .bool,
+            .decimal,
             .float,
             .double:
             return nil
@@ -312,6 +327,7 @@ extension UInt: AttributeDecodable {
             .data,
             .date,
             .bool,
+            .decimal,
             .float,
             .double:
             return nil
@@ -337,6 +353,7 @@ extension UInt8: AttributeDecodable {
             .data,
             .date,
             .bool,
+            .decimal,
             .float,
             .double:
             return nil
@@ -362,6 +379,7 @@ extension UInt16: AttributeDecodable {
             .data,
             .date,
             .bool,
+            .decimal,
             .float,
             .double:
             return nil
@@ -387,6 +405,7 @@ extension UInt32: AttributeDecodable {
             .data,
             .date,
             .bool,
+            .decimal,
             .float,
             .double:
             return nil
@@ -411,6 +430,7 @@ extension UInt64: AttributeDecodable {
             .data,
             .date,
             .bool,
+            .decimal,
             .float,
             .double:
             return nil

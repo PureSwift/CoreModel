@@ -36,6 +36,8 @@ public extension NSAttributeType {
             self = .UUIDAttributeType
         case .url:
             self = .URIAttributeType
+        case .decimal:
+            self = .decimalAttributeType
         }
     }
 }
@@ -53,7 +55,7 @@ public extension AttributeType {
         case .integer64AttributeType:
             self = .int64
         case .decimalAttributeType:
-            return nil
+            self = .decimal
         case .doubleAttributeType:
             self = .double
         case .floatAttributeType:

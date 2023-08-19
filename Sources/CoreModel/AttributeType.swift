@@ -42,4 +42,7 @@ public enum AttributeType: String, Codable, CaseIterable, Sendable {
     
     /// URL
     case url
+    
+    /// Decimal
+    case decimal
 }

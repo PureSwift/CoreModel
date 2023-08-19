@@ -22,6 +22,7 @@ public enum AttributeValue: Equatable, Hashable, Codable {
     case int64(Int64)
     case float(Float)
     case double(Double)
+    case decimal(Decimal)
 }
 
 /// CoreModel Relationship Value
