@@ -9,7 +9,7 @@ import Foundation
 
 // MARK: - Default Codable Implementation
 
-extension Entity where Self: Decodable, Self.ID: Decodable {
+extension Entity where Self: Decodable, Self.ID: Decodable, Self.ID: ObjectIDConvertible {
     
     public init(
         from model: ModelData
@@ -71,6 +71,7 @@ internal final class ModelDataDecoder: Decoder {
         self.codingPath = codingPath
         self.userInfo = userInfo
         self.log = log
+        self.identifierKey = identifierKey
         assert(data.entity == entity.id)
         
         // properties cache
@@ -181,9 +182,17 @@ internal extension ModelDataDecoder {
     }
     
     func decodeDecodable<T: Decodable> (_ type: T.Type, forKey key: CodingKey) throws -> T {
-        log?("Will decode \type) at path \"\(codingPath.path)\"")
-        // override for native types
-        if type == Data.self {
+        // override for native types and id
+        if key.stringValue == identifierKey {
+            guard let convertible = type as? ObjectIDConvertible.Type else {
+                throw DecodingError.typeMismatch(ObjectIDConvertible.self, DecodingError.Context(codingPath: codingPath, debugDescription: "Cannot decode identifer from \(type). Types used as identifiers must conform to \(String(describing: ObjectID.self))"))
+            }
+            let id = self.data.id
+            guard let value = convertible.init(objectID: id) else {
+                throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: codingPath, debugDescription: "Cannot decode \(type) from identifier \(id)"))
+            }
+            return value as! T
+        } else if type == Data.self {
             return try decodeAttribute(Data.self, forKey: key) as! T
         } else if type == Date.self {
             return try decodeAttribute(Date.self, forKey: key) as! T
@@ -195,6 +204,7 @@ internal extension ModelDataDecoder {
             return try decodeAttribute(decodableType, forKey: key) as! T
         } else {
             // decode using Decodable, container should read directly.
+            log?("Will decode \(type) at path \"\(codingPath.path)\"")
             return try T.init(from: self)
         }
     }
@@ -312,7 +322,6 @@ internal struct ModelDataKeyedDecodingContainer <K: CodingKey> : KeyedDecodingCo
         
         self.decoder.codingPath.append(key)
         defer { self.decoder.codingPath.removeLast() }
-        self.decoder.log?("Will read \(type) at path \"\(decoder.codingPath.path)\"")
         return try self.decoder.decodeString(forKey: key)
     }
     
@@ -320,7 +329,6 @@ internal struct ModelDataKeyedDecodingContainer <K: CodingKey> : KeyedDecodingCo
         
         self.decoder.codingPath.append(key)
         defer { self.decoder.codingPath.removeLast() }
-        self.decoder.log?("Will read \(type) at path \"\(decoder.codingPath.path)\"")
         return try self.decoder.decodeDecodable(type, forKey: key)
     }
     
@@ -473,4 +481,193 @@ internal struct ModelDataSingleValueDecodingContainer: SingleValueDecodingContai
         }
         return key
     }
+}
+
+// MARK: - UnkeyedDecodingContainer
+
+internal struct ModelDataUnkeyedDecodingContainer: UnkeyedDecodingContainer {
+        
+    // MARK: Properties
+    
+    /// A reference to the encoder we're reading from.
+    let decoder: ModelDataDecoder
+    
+    /// The path of coding keys taken to get to this point in decoding.
+    let codingPath: [CodingKey]
+    
+    let objectIDs: [ObjectID]
+    
+    private(set) var currentIndex: Int = 0
+    
+    // MARK: Initialization
+    
+    /// Initializes `self` by referencing the given decoder and container.
+    init(referencing decoder: ModelDataDecoder) throws {
+        
+        self.decoder = decoder
+        self.codingPath = decoder.codingPath
+        // get to-many relationship
+        guard let key = codingPath.first else {
+            throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Cannot decode to-many relationship from root data."))
+        }
+        guard let relationship = decoder.data.relationships[PropertyKey(key)] else {
+            throw DecodingError.keyNotFound(key, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "No relationship value for \(key.stringValue)"))
+        }
+        switch relationship {
+        case .null:
+            self.objectIDs = []
+        case let .toMany(objectIDs):
+            self.objectIDs = objectIDs
+        case .toOne:
+            throw DecodingError.typeMismatch([String].self, DecodingError.Context(codingPath: codingPath, debugDescription: "Invalid relationship value \(relationship)"))
+        }
+    }
+    
+    // MARK: UnkeyedDecodingContainer
+    
+    var count: Int? {
+        objectIDs.count
+    }
+    
+    var isAtEnd: Bool {
+        currentIndex >= objectIDs.count
+    }
+    
+    func decodeNil() throws -> Bool {
+        throw DecodingError.typeMismatch(Optional<Any>.self, DecodingError.Context(codingPath: codingPath, debugDescription: "Cannot decode to-many relationship of \(Optional<Any>.self)"))
+    }
+    
+    func decode(_ type: Bool.Type) throws -> Bool {
+        throw DecodingError.typeMismatch(type, DecodingError.Context(codingPath: codingPath, debugDescription: "Cannot decode to-many relationship of \(type)"))
+    }
+    
+    func decode(_ type: Double.Type) throws -> Double {
+        throw DecodingError.typeMismatch(type, DecodingError.Context(codingPath: codingPath, debugDescription: "Cannot decode to-many relationship of \(type)"))
+    }
+    
+    func decode(_ type: Float.Type) throws -> Float {
+        throw DecodingError.typeMismatch(type, DecodingError.Context(codingPath: codingPath, debugDescription: "Cannot decode to-many relationship of \(type)"))
+    }
+    
+    func decode(_ type: Int.Type) throws -> Int {
+        throw DecodingError.typeMismatch(type, DecodingError.Context(codingPath: codingPath, debugDescription: "Cannot decode to-many relationship of \(type)"))
+    }
+    
+    func decode(_ type: Int8.Type) throws -> Int8 {
+        throw DecodingError.typeMismatch(type, DecodingError.Context(codingPath: codingPath, debugDescription: "Cannot decode to-many relationship of \(type)"))
+    }
+    
+    func decode(_ type: Int16.Type) throws -> Int16 {
+        throw DecodingError.typeMismatch(type, DecodingError.Context(codingPath: codingPath, debugDescription: "Cannot decode to-many relationship of \(type)"))
+    }
+    
+    func decode(_ type: Int32.Type) throws -> Int32 {
+        throw DecodingError.typeMismatch(type, DecodingError.Context(codingPath: codingPath, debugDescription: "Cannot decode to-many relationship of \(type)"))
+    }
+    
+    func decode(_ type: Int64.Type) throws -> Int64 {
+        throw DecodingError.typeMismatch(type, DecodingError.Context(codingPath: codingPath, debugDescription: "Cannot decode to-many relationship of \(type)"))
+    }
+    
+    func decode(_ type: UInt.Type) throws -> UInt {
+        throw DecodingError.typeMismatch(type, DecodingError.Context(codingPath: codingPath, debugDescription: "Cannot decode to-many relationship of \(type)"))
+    }
+
+
+    func decode(_ type: UInt8.Type) throws -> UInt8 {
+        throw DecodingError.typeMismatch(type, DecodingError.Context(codingPath: codingPath, debugDescription: "Cannot decode to-many relationship of \(type)"))
+    }
+
+
+    func decode(_ type: UInt16.Type) throws -> UInt16 {
+        throw DecodingError.typeMismatch(type, DecodingError.Context(codingPath: codingPath, debugDescription: "Cannot decode to-many relationship of \(type)"))
+    }
+
+
+    func decode(_ type: UInt32.Type) throws -> UInt32 {
+        throw DecodingError.typeMismatch(type, DecodingError.Context(codingPath: codingPath, debugDescription: "Cannot decode to-many relationship of \(type)"))
+    }
+
+
+    func decode(_ type: UInt64.Type) throws -> UInt64 {
+        throw DecodingError.typeMismatch(type, DecodingError.Context(codingPath: codingPath, debugDescription: "Cannot decode to-many relationship of \(type)"))
+    }
+        
+    func nestedContainer<NestedKey>(keyedBy type: NestedKey.Type) throws -> KeyedDecodingContainer<NestedKey> where NestedKey : CodingKey {
+        fatalError()
+    }
+    
+    func nestedUnkeyedContainer() throws -> UnkeyedDecodingContainer {
+        fatalError()
+    }
+    
+    func superDecoder() throws -> Decoder {
+        decoder
+    }
+    
+    mutating func decode(_ type: String.Type) throws -> String {
+        let indexKey = IndexCodingKey(rawValue: currentIndex)
+        self.decoder.codingPath.append(indexKey)
+        defer { self.decoder.codingPath.removeLast() }
+        return try decodeRelationship(type)
+    }
+    
+    mutating func decode<T>(_ type: T.Type) throws -> T where T : Decodable {
+        let indexKey = IndexCodingKey(rawValue: currentIndex)
+        self.decoder.codingPath.append(indexKey)
+        defer { self.decoder.codingPath.removeLast() }
+        let string = try decodeRelationship(type)
+        let id = ObjectID(rawValue: string)
+        guard let convertible = type as? ObjectIDConvertible.Type else {
+            throw DecodingError.typeMismatch(ObjectIDConvertible.self, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Cannot decode identifer from \(type). Types used as identifiers must conform to \(String(describing: ObjectID.self))"))
+        }
+        guard let value = convertible.init(objectID: id) else {
+            throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Cannot decode \(type) from identifier \(id)"))
+        }
+        return value as! T
+    }
+    
+    // MARK: Private Methods
+    
+    private mutating func decodeRelationship<T>(_ type: T.Type) throws -> String {
+        guard objectIDs.count > currentIndex else {
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "End of to many relationship"))
+        }
+        let objectID = objectIDs[currentIndex]
+        // increment index
+        currentIndex += 1
+        // return value
+        return objectID.rawValue
+    }
+}
+
+internal struct IndexCodingKey: CodingKey, RawRepresentable, Equatable, Hashable {
+    
+    let rawValue: Int
+    
+    init(rawValue: Int) {
+        self.rawValue = rawValue
+    }
+    
+    var stringValue: String {
+        rawValue.description
+    }
+    
+    init?(stringValue: String) {
+        guard let rawValue = Int(stringValue) else {
+            return nil
+        }
+        self.init(rawValue: rawValue)
+    }
+    
+    var intValue: Int? {
+        rawValue
+    }
+    
+    init?(intValue: Int) {
+        self.init(rawValue: intValue)
+    }
+    
+    
+    
 }
