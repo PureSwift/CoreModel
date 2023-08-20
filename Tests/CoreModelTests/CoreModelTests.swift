@@ -12,7 +12,11 @@ import Predicate
 
 final class CoreModelTests: XCTestCase {
     
-    func testCoreModel() {
+    func testEntityName() {
         
+        XCTAssertEqual(Person.entityName, "Person")
+        XCTAssertEqual(Event.entityName, "Event")
+        XCTAssertEqual(Campground.entityName, "Campground")
+        XCTAssertEqual(Campground.RentalUnit.entityName, "RentalUnit")
     }
 }
