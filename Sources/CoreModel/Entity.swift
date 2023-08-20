@@ -24,6 +24,13 @@ public protocol Entity: Identifiable where Self.ID: CustomStringConvertible, Cod
     func encode() throws -> ModelData
 }
 
+public extension Entity {
+    
+    static var entityName: EntityName {
+        EntityName(rawValue: String(describing: Self.self))
+    }
+}
+
 public extension Model {
     
     init(entities: any Entity.Type...) {
