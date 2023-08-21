@@ -7,7 +7,6 @@
 //
 
 import Foundation
-import Predicate
 
 /// CoreModel Fetch Request
 public struct FetchRequest: Codable, Equatable, Hashable, Sendable {

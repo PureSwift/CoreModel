@@ -9,7 +9,6 @@
 import Foundation
 import CoreData
 import CoreModel
-import Predicate
 
 extension NSManagedObjectContext: ModelStorage {
     
