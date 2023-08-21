@@ -20,7 +20,6 @@ internal extension NSNumber {
             self.init(value: value)
         case let .int64(value):
             self.init(value: value)
-            self.init(value: value)
         case let .float(value):
             self.init(value: value)
         case let .double(value):
