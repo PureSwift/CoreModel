@@ -5,6 +5,7 @@
 //  Created by Alsey Coleman Miller on 4/12/20.
 //
 
+#if canImport(Darwin)
 import Foundation
 
 internal extension NSNumber {
@@ -29,3 +30,4 @@ internal extension NSNumber {
         }
     }
 }
+#endif
