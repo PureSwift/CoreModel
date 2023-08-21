@@ -30,6 +30,7 @@ internal extension NSEntityDescription {
         properties += entity.attributes.map { NSAttributeDescription(attribute: $0) }
         properties += entity.relationships.map { NSRelationshipDescription(relationship: $0) }
         self.properties = properties
+        self.uniquenessConstraints = [[NSManagedObject.BuiltInProperty.id.rawValue as NSString]]
     }
 }
 

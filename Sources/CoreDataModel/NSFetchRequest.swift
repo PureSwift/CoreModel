@@ -14,8 +14,12 @@ import CoreModel
 public extension FetchRequest {
     
     func toFoundation() -> NSFetchRequest<NSManagedObject> {
+        toFoundation(NSManagedObject.self)
+    }
+    
+    func toFoundation<ResultType: NSFetchRequestResult>(_ result: ResultType.Type) -> NSFetchRequest<ResultType> {
         
-        let fetchRequest = NSFetchRequest<NSManagedObject>(entityName: entity.rawValue)
+        let fetchRequest = NSFetchRequest<ResultType>(entityName: entity.rawValue)
         fetchRequest.predicate = predicate?.toFoundation()
         fetchRequest.fetchLimit = fetchLimit
         fetchRequest.sortDescriptors = sortDescriptors.map {

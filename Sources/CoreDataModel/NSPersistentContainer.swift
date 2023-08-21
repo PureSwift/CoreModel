@@ -50,6 +50,12 @@ extension NSPersistentContainer: ModelStorage {
             try context.delete(entity, for: id)
         }
     }
+    
+    public func fetchID(_ fetchRequest: FetchRequest) async throws -> [ObjectID] {
+        try await performBackgroundTask { context in
+            try context.fetchID(fetchRequest)
+        }
+    }
 }
 
 @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)

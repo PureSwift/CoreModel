@@ -49,6 +49,13 @@ extension NSManagedObjectContext: ModelStorage {
         }
         self.delete(managedObject)
     }
+    
+    public func fetchID(_ fetchRequest: FetchRequest) throws -> [ObjectID] {
+        let fetch = fetchRequest.toFoundation()
+        fetch.propertiesToFetch = [NSManagedObject.BuiltInProperty.id.rawValue]
+        fetch.returnsObjectsAsFaults = false
+        return try self.fetch(fetchRequest.toFoundation()).map { try $0.modelObjectID }
+    }
 }
 
 internal extension NSManagedObjectContext {

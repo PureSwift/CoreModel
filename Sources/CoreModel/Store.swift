@@ -15,6 +15,9 @@ public protocol ModelStorage {
     /// Fetch managed objects.
     func fetch(_ fetchRequest: FetchRequest) async throws -> [ModelData]
     
+    /// Fetch managed objects IDs.
+    func fetchID(_ fetchRequest: FetchRequest) async throws -> [ObjectID]
+    
     /// Fetch and return result count.
     func count(_ fetchRequest: FetchRequest) async throws -> UInt
     
