@@ -89,6 +89,13 @@ final class CoreDataTests: XCTestCase {
         XCTAssertEqual(campgroundData.relationships[PropertyKey(Campground.CodingKeys.units)], .toMany([ObjectID(rentalUnit.id)]))
         let fetchedRentalUnit = try await store.fetch(Campground.RentalUnit.self, for: rentalUnit.id)
         XCTAssertEqual(fetchedRentalUnit, rentalUnit)
+        
+        let rentalUnitFetchRequest = FetchRequest(
+            entity: Campground.RentalUnit.entityName,
+            predicate: Campground.RentalUnit.CodingKeys.campground.stringValue.compare(.equalTo, .relationship(.toOne(ObjectID(campground.id))))
+        )
+        let rentalUnitIDs = try await store.fetchID(rentalUnitFetchRequest)
+        XCTAssertEqual(rentalUnitIDs, campground.units.map { ObjectID($0) })
     }
 }
 
