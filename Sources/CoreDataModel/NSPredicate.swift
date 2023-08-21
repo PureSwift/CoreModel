@@ -113,7 +113,7 @@ public extension FetchRequest.Predicate.Comparison.Option {
     }
 }
 
-public extension Expression {
+public extension FetchRequest.Predicate.Expression {
     
     func toFoundation() -> NSExpression {
         

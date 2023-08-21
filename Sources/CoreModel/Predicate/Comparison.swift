@@ -134,7 +134,7 @@ extension FetchRequest.Predicate.Comparison: CustomStringConvertible {
 
 // MARK: - Operators
 
-public func < (lhs: Expression, rhs: Expression) -> FetchRequest.Predicate {
+public func < (lhs: FetchRequest.Predicate.Expression, rhs: FetchRequest.Predicate.Expression) -> FetchRequest.Predicate {
     
     let comparison = FetchRequest.Predicate.Comparison(
         left: lhs,
@@ -144,7 +144,7 @@ public func < (lhs: Expression, rhs: Expression) -> FetchRequest.Predicate {
     return .comparison(comparison)
 }
 
-public func <= (lhs: Expression, rhs: Expression) -> FetchRequest.Predicate {
+public func <= (lhs: FetchRequest.Predicate.Expression, rhs: FetchRequest.Predicate.Expression) -> FetchRequest.Predicate {
     
     let comparison = FetchRequest.Predicate.Comparison(left: lhs,
                                   right: rhs,
@@ -153,7 +153,7 @@ public func <= (lhs: Expression, rhs: Expression) -> FetchRequest.Predicate {
     return .comparison(comparison)
 }
 
-public func > (lhs: Expression, rhs: Expression) -> FetchRequest.Predicate {
+public func > (lhs: FetchRequest.Predicate.Expression, rhs: FetchRequest.Predicate.Expression) -> FetchRequest.Predicate {
     
     let comparison = FetchRequest.Predicate.Comparison(left: lhs,
                                   right: rhs,
@@ -162,7 +162,7 @@ public func > (lhs: Expression, rhs: Expression) -> FetchRequest.Predicate {
     return .comparison(comparison)
 }
 
-public func >= (lhs: Expression, rhs: Expression) -> FetchRequest.Predicate {
+public func >= (lhs: FetchRequest.Predicate.Expression, rhs: FetchRequest.Predicate.Expression) -> FetchRequest.Predicate {
     
     let comparison = FetchRequest.Predicate.Comparison(left: lhs,
                                   right: rhs,
@@ -171,7 +171,7 @@ public func >= (lhs: Expression, rhs: Expression) -> FetchRequest.Predicate {
     return .comparison(comparison)
 }
 
-public func == (lhs: Expression, rhs: Expression) -> FetchRequest.Predicate {
+public func == (lhs: FetchRequest.Predicate.Expression, rhs: FetchRequest.Predicate.Expression) -> FetchRequest.Predicate {
     
     let comparison = FetchRequest.Predicate.Comparison(left: lhs,
                                   right: rhs,
@@ -180,7 +180,7 @@ public func == (lhs: Expression, rhs: Expression) -> FetchRequest.Predicate {
     return .comparison(comparison)
 }
 
-public func != (lhs: Expression, rhs: Expression) -> FetchRequest.Predicate {
+public func != (lhs: FetchRequest.Predicate.Expression, rhs: FetchRequest.Predicate.Expression) -> FetchRequest.Predicate {
     
     let comparison = FetchRequest.Predicate.Comparison(left: lhs,
                                   right: rhs,
@@ -248,19 +248,19 @@ public func != <T: AttributeEncodable> (lhs: String, rhs: T) -> FetchRequest.Pre
 // Extensions for KeyPath comparisons
 public extension String {
     
-    func compare(_ type: FetchRequest.Predicate.Comparison.Operator, _ rhs: Expression) -> FetchRequest.Predicate {
+    func compare(_ type: FetchRequest.Predicate.Comparison.Operator, _ rhs: FetchRequest.Predicate.Expression) -> FetchRequest.Predicate {
         
         let comparison = FetchRequest.Predicate.Comparison(left: .keyPath(.init(rawValue: self)), right: rhs, type: type)
         return .comparison(comparison)
     }
     
-    func compare(_ type: FetchRequest.Predicate.Comparison.Operator, _ options: Set<FetchRequest.Predicate.Comparison.Option>, _ rhs: Expression) -> FetchRequest.Predicate {
+    func compare(_ type: FetchRequest.Predicate.Comparison.Operator, _ options: Set<FetchRequest.Predicate.Comparison.Option>, _ rhs: FetchRequest.Predicate.Expression) -> FetchRequest.Predicate {
         
         let comparison = FetchRequest.Predicate.Comparison(left: .keyPath(.init(rawValue: self)), right: rhs, type: type, options: options)
         return .comparison(comparison)
     }
     
-    func compare(_ modifier: FetchRequest.Predicate.Comparison.Modifier, _ type: FetchRequest.Predicate.Comparison.Operator, _ options: Set<FetchRequest.Predicate.Comparison.Option>, _ rhs: Expression) -> FetchRequest.Predicate {
+    func compare(_ modifier: FetchRequest.Predicate.Comparison.Modifier, _ type: FetchRequest.Predicate.Comparison.Operator, _ options: Set<FetchRequest.Predicate.Comparison.Option>, _ rhs: FetchRequest.Predicate.Expression) -> FetchRequest.Predicate {
         
         let comparison = FetchRequest.Predicate.Comparison(left: .keyPath(.init(rawValue: self)), right: rhs, type: type, modifier: modifier, options: options)
         return .comparison(comparison)

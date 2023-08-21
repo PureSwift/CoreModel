@@ -6,30 +6,33 @@
 //  Copyright © 2017 PureSwift. All rights reserved.
 //
 
-/// Used to represent expressions in a predicate.
-public enum Expression: Equatable, Hashable, Sendable {
+public extension FetchRequest.Predicate {
     
-    /// Expression that represents a given constant attribute value.
-    case attribute(AttributeValue)
+    /// Used to represent expressions in a predicate.
+    enum Expression: Equatable, Hashable, Sendable {
+        
+        /// Expression that represents a given constant attribute value.
+        case attribute(AttributeValue)
+        
+        /// Expression that represents a given constant attribute value.
+        case relationship(RelationshipValue)
+        
+        /// Expression that invokes `value​For​Key​Path:​` with a given key path.
+        case keyPath(PredicateKeyPath)
+    }
     
-    /// Expression that represents a given constant attribute value.
-    case relationship(RelationshipValue)
-    
-    /// Expression that invokes `value​For​Key​Path:​` with a given key path.
-    case keyPath(PredicateKeyPath)
+    /// Type of predicate expression.
+    enum ExpressionType: String, Codable, Sendable {
+        
+        case attribute
+        case relationship
+        case keyPath
+    }
 }
 
-/// Type of predicate expression.
-public enum ExpressionType: String, Codable, Sendable {
+public extension FetchRequest.Predicate.Expression {
     
-    case attribute
-    case relationship
-    case keyPath
-}
-
-public extension Expression {
-    
-    var type: ExpressionType {
+    var type: FetchRequest.Predicate.ExpressionType {
         switch self {
         case .attribute: return .attribute
         case .relationship: return .relationship
@@ -40,7 +43,7 @@ public extension Expression {
 
 // MARK: - CustomStringConvertible
 
-extension Expression: CustomStringConvertible {
+extension FetchRequest.Predicate.Expression: CustomStringConvertible {
     
     public var description: String {
         
@@ -91,7 +94,7 @@ internal extension RelationshipValue {
 
 // MARK: - Codable
 
-extension Expression: Codable {
+extension FetchRequest.Predicate.Expression: Codable {
     
     internal enum CodingKeys: String, CodingKey {
         
@@ -102,7 +105,7 @@ extension Expression: Codable {
     public init(from decoder: Decoder) throws {
         
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        let type = try container.decode(ExpressionType.self, forKey: .type)
+        let type = try container.decode(FetchRequest.Predicate.ExpressionType.self, forKey: .type)
         
         switch type {
         case .attribute:
@@ -135,21 +138,21 @@ extension Expression: Codable {
 
 // MARK: - Extensions
 
-public extension Expression {
+public extension FetchRequest.Predicate.Expression {
     
-    func compare(_ type: FetchRequest.Predicate.Comparison.Operator, _ rhs: Expression) -> FetchRequest.Predicate {
+    func compare(_ type: FetchRequest.Predicate.Comparison.Operator, _ rhs: FetchRequest.Predicate.Expression) -> FetchRequest.Predicate {
         
         let comparison = FetchRequest.Predicate.Comparison(left: self, right: rhs, type: type)
         return .comparison(comparison)
     }
     
-    func compare(_ type: FetchRequest.Predicate.Comparison.Operator, _ options: Set<FetchRequest.Predicate.Comparison.Option>, _ rhs: Expression) -> FetchRequest.Predicate {
+    func compare(_ type: FetchRequest.Predicate.Comparison.Operator, _ options: Set<FetchRequest.Predicate.Comparison.Option>, _ rhs: FetchRequest.Predicate.Expression) -> FetchRequest.Predicate {
         
         let comparison = FetchRequest.Predicate.Comparison(left: self, right: rhs, type: type, options: options)
         return .comparison(comparison)
     }
     
-    func compare(_ modifier: FetchRequest.Predicate.Comparison.Modifier, _ type: FetchRequest.Predicate.Comparison.Operator, _ options: Set<FetchRequest.Predicate.Comparison.Option>, _ rhs: Expression) -> FetchRequest.Predicate {
+    func compare(_ modifier: FetchRequest.Predicate.Comparison.Modifier, _ type: FetchRequest.Predicate.Comparison.Operator, _ options: Set<FetchRequest.Predicate.Comparison.Option>, _ rhs: FetchRequest.Predicate.Expression) -> FetchRequest.Predicate {
         
         let comparison = FetchRequest.Predicate.Comparison(left: self, right: rhs, type: type, modifier: modifier, options: options)
         return .comparison(comparison)

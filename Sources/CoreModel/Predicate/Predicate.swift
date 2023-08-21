@@ -18,18 +18,21 @@ public extension FetchRequest {
     }
 }
 
-/// Predicate Type
-public enum PredicateType: String, Codable, Sendable {
+public extension FetchRequest {
     
-    case comparison
-    case compound
-    case value
+    /// Predicate Type
+    enum PredicateType: String, Codable, Sendable {
+        
+        case comparison
+        case compound
+        case value
+    }
 }
 
 public extension FetchRequest.Predicate {
     
     /// Predicate Type
-    var type: PredicateType {
+    var type: FetchRequest.PredicateType {
         switch self {
         case .comparison: return .comparison
         case .compound: return .compound
@@ -65,7 +68,7 @@ extension FetchRequest.Predicate: Codable {
     public init(from decoder: Decoder) throws {
         
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        let type = try container.decode(PredicateType.self, forKey: .type)
+        let type = try container.decode(FetchRequest.PredicateType.self, forKey: .type)
         
         switch type {
         case .comparison:
