@@ -19,7 +19,7 @@ extension NSObject: PredicateEvaluatable {
 }
 */
 
-public extension FetchRequest.Predicate {
+internal extension FetchRequest.Predicate {
     
     func toFoundation() -> NSPredicate {
         
@@ -31,7 +31,7 @@ public extension FetchRequest.Predicate {
     }
 }
 
-public extension FetchRequest.Predicate.Compound {
+internal extension FetchRequest.Predicate.Compound {
     
     func toFoundation() -> NSCompoundPredicate {
         
@@ -40,7 +40,7 @@ public extension FetchRequest.Predicate.Compound {
     }
 }
 
-public extension FetchRequest.Predicate.Compound.Logical​Type {
+internal extension FetchRequest.Predicate.Compound.Logical​Type {
     
     func toFoundation() -> NSCompoundPredicate.LogicalType {
         switch self {
@@ -51,11 +51,16 @@ public extension FetchRequest.Predicate.Compound.Logical​Type {
     }
 }
 
-public extension FetchRequest.Predicate.Comparison {
+internal extension FetchRequest.Predicate.Comparison {
     
     func toFoundation() -> NSComparisonPredicate {
         
         let options = self.options.reduce(NSComparisonPredicate.Options(), { $0.union($1.toFoundation()) })
+        var left = self.left
+        if right.type == .relationship, case var .keyPath(keyPath) = left {
+            keyPath.append(.property(NSManagedObject.BuiltInProperty.id.rawValue))
+            left = .keyPath(keyPath)
+        }
         return NSComparisonPredicate(leftExpression: left.toFoundation(),
                                      rightExpression: right.toFoundation(),
                                      modifier: modifier?.toFoundation() ?? .direct,
@@ -64,7 +69,7 @@ public extension FetchRequest.Predicate.Comparison {
     }
 }
 
-public extension FetchRequest.Predicate.Comparison.Modifier {
+internal extension FetchRequest.Predicate.Comparison.Modifier {
     
     func toFoundation() -> NSComparisonPredicate.Modifier {
         
@@ -75,7 +80,7 @@ public extension FetchRequest.Predicate.Comparison.Modifier {
     }
 }
 
-public extension FetchRequest.Predicate.Comparison.Operator {
+internal extension FetchRequest.Predicate.Comparison.Operator {
     
     func toFoundation() -> NSComparisonPredicate.Operator {
         
@@ -97,7 +102,7 @@ public extension FetchRequest.Predicate.Comparison.Operator {
     }
 }
 
-public extension FetchRequest.Predicate.Comparison.Option {
+internal extension FetchRequest.Predicate.Comparison.Option {
     
     func toFoundation() -> NSComparisonPredicate.Options {
         
@@ -113,7 +118,7 @@ public extension FetchRequest.Predicate.Comparison.Option {
     }
 }
 
-public extension FetchRequest.Predicate.Expression {
+internal extension FetchRequest.Predicate.Expression {
     
     func toFoundation() -> NSExpression {
         
