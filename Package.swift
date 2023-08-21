@@ -23,18 +23,9 @@ let package = Package(
             ]
         )
     ],
-    dependencies: [
-        .package(
-            url: "https://github.com/PureSwift/Predicate.git",
-            branch: "master"
-        )
-    ],
     targets: [
         .target(
-            name: "CoreModel",
-            dependencies: [
-                "Predicate"
-            ]
+            name: "CoreModel"
         ),
         .target(
             name: "CoreDataModel",
