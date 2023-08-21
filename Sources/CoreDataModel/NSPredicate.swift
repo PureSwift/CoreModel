@@ -119,7 +119,8 @@ public extension Expression {
         
         switch self {
         case let .keyPath(keyPath): return NSExpression(forKeyPath: keyPath.rawValue)
-        case let .value(value): return NSExpression(forConstantValue: value.toFoundation())
+        case let .attribute(value): return NSExpression(forConstantValue: value.toFoundation())
+        case let .relationship(value): return NSExpression(forConstantValue: value.toFoundation())
         }
     }
 }
@@ -143,6 +144,25 @@ internal extension AttributeValue {
         case let .url(value):       return value as NSURL
         case let .decimal(value):   return value as NSDecimalNumber
         }
+    }
+}
+
+internal extension RelationshipValue {
+    
+    func toFoundation() -> AnyObject? {
+        
+        switch self {
+        case .null:                 return nil
+        case let .toOne(value):     return value.toFoundation()
+        case let .toMany(value):    return value.map({ $0.toFoundation() }) as NSArray
+        }
+    }
+}
+
+internal extension ObjectID {
+    
+    func toFoundation() -> AnyObject {
+        rawValue as NSString
     }
 }
 

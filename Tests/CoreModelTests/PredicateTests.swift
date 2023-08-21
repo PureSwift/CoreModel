@@ -13,9 +13,9 @@ final class PredicateTests: XCTestCase {
     
     func testDescription() {
         
-        XCTAssertEqual((.keyPath("name") == .value(.string("Coleman"))).description, "name == \"Coleman\"")
-        XCTAssertEqual(((.keyPath("name") != .value(.null)) as FetchRequest.Predicate).description, "name != nil")
-        XCTAssertEqual((!(.keyPath("name") == .value(.null))).description, "NOT name == nil")
+        XCTAssertEqual((.keyPath("name") == .attribute(.string("Coleman"))).description, "name == \"Coleman\"")
+        XCTAssertEqual(((.keyPath("name") != .attribute(.null)) as FetchRequest.Predicate).description, "name != nil")
+        XCTAssertEqual((!(.keyPath("name") == .attribute(.null))).description, "NOT name == nil")
         XCTAssertEqual(("isValid" == false).description, "isValid == false")
     }
     
@@ -23,8 +23,8 @@ final class PredicateTests: XCTestCase {
         
         let predicate: FetchRequest.Predicate = "id" > Int64(0)
             && "id" != Int64(99)
-            && "name".compare(.beginsWith, .value(.string("C")))
-            && "name".compare(.contains, [.diacriticInsensitive, .caseInsensitive], .value(.string("COLE")))
+            && "name".compare(.beginsWith, .attribute(.string("C")))
+            && "name".compare(.contains, [.diacriticInsensitive, .caseInsensitive], .attribute(.string("COLE")))
         
         XCTAssertEqual(predicate.description, #"((id > 0 AND id != 99) AND name BEGINSWITH "C") AND name CONTAINS[cd] "COLE""#)
     }
@@ -70,7 +70,7 @@ final class PredicateTests: XCTestCase {
         
         let future = Date.distantFuture
         
-        let predicate: FetchRequest.Predicate = ("name").compare(.matches, [.caseInsensitive], .value(.string(#"event \d"#))) && [
+        let predicate: FetchRequest.Predicate = ("name").compare(.matches, [.caseInsensitive], .attribute(.string(#"event \d"#))) && [
             ("start") < future,
             ("speakers.@count") > 0
             ]

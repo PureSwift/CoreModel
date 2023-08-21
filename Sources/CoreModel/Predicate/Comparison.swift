@@ -194,7 +194,7 @@ public func != (lhs: Expression, rhs: Expression) -> FetchRequest.Predicate {
 public func < <T: AttributeEncodable>(lhs: String, rhs: T) -> FetchRequest.Predicate {
     
     let comparison = FetchRequest.Predicate.Comparison(left: .keyPath(.init(rawValue: lhs)),
-                                  right: .value(rhs.attributeValue),
+                                  right: .attribute(rhs.attributeValue),
                                   type: .lessThan)
     
     return .comparison(comparison)
@@ -203,7 +203,7 @@ public func < <T: AttributeEncodable>(lhs: String, rhs: T) -> FetchRequest.Predi
 public func <= <T: AttributeEncodable>(lhs: String, rhs: T) -> FetchRequest.Predicate {
     
     let comparison = FetchRequest.Predicate.Comparison(left: .keyPath(.init(rawValue: lhs)),
-                                  right: .value(rhs.attributeValue),
+                                  right: .attribute(rhs.attributeValue),
                                   type: .lessThanOrEqualTo)
     
     return .comparison(comparison)
@@ -212,7 +212,7 @@ public func <= <T: AttributeEncodable>(lhs: String, rhs: T) -> FetchRequest.Pred
 public func > <T: AttributeEncodable>(lhs: String, rhs: T) -> FetchRequest.Predicate {
     
     let comparison = FetchRequest.Predicate.Comparison(left: .keyPath(.init(rawValue: lhs)),
-                                  right: .value(rhs.attributeValue),
+                                  right: .attribute(rhs.attributeValue),
                                   type: .greaterThan)
     
     return .comparison(comparison)
@@ -221,7 +221,7 @@ public func > <T: AttributeEncodable>(lhs: String, rhs: T) -> FetchRequest.Predi
 public func >= <T: AttributeEncodable> (lhs: String, rhs: T) -> FetchRequest.Predicate {
     
     let comparison = FetchRequest.Predicate.Comparison(left: .keyPath(.init(rawValue: lhs)),
-                                  right: .value(rhs.attributeValue),
+                                  right: .attribute(rhs.attributeValue),
                                   type: .greaterThanOrEqualTo)
     
     return .comparison(comparison)
@@ -230,7 +230,7 @@ public func >= <T: AttributeEncodable> (lhs: String, rhs: T) -> FetchRequest.Pre
 public func == <T: AttributeEncodable> (lhs: String, rhs: T) -> FetchRequest.Predicate {
     
     let comparison = FetchRequest.Predicate.Comparison(left: .keyPath(.init(rawValue: lhs)),
-                                  right: .value(rhs.attributeValue),
+                                  right: .attribute(rhs.attributeValue),
                                   type: .equalTo)
     
     return .comparison(comparison)
@@ -239,7 +239,7 @@ public func == <T: AttributeEncodable> (lhs: String, rhs: T) -> FetchRequest.Pre
 public func != <T: AttributeEncodable> (lhs: String, rhs: T) -> FetchRequest.Predicate {
     
     let comparison = FetchRequest.Predicate.Comparison(left: .keyPath(.init(rawValue: lhs)),
-                                  right: .value(rhs.attributeValue),
+                                  right: .attribute(rhs.attributeValue),
                                   type: .notEqualTo)
     
     return .comparison(comparison)

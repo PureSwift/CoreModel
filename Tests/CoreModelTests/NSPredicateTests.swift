@@ -16,22 +16,22 @@ final class NSPredicateTests: XCTestCase {
     
     func testDescription() {
         
-        XCTAssertEqual((.keyPath("name") == .value(.string("Coleman"))).description,
+        XCTAssertEqual((.keyPath("name") == .attribute(.string("Coleman"))).description,
                        NSPredicate(format: "name == \"Coleman\"").description)
-        XCTAssertEqual(((.keyPath("name") != .value(.null)) as FetchRequest.Predicate).description,
+        XCTAssertEqual(((.keyPath("name") != .attribute(.null)) as FetchRequest.Predicate).description,
                        NSPredicate(format: "name != nil").description)
-        XCTAssertEqual((!(.keyPath("name") == .value(.null))).description,
+        XCTAssertEqual((!(.keyPath("name") == .attribute(.null))).description,
                        NSPredicate(format: "NOT name == nil").description)
     }
     
     func testComparison() {
         
         let predicate: FetchRequest.Predicate = #keyPath(PersonObject.id) > Int64(0)
-            && (#keyPath(PersonObject.name)).compare(.notEqualTo, .value(.null))
+            && (#keyPath(PersonObject.name)).compare(.notEqualTo, .attribute(.null))
             && (#keyPath(PersonObject.id)) != Int64(99)
             && (#keyPath(PersonObject.id)) == Int64(1)
-            && (#keyPath(PersonObject.name)).compare(.beginsWith, .value(.string("C")))
-            && (#keyPath(PersonObject.name)).compare(.contains, [.diacriticInsensitive, .caseInsensitive], .value(.string("COLE")))
+            && (#keyPath(PersonObject.name)).compare(.beginsWith, .attribute(.string("C")))
+            && (#keyPath(PersonObject.name)).compare(.contains, [.diacriticInsensitive, .caseInsensitive], .attribute(.string("COLE")))
         
         let converted = predicate.toFoundation()
         
@@ -69,7 +69,7 @@ final class NSPredicateTests: XCTestCase {
         
         let now = Date()
         
-        let predicate: FetchRequest.Predicate = (#keyPath(EventObject.name)).compare(.matches, [.caseInsensitive], .value(.string(#"\w+ event"#)))
+        let predicate: FetchRequest.Predicate = (#keyPath(EventObject.name)).compare(.matches, [.caseInsensitive], .attribute(.string(#"\w+ event"#)))
             && (#keyPath(EventObject.start)) < now
             && ("speakers.@count") > 0
         
@@ -122,7 +122,7 @@ final class NSPredicateTests: XCTestCase {
         
         let now = Date()
         
-        let predicate: FetchRequest.Predicate = (#keyPath(EventObject.name)).compare(.matches, [.caseInsensitive], .value(.string(#"event \d"#))) && [
+        let predicate: FetchRequest.Predicate = (#keyPath(EventObject.name)).compare(.matches, [.caseInsensitive], .attribute(.string(#"event \d"#))) && [
             (#keyPath(EventObject.start)) < now,
             ("speakers.@count") > 0
             ]
@@ -142,10 +142,10 @@ final class NSPredicateTests: XCTestCase {
         attributes.numbers = [0,1,2,3]
         attributes.strings = ["1", "2", "3"]
         
-        let predicate: FetchRequest.Predicate = (#keyPath(AttributesObject.string)).compare(.equalTo, .value(.null))
-            && (#keyPath(AttributesObject.data)).compare(.notEqualTo, .value(.null))
-            && (#keyPath(AttributesObject.numbers)).compare(.contains, .value(.int16(1)))
-            && (#keyPath(AttributesObject.strings)).compare(.contains, .value(.string("1")))
+        let predicate: FetchRequest.Predicate = (#keyPath(AttributesObject.string)).compare(.equalTo, .attribute(.null))
+            && (#keyPath(AttributesObject.data)).compare(.notEqualTo, .attribute(.null))
+            && (#keyPath(AttributesObject.numbers)).compare(.contains, .attribute(.int16(1)))
+            && (#keyPath(AttributesObject.strings)).compare(.contains, .attribute(.string("1")))
         
         let nsPredicate = predicate.toFoundation()
         
