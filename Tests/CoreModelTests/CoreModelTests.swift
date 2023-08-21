@@ -7,7 +7,6 @@
 
 import Foundation
 import XCTest
-import Predicate
 @testable import CoreModel
 
 final class CoreModelTests: XCTestCase {

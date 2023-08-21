@@ -10,7 +10,6 @@
 import Foundation
 import CoreData
 import XCTest
-import Predicate
 @testable import CoreModel
 @testable import CoreDataModel
 
