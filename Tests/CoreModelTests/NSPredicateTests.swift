@@ -146,8 +146,6 @@ final class NSPredicateTests: XCTestCase {
             && (#keyPath(AttributesObject.data)).compare(.notEqualTo, .value(.null))
             && (#keyPath(AttributesObject.numbers)).compare(.contains, .value(.int16(1)))
             && (#keyPath(AttributesObject.strings)).compare(.contains, .value(.string("1")))
-            //&& (#keyPath(AttributesObject.numbers)).all(in: [1])
-            //&& (#keyPath(AttributesObject.strings)).compare(.contains, .value(.collection([.string("1")])))
         
         let nsPredicate = predicate.toFoundation()
         
