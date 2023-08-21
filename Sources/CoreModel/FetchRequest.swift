@@ -10,7 +10,7 @@ import Foundation
 import Predicate
 
 /// CoreModel Fetch Request
-public struct FetchRequest: Codable, Equatable, Hashable {
+public struct FetchRequest: Codable, Equatable, Hashable, Sendable {
     
     public var entity: EntityName
     

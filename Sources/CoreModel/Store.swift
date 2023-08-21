@@ -86,10 +86,10 @@ public extension ModelStorage {
     func fetch<T>(
         _ entity: T.Type,
         sortDescriptors: [FetchRequest.SortDescriptor] = [],
-        predicate: Predicate? = nil,
+        predicate: FetchRequest.Predicate? = nil,
         fetchLimit: Int = 0,
         fetchOffset: Int = 0
-    ) async throws -> [ModelData] where T: Entity {
+    ) async throws -> [T] where T: Entity {
         let fetchRequest = FetchRequest(
             entity: T.entityName,
             sortDescriptors: sortDescriptors,
@@ -98,13 +98,14 @@ public extension ModelStorage {
             fetchOffset: fetchOffset
         )
         return try await fetch(fetchRequest)
+            .map { try T.init(from: $0) }
     }
     
     /// Fetch and return result count.
     func count<T>(
         _ entity: T.Type,
         sortDescriptors: [FetchRequest.SortDescriptor] = [],
-        predicate: Predicate? = nil,
+        predicate: FetchRequest.Predicate? = nil,
         fetchLimit: Int = 0,
         fetchOffset: Int = 0
     ) async throws -> UInt where T: Entity {

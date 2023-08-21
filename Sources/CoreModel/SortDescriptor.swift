@@ -8,7 +8,7 @@
 
 public extension FetchRequest {
     
-    struct SortDescriptor: Codable, Equatable, Hashable {
+    struct SortDescriptor: Codable, Equatable, Hashable, Sendable {
         
         public var property: PropertyKey
         

@@ -7,8 +7,10 @@
 
 import Foundation
 
+// MARK: - Attribute
+
 /// CoreModel Attribute Value
-public enum AttributeValue: Equatable, Hashable, Codable {
+public enum AttributeValue: Equatable, Hashable, Codable, Sendable {
     
     case null
     case string(String)
@@ -25,8 +27,10 @@ public enum AttributeValue: Equatable, Hashable, Codable {
     case decimal(Decimal)
 }
 
+// MARK: - Relationship
+
 /// CoreModel Relationship Value
-public enum RelationshipValue: Equatable, Hashable, Codable {
+public enum RelationshipValue: Equatable, Hashable, Codable, Sendable {
     
     case null
     case toOne(ObjectID)
