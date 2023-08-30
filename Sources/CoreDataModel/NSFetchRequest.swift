@@ -27,6 +27,20 @@ public extension FetchRequest {
         }
         sortDescriptors.append(NSSortDescriptor(key: NSManagedObject.BuiltInProperty.id.rawValue, ascending: true))
         fetchRequest.sortDescriptors = sortDescriptors
+        let resultType: NSFetchRequestResultType
+        if result == NSManagedObject.self {
+            resultType = .managedObjectResultType
+        } else if result == NSManagedObjectID.self {
+            resultType = .managedObjectIDResultType
+        } else if result == NSNumber.self {
+            resultType = .countResultType
+        } else if result == NSDictionary.self {
+            resultType = .dictionaryResultType
+        } else {
+            assertionFailure()
+            resultType = .managedObjectResultType
+        }
+        fetchRequest.resultType = resultType
         return fetchRequest
     }
 }
