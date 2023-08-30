@@ -22,9 +22,11 @@ public extension FetchRequest {
         let fetchRequest = NSFetchRequest<ResultType>(entityName: entity.rawValue)
         fetchRequest.predicate = predicate?.toFoundation()
         fetchRequest.fetchLimit = fetchLimit
-        fetchRequest.sortDescriptors = sortDescriptors.map {
+        var sortDescriptors = sortDescriptors.map {
             NSSortDescriptor(key: $0.property.rawValue, ascending: $0.ascending)
         }
+        sortDescriptors.append(NSSortDescriptor(key: NSManagedObject.BuiltInProperty.id.rawValue, ascending: true))
+        fetchRequest.sortDescriptors = sortDescriptors
         return fetchRequest
     }
 }
