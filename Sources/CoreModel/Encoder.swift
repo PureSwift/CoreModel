@@ -94,7 +94,7 @@ internal extension ModelDataEncoder {
     func setAttribute(_ value: AttributeValue, forKey key: PropertyKey) throws {
         log?("Will set \(value) for attribute \"\(key)\"")
         guard relationships.keys.contains(key) == false else {
-            assertionFailure()
+            assertionFailure("Trying to set \(value) for relationship \(key)")
             throw EncodingError.invalidValue(value, EncodingError.Context(codingPath: codingPath, debugDescription: "Cannot set attribute value \(value) for relationship \(key)."))
         }
         guard attributes.keys.contains(key) else {
@@ -128,8 +128,10 @@ internal extension ModelDataEncoder {
     
     func setEncodable <T: Encodable> (_ value: T, forKey key: PropertyKey) throws {
         
-        if let encodable = value as? AttributeEncodable, attributes.keys.contains(key) {
+        if attributes.keys.contains(key), let encodable = value as? AttributeEncodable {
             try setAttribute(encodable.attributeValue, forKey: key)
+        } else if relationships.keys.contains(key), let id = value as? ObjectIDConvertible {
+            try setRelationship(.toOne(ObjectID(id)), forKey: key)
         } else {
             // encode using Encodable, container should write directly.
             try value.encode(to: self)
