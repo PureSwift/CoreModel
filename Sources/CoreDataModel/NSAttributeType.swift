@@ -76,6 +76,10 @@ public extension AttributeType {
             return nil
         case .objectIDAttributeType:
             return nil
+        #if swift(>=5.9)
+        case .compositeAttributeType:
+            return nil
+        #endif
         @unknown default:
             return nil
         }
