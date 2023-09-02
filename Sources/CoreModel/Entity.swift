@@ -52,3 +52,21 @@ public extension EntityDescription {
         self.init(id: T.entityName, attributes: attributes, relationships: relationships)
     }
 }
+
+public extension Relationship {
+    
+    init<Entity, DestinationEntity>(
+        id: Entity.CodingKeys,
+        entity: Entity.Type,
+        destination: DestinationEntity.Type,
+        type: RelationshipType,
+        inverseRelationship: DestinationEntity.CodingKeys
+    ) where Entity: CoreModel.Entity, DestinationEntity: CoreModel.Entity {
+        self.init(
+            id: PropertyKey(id),
+            type: type,
+            destinationEntity: destination.entityName,
+            inverseRelationship: PropertyKey(inverseRelationship)
+        )
+    }
+}
