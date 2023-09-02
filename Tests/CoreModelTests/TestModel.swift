@@ -49,11 +49,12 @@ extension Person: Entity {
     
     static var relationships: [CodingKeys: Relationship] {
         [
-            .events: .init(
-                id: PropertyKey(CodingKeys.events),
+            .events: Relationship(
+                id: .events,
+                entity: Person.self,
+                destination: Event.self,
                 type: .toMany,
-                destinationEntity: Event.entityName,
-                inverseRelationship: PropertyKey(Event.CodingKeys.people)
+                inverseRelationship: .people
             )
         ]
     }
