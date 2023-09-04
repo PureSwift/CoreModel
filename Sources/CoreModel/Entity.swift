@@ -29,6 +29,10 @@ public extension Entity {
     static var entityName: EntityName {
         EntityName(rawValue: String(describing: Self.self))
     }
+    
+    static var attributes: [CodingKeys: AttributeType] { [:] }
+    
+    static var relationships: [CodingKeys: Relationship] { [:] }
 }
 
 public extension Model {
