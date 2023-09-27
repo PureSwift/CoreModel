@@ -34,7 +34,7 @@ extension NSManagedObjectContext: ModelStorage {
         try insert(value, model: model)
     }
     
-    public func insert(_ values: [ModelData]) async throws {
+    public func insert(_ values: [ModelData]) throws {
         guard let model = self.persistentStoreCoordinator?.managedObjectModel else {
             assertionFailure("Missing model")
             throw CocoaError(.coreData)
@@ -83,8 +83,10 @@ internal extension NSManagedObjectContext {
             entity: entityName,
             predicate: NSManagedObject.BuiltInProperty.id.rawValue == id.rawValue,
             fetchLimit: 1
-        )
-        return try fetchObjects(fetchRequest).first
+        ).toFoundation(NSManagedObjectID.self)
+        assert(fetchRequest.resultType == .managedObjectIDResultType)
+        let objectIDs = try self.fetch(fetchRequest)
+        return objectIDs.first.flatMap { self.object(with: $0) }
     }
     
     func insert(

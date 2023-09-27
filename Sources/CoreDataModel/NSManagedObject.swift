@@ -35,8 +35,6 @@ internal extension NSManagedObject {
             throw CocoaError(.coreData)
         }
         
-        let value: AttributeValue
-        
         switch attributeType {
         case .bool:
             guard let value = objectValue as? Bool else {
