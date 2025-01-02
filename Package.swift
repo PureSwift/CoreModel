@@ -1,4 +1,4 @@
-// swift-tools-version:5.7
+// swift-tools-version:6.0
 import PackageDescription
 
 let package = Package(
@@ -31,6 +31,9 @@ let package = Package(
             name: "CoreDataModel",
             dependencies: [
                 "CoreModel"
+            ],
+            swiftSettings: [
+                .swiftLanguageMode(.v5)
             ]
         ),
         .testTarget(
@@ -39,7 +42,7 @@ let package = Package(
                 "CoreModel",
                 .byName(
                     name: "CoreDataModel",
-                    condition: .when(platforms: [.macOS, .iOS, .macCatalyst, .watchOS, .tvOS])
+                    condition: .when(platforms: [.macOS, .iOS, .macCatalyst, .watchOS, .tvOS, .visionOS])
                 )
             ]
         )
