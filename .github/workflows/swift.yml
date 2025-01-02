@@ -28,7 +28,7 @@ jobs:
     name: Test
     strategy:
       matrix:
-        swift: [5.8.1]
+        swift: [6.0.3]
         os: [ubuntu-20.04, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
