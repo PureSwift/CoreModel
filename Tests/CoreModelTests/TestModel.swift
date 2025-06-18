@@ -11,7 +11,6 @@ import CoreModel
 @Entity
 struct Person: Equatable, Hashable, Codable, Identifiable, Entity {
     
-    @Attribute
     let id: UUID
     
     @Attribute

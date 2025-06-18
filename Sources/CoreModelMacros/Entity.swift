@@ -172,6 +172,8 @@ extension EntityMacro {
         providingMembersOf declaration: some DeclGroupSyntax,
         in context: some MacroExpansionContext
     ) throws -> DeclSyntax {
+        
+        let entityName = try typeName(of: node, providingMembersOf: declaration, in: context)
 
         var relationshipEntries: [String] = []
 
@@ -203,19 +205,21 @@ extension EntityMacro {
                 if attr.attributeName.description == "Relationship" {
                     
                     guard let arguments = attr.arguments?.as(LabeledExprListSyntax.self),
-                       let inverseArg = arguments.first(where: { $0.label?.text == "inverse" }) else {
+                       let inverseArg = arguments.first(where: { $0.label?.text == "inverse" }),
+                          let keyPathExpr = inverseArg.expression.as(KeyPathExprSyntax.self),
+                          let lastComponent = keyPathExpr.components.last else {
                         throw MacroError.unknownInverseRelationship(for: identifier)
                     }
                     
-                    let inverse = inverseArg.expression.description.trimmingCharacters(in: .whitespacesAndNewlines)
+                    let inverseKeyName = lastComponent
                     
                     let entry = """
                     .\(identifier): Relationship(
-                            id: .\(identifier),
-                            entity: Self.self,
-                            destination: \(destinationType).self,
-                            type: \(relationshipType),
-                            inverseRelationship: \(inverse)
+                        id: .\(identifier),
+                        entity: \(entityName).self,
+                        destination: \(destinationType).self,
+                        type: \(relationshipType),
+                        inverseRelationship: \(inverseKeyName)
                     )
                     """
                     relationshipEntries.append(entry)
