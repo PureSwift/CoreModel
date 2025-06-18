@@ -84,7 +84,7 @@ extension EntityMacro {
             entityName = try typeName(of: node, providingMembersOf: declaration, in: context)
         }
         let entityNameDecl = """
-        static var entityName: String { "\(entityName)" }
+        public static var entityName: String { "\(entityName)" }
         """
         return DeclSyntax(stringLiteral: entityNameDecl)
     }
@@ -159,7 +159,7 @@ extension EntityMacro {
         }
 
         let attributesDecl = """
-        static var attributes: [CodingKeys: AttributeType] {
+        public static var attributes: [CodingKeys: AttributeType] {
             [\n                \(attributeEntries.joined(separator: ",\n                "))
             ]
         }
@@ -235,7 +235,7 @@ extension EntityMacro {
         }
 
         let relationshipsDecl = """
-        static var relationships: [CodingKeys: Relationship] {
+        public static var relationships: [CodingKeys: Relationship] {
             [\n            \(relationshipEntries.joined(separator: ",\n            "))
             ]
         }
