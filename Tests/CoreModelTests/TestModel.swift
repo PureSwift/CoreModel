@@ -8,14 +8,19 @@
 import Foundation
 import CoreModel
 
-struct Person: Equatable, Hashable, Codable, Identifiable {
+@Entity
+struct Person: Equatable, Hashable, Codable, Identifiable, Entity {
     
+    @Attribute
     let id: UUID
     
+    @Attribute
     var name: String
     
+    @Attribute
     var created: Date
     
+    @Attribute
     var age: UInt
     
     var events: [Event.ID]
@@ -35,17 +40,10 @@ struct Person: Equatable, Hashable, Codable, Identifiable {
         case age
         case events
     }
+    
 }
 
-extension Person: Entity {
-        
-    static var attributes: [CodingKeys: AttributeType] {
-        [
-            .name: .string,
-            .created: .date,
-            .age: .int16
-        ]
-    }
+extension Person {
     
     static var relationships: [CodingKeys: Relationship] {
         [
