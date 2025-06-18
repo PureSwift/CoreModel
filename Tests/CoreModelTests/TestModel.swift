@@ -337,18 +337,24 @@ extension Campground.Schedule: AttributeDecodable {
 public extension Campground {
     
     /// Campground Rental Unit
-    struct RentalUnit: Equatable, Hashable, Codable, Identifiable {
+    @Entity
+    struct RentalUnit: Equatable, Hashable, Codable, Identifiable, Entity {
         
         public let id: UUID
         
+        @Relationship(destination: Campground.self, inverse: .units)
         public let campground: Campground.ID
         
+        @Attribute
         public var name: String
         
+        @Attribute(.string)
         public var notes: String?
         
+        @Attribute(.string)
         public var amenities: [Amenity]
         
+        @Attribute(.string)
         public var checkout: Schedule
         
         public init(
@@ -376,28 +382,5 @@ public extension Campground {
             case amenities
             case checkout
         }
-    }
-}
-
-extension Campground.RentalUnit: Entity {
-        
-    public static var attributes: [CodingKeys: AttributeType] {
-        [
-            .name : .string,
-            .notes : .string,
-            .amenities : .string,
-            .checkout : .string
-        ]
-    }
-    
-    public static var relationships: [CodingKeys: Relationship] {
-        [
-            .campground : Relationship(
-                id: PropertyKey(CodingKeys.campground),
-                type: .toOne,
-                destinationEntity: Campground.entityName,
-                inverseRelationship: PropertyKey(Campground.CodingKeys.units)
-            )
-        ]
     }
 }
