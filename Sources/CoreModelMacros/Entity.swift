@@ -173,73 +173,64 @@ extension EntityMacro {
         in context: some MacroExpansionContext
     ) throws -> DeclSyntax {
 
-        var entries: [String] = []
+        var relationshipEntries: [String] = []
 
         for member in declaration.memberBlock.members {
             guard let varDecl = member.decl.as(VariableDeclSyntax.self),
                   let binding = varDecl.bindings.first,
-                  let propertyName = binding.pattern.as(IdentifierPatternSyntax.self)?.identifier.text
-                else { continue }
+                  let identifier = binding.pattern.as(IdentifierPatternSyntax.self)?.identifier.text,
+                  let typeSyntax = binding.typeAnnotation?.type else { continue }
+
             
             let attributes = varDecl.attributes
+            
+            let rawType = typeSyntax.description.trimmingCharacters(in: .whitespacesAndNewlines)
+
+            var relationshipType = ".toOne"
+            var destinationType = rawType
+
+            if rawType.hasPrefix("[") && rawType.hasSuffix("]") {
+                relationshipType = ".toMany"
+                destinationType = String(rawType.dropFirst().dropLast()).trimmingCharacters(in: .whitespaces)
+            }
+
+            // Handle .ID suffix
+            if destinationType.hasSuffix(".ID") {
+                destinationType = String(destinationType.dropLast(3)) // remove ".ID"
+            }
 
             for attr in attributes.compactMap({ $0.as(AttributeSyntax.self) }) {
                 if attr.attributeName.description == "Relationship" {
-                    // Infer destination type and toMany based on the property's type
-                    var toMany = false
-                    var destinationType = "UnknownType"
-
-                    if let typeSyntax = binding.typeAnnotation?.type {
-                        let typeStr = typeSyntax.description.trimmingCharacters(in: .whitespacesAndNewlines)
-
-                        if typeStr.hasPrefix("[") && typeStr.hasSuffix("]") {
-                            toMany = true
-                            let start = typeStr.index(after: typeStr.startIndex)
-                            let end = typeStr.index(before: typeStr.endIndex)
-                            destinationType = String(typeStr[start..<end])
-                        } else {
-                            destinationType = typeStr
-                        }
+                    
+                    guard let arguments = attr.arguments?.as(LabeledExprListSyntax.self),
+                       let inverseArg = arguments.first(where: { $0.label?.text == "inverse" }) else {
+                        throw MacroError.unknownInverseRelationship(for: identifier)
                     }
-
-                    // Extract inverse relationship name if provided
-                    var inverseName = "unknown"
-                    if let args = attr.arguments?.as(LabeledExprListSyntax.self) {
-                        for arg in args {
-                            if arg.label?.text == "inverse",
-                               let expr = arg.expression.as(MemberAccessExprSyntax.self) {
-                                inverseName = expr.name.text
-                            }
-                        }
-                    }
-
-                    let typeStr = toMany ? ".toMany" : ".toOne"
-
-                    let entityType = try typeName(of: node, providingMembersOf: declaration, in: context)
-
+                    
+                    let inverse = inverseArg.expression.description.trimmingCharacters(in: .whitespacesAndNewlines)
+                    
                     let entry = """
-                    .\(propertyName): Relationship(
-                        id: .\(propertyName),
-                        entity: \(entityType).self,
-                        destination: \(destinationType).self,
-                        type: \(typeStr),
-                        inverseRelationship: .\(inverseName)
+                    .\(identifier): Relationship(
+                            id: .\(identifier),
+                            entity: Self.self,
+                            destination: \(destinationType).self,
+                            type: \(relationshipType),
+                            inverseRelationship: \(inverse)
                     )
                     """
-
-                    entries.append(entry)
+                    relationshipEntries.append(entry)
                 }
             }
         }
 
         let relationshipsDecl = """
         static var relationships: [CodingKeys: Relationship] {
-            [
-                \(entries.joined(separator: ",\n            "))
+            [\n            \(relationshipEntries.joined(separator: ",\n            "))
             ]
         }
         """
 
         return DeclSyntax(stringLiteral: relationshipsDecl)
     }
+
 }

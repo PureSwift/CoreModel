@@ -45,18 +45,6 @@ struct Person: Equatable, Hashable, Codable, Identifiable, Entity {
 
 extension Person {
     
-    static var relationships: [CodingKeys: Relationship] {
-        [
-            .events: Relationship(
-                id: .events,
-                entity: Person.self,
-                destination: Event.self,
-                type: .toMany,
-                inverseRelationship: .people
-            )
-        ]
-    }
-    
     init(from container: ModelData) throws {
         guard container.entity == Self.entityName else {
             throw DecodingError.typeMismatch(Self.self, DecodingError.Context(codingPath: [], debugDescription: "Cannot decode \(String(describing: Self.self)) from \(container.entity)"))
