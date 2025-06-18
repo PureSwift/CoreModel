@@ -20,7 +20,7 @@ struct Person: Equatable, Hashable, Codable, Identifiable, Entity {
     @Attribute
     var created: Date
     
-    @Attribute
+    @Attribute(.int16)
     var age: UInt
     
     var events: [Event.ID]

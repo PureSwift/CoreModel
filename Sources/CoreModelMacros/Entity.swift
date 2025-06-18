@@ -96,17 +96,19 @@ extension EntityMacro {
     ) throws -> DeclSyntax {
         // Collect @Attribute properties with metadata
         var attributeEntries: [String] = []
-/*
-        for member in declaration.memberBlock {
+        
+        for member in declaration.memberBlock.members {
             guard let varDecl = member.decl.as(VariableDeclSyntax.self),
                   let binding = varDecl.bindings.first,
                   let identifier = binding.pattern.as(IdentifierPatternSyntax.self)?.identifier.text,
-                  let typeSyntax = binding.typeAnnotation?.type,
-                  let attributes = varDecl.attributes else { continue }
+                  let typeSyntax = binding.typeAnnotation?.type
+                  else { continue }
 
+            let attributes = varDecl.attributes
+            
             let typeName = typeSyntax.description.trimmingCharacters(in: .whitespacesAndNewlines)
             
-            let inferredType: String
+            let inferredType: String?
 
             switch typeName {
             case "String":
@@ -122,7 +124,7 @@ extension EntityMacro {
             case "Int64":
                 inferredType = ".int64"
             case "Int":
-                inferredType = ".int64" // Default Int maps to int64
+                inferredType = ".int64"
             case "Float":
                 inferredType = ".float"
             case "Double":
@@ -136,22 +138,26 @@ extension EntityMacro {
             case "Decimal":
                 inferredType = ".decimal"
             default:
-                inferredType = ".string" // fallback, or emit a compiler diagnostic
+                inferredType = nil
             }
-
+            
             for attr in attributes.compactMap({ $0.as(AttributeSyntax.self) }) {
                 if attr.attributeName.description == "Attribute" {
+                    let type: String
                     if let argument = attr.argument?.description.trimmingCharacters(in: .whitespacesAndNewlines) {
                         // Use explicit parameter
-                        attributeEntries.append(".\(identifier): \(argument)")
-                    } else {
+                        type = argument
+                    } else if let inferredType {
                         // Use inferred type
-                        attributeEntries.append(".\(identifier): AttributeType(\(inferredType))")
+                        type = inferredType
+                    } else {
+                        throw MacroError.unknownAttributeType(for: identifier)
                     }
+                    attributeEntries.append(".\(identifier): \(type)")
                 }
             }
         }
-*/
+
         let attributesDecl = """
         static var attributes: [CodingKeys: AttributeType] {
             [\n                \(attributeEntries.joined(separator: ",\n                "))

@@ -8,4 +8,5 @@
 enum MacroError: Error {
     
     case invalidType
+    case unknownAttributeType(for: String)
 }

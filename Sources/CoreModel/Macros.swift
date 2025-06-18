@@ -14,7 +14,7 @@ public macro Entity(_ name: String? = nil) = #externalMacro(
 )
 
 @attached(peer)
-public macro Attribute(type: AttributeType? = nil) = #externalMacro(
+public macro Attribute(_ type: AttributeType? = nil) = #externalMacro(
     module: "CoreModelMacros",
     type: "AttributeMacro"
 )
