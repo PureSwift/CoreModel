@@ -144,7 +144,7 @@ extension EntityMacro {
             for attr in attributes.compactMap({ $0.as(AttributeSyntax.self) }) {
                 if attr.attributeName.description == "Attribute" {
                     let type: String
-                    if let argument = attr.argument?.description.trimmingCharacters(in: .whitespacesAndNewlines) {
+                    if let argument = attr.arguments?.description.trimmingCharacters(in: .whitespacesAndNewlines) {
                         // Use explicit parameter
                         type = argument
                     } else if let inferredType {
@@ -172,13 +172,74 @@ extension EntityMacro {
         providingMembersOf declaration: some DeclGroupSyntax,
         in context: some MacroExpansionContext
     ) throws -> DeclSyntax {
-        
+
+        var entries: [String] = []
+
+        for member in declaration.memberBlock.members {
+            guard let varDecl = member.decl.as(VariableDeclSyntax.self),
+                  let binding = varDecl.bindings.first,
+                  let propertyName = binding.pattern.as(IdentifierPatternSyntax.self)?.identifier.text
+                else { continue }
+            
+            let attributes = varDecl.attributes
+
+            for attr in attributes.compactMap({ $0.as(AttributeSyntax.self) }) {
+                if attr.attributeName.description == "Relationship" {
+                    // Infer destination type and toMany based on the property's type
+                    var toMany = false
+                    var destinationType = "UnknownType"
+
+                    if let typeSyntax = binding.typeAnnotation?.type {
+                        let typeStr = typeSyntax.description.trimmingCharacters(in: .whitespacesAndNewlines)
+
+                        if typeStr.hasPrefix("[") && typeStr.hasSuffix("]") {
+                            toMany = true
+                            let start = typeStr.index(after: typeStr.startIndex)
+                            let end = typeStr.index(before: typeStr.endIndex)
+                            destinationType = String(typeStr[start..<end])
+                        } else {
+                            destinationType = typeStr
+                        }
+                    }
+
+                    // Extract inverse relationship name if provided
+                    var inverseName = "unknown"
+                    if let args = attr.arguments?.as(LabeledExprListSyntax.self) {
+                        for arg in args {
+                            if arg.label?.text == "inverse",
+                               let expr = arg.expression.as(MemberAccessExprSyntax.self) {
+                                inverseName = expr.name.text
+                            }
+                        }
+                    }
+
+                    let typeStr = toMany ? ".toMany" : ".toOne"
+
+                    let entityType = try typeName(of: node, providingMembersOf: declaration, in: context)
+
+                    let entry = """
+                    .\(propertyName): Relationship(
+                        id: .\(propertyName),
+                        entity: \(entityType).self,
+                        destination: \(destinationType).self,
+                        type: \(typeStr),
+                        inverseRelationship: .\(inverseName)
+                    )
+                    """
+
+                    entries.append(entry)
+                }
+            }
+        }
+
         let relationshipsDecl = """
-        static var relationships: [CodingKeys: RelationshipType] {
-            [:]
+        static var relationships: [CodingKeys: Relationship] {
+            [
+                \(entries.joined(separator: ",\n            "))
+            ]
         }
         """
-        
+
         return DeclSyntax(stringLiteral: relationshipsDecl)
     }
 }

@@ -23,6 +23,7 @@ struct Person: Equatable, Hashable, Codable, Identifiable, Entity {
     @Attribute(.int16)
     var age: UInt
     
+    @Relationship(inverse: \Event.people)
     var events: [Event.ID]
     
     init(id: UUID = UUID(), name: String, created: Date = Date(), age: UInt, events: [Event.ID] = []) {
@@ -40,7 +41,6 @@ struct Person: Equatable, Hashable, Codable, Identifiable, Entity {
         case age
         case events
     }
-    
 }
 
 extension Person {

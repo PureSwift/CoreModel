@@ -7,7 +7,7 @@
 
 
 
-@attached(member, names: named(entityName))
+@attached(member, names: arbitrary)
 public macro Entity(_ name: String? = nil) = #externalMacro(
     module: "CoreModelMacros",
     type: "EntityMacro"
@@ -20,7 +20,7 @@ public macro Attribute(_ type: AttributeType? = nil) = #externalMacro(
 )
 
 @attached(peer)
-public macro Relationship<K: CodingKey>(inverse: CodingKey) = #externalMacro(
+public macro Relationship<Root, Value>(inverse: KeyPath<Root, Value>) = #externalMacro(
     module: "CoreModelMacros",
     type: "RelationshipMacro"
 )
