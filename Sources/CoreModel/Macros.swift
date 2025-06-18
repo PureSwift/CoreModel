@@ -6,6 +6,7 @@
 //
 
 @attached(member, names: arbitrary)
+@attached(extension, conformances: CoreModel.Entity)
 public macro Entity(_ name: String? = nil) = #externalMacro(
     module: "CoreModelMacros",
     type: "EntityMacro"

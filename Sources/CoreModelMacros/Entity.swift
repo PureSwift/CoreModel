@@ -13,7 +13,7 @@ import SwiftSyntaxMacros
 /// `@Entity` macro
 ///
 /// Adds protocol conformance and implementaion for entity name.
-public struct EntityMacro: MemberMacro {
+public struct EntityMacro: MemberMacro, ExtensionMacro {
     
     public static var expansionNames: [String] {
         [
@@ -21,6 +21,34 @@ public struct EntityMacro: MemberMacro {
             "attributes",
             "relationships"
         ]
+    }
+    
+    // Add protocol conformance via extension
+    public static func expansion(
+        of node: AttributeSyntax,
+        attachedTo declaration: some DeclGroupSyntax,
+        providingExtensionsOf type: some TypeSyntaxProtocol,
+        conformingTo protocols: [TypeSyntax],
+        in context: some MacroExpansionContext
+    ) throws -> [ExtensionDeclSyntax] {
+        let extensionDecl = ExtensionDeclSyntax(
+            leadingTrivia: nil,
+            attributes: [],
+            modifiers: [],
+            extensionKeyword: .keyword(.extension),
+            extendedType: TypeSyntax(type),
+            inheritanceClause: InheritanceClauseSyntax(
+                colon: .colonToken(trailingTrivia: .space),
+                inheritedTypes: InheritedTypeListSyntax {
+                    InheritedTypeSyntax(
+                        type: TypeSyntax(stringLiteral: "CoreModel.Entity")
+                    )
+                }
+            ),
+            genericWhereClause: nil,
+            memberBlock: MemberBlockSyntax(members: [])
+        )
+        return [extensionDecl]
     }
     
     public static func expansion(
