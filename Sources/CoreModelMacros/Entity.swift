@@ -14,13 +14,39 @@ import SwiftSyntaxMacros
 ///
 /// Adds protocol conformance and implementaion for entity name.
 public struct EntityMacro: MemberMacro {
+    
+    public static var expansionNames: [String] {
+        [
+            "entityName",
+            "attributes",
+            "relationships"
+        ]
+    }
+    
     public static func expansion(
         of node: AttributeSyntax,
         providingMembersOf declaration: some DeclGroupSyntax,
         in context: some MacroExpansionContext
     ) throws -> [DeclSyntax] {
+        let entityNameDeclarationSyntax = try entityNameDeclarationSyntax(of: node, providingMembersOf: declaration, in: context)
+        let attributesDeclarationSyntax = try attributesDeclarationSyntax(of: node, providingMembersOf: declaration, in: context)
+        let relationshipsDeclarationSyntax = try relationshipsDeclarationSyntax(of: node, providingMembersOf: declaration, in: context)
+        return [
+            entityNameDeclarationSyntax,
+            attributesDeclarationSyntax,
+            relationshipsDeclarationSyntax
+        ]
+    }
+}
 
-        // get type name
+extension EntityMacro {
+    
+    public static func typeName(
+        of node: AttributeSyntax,
+        providingMembersOf declaration: some DeclGroupSyntax,
+        in context: some MacroExpansionContext
+    ) throws -> String {
+        // Extract type name
         let typeName: String
         if let structDecl = declaration.as(StructDeclSyntax.self) {
             typeName = structDecl.name.text
@@ -31,23 +57,47 @@ public struct EntityMacro: MemberMacro {
         } else {
             throw MacroError.invalidType
         }
-        
+        return typeName
+    }
+    
+    public static func explicitEntityName(
+        of node: AttributeSyntax,
+        providingMembersOf declaration: some DeclGroupSyntax,
+        in context: some MacroExpansionContext
+    ) throws -> String? {
         // Extract optional entity name
-        let nameArg = (node.arguments?.firstToken(viewMode: .sourceAccurate) as? LabeledExprListSyntax)?
+        return (node.arguments?.firstToken(viewMode: .sourceAccurate) as? LabeledExprListSyntax)?
             .first?
             .expression
             .description
             .trimmingCharacters(in: .punctuationCharacters)
-        
-        let entityName = nameArg ?? typeName
-
+    }
+    
+    public static func entityNameDeclarationSyntax(
+        of node: AttributeSyntax,
+        providingMembersOf declaration: some DeclGroupSyntax,
+        in context: some MacroExpansionContext
+    ) throws -> DeclSyntax {
+        let entityName: String
+        if let entityNameArgument = try explicitEntityName(of: node, providingMembersOf: declaration, in: context) {
+            entityName = entityNameArgument
+        } else {
+            entityName = try typeName(of: node, providingMembersOf: declaration, in: context)
+        }
         let entityNameDecl = """
         static var entityName: String { "\(entityName)" }
         """
-
+        return DeclSyntax(stringLiteral: entityNameDecl)
+    }
+    
+    public static func attributesDeclarationSyntax(
+        of node: AttributeSyntax,
+        providingMembersOf declaration: some DeclGroupSyntax,
+        in context: some MacroExpansionContext
+    ) throws -> DeclSyntax {
         // Collect @Attribute properties with metadata
         var attributeEntries: [String] = []
-/*
+
         for member in declaration.memberBlock {
             guard let varDecl = member.decl.as(VariableDeclSyntax.self),
                   let binding = varDecl.bindings.first,
@@ -56,22 +106,38 @@ public struct EntityMacro: MemberMacro {
                   let attributes = varDecl.attributes else { continue }
 
             let typeName = typeSyntax.description.trimmingCharacters(in: .whitespacesAndNewlines)
+            
             let inferredType: String
 
-            if typeName.hasPrefix("Optional") || typeName.hasSuffix("?") {
-                inferredType = ".optional"
-            } else if typeName == "String" {
+            switch typeName {
+            case "String":
                 inferredType = ".string"
-            } else if typeName == "Int" || typeName == "Int64" || typeName == "Int32" {
-                inferredType = ".integer"
-            } else if typeName == "Double" || typeName == "Float" {
+            case "Data":
+                inferredType = ".data"
+            case "Bool":
+                inferredType = ".bool"
+            case "Int16":
+                inferredType = ".int16"
+            case "Int32":
+                inferredType = ".int32"
+            case "Int64":
+                inferredType = ".int64"
+            case "Int":
+                inferredType = ".int64" // Default Int maps to int64
+            case "Float":
                 inferredType = ".float"
-            } else if typeName == "Bool" {
-                inferredType = ".boolean"
-            } else if typeName == "Date" {
+            case "Double":
+                inferredType = ".double"
+            case "Date":
                 inferredType = ".date"
-            } else {
-                inferredType = ".unsupported(\"\(typeName)\")"
+            case "UUID":
+                inferredType = ".uuid"
+            case "URL":
+                inferredType = ".url"
+            case "Decimal":
+                inferredType = ".decimal"
+            default:
+                inferredType = ".string" // fallback, or emit a compiler diagnostic
             }
 
             for attr in attributes.compactMap({ $0.as(AttributeSyntax.self) }) {
@@ -85,7 +151,7 @@ public struct EntityMacro: MemberMacro {
                     }
                 }
             }
-        }*/
+        }
 
         let attributesDecl = """
         static var attributes: [CodingKeys: AttributeType] {
@@ -93,11 +159,21 @@ public struct EntityMacro: MemberMacro {
             ]
         }
         """
-
-        return [
-            DeclSyntax(stringLiteral: entityNameDecl),
-            DeclSyntax(stringLiteral: attributesDecl)
-        ]
+        return DeclSyntax(stringLiteral: attributesDecl)
+    }
+    
+    public static func relationshipsDeclarationSyntax(
+        of node: AttributeSyntax,
+        providingMembersOf declaration: some DeclGroupSyntax,
+        in context: some MacroExpansionContext
+    ) throws -> DeclSyntax {
+        
+        let relationshipsDecl = """
+        static var relationships: [CodingKeys: RelationshipType] {
+            [:]
+        }
+        """
+        
+        return DeclSyntax(stringLiteral: relationshipsDecl)
     }
 }
-
