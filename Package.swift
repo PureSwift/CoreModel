@@ -1,5 +1,6 @@
 // swift-tools-version:6.0
 import PackageDescription
+import CompilerPluginSupport
 
 let package = Package(
     name: "CoreModel",
@@ -23,9 +24,18 @@ let package = Package(
             ]
         )
     ],
+    dependencies: [
+        .package(
+            url: "https://github.com/apple/swift-syntax.git",
+            from: "600.0.1"
+        )
+    ],
     targets: [
         .target(
-            name: "CoreModel"
+            name: "CoreModel",
+            dependencies: [
+                "CoreModelMacros"
+            ]
         ),
         .target(
             name: "CoreDataModel",
@@ -36,10 +46,24 @@ let package = Package(
                 .swiftLanguageMode(.v5)
             ]
         ),
+        .macro(
+          name: "CoreModelMacros",
+          dependencies: [
+              .product(
+                  name: "SwiftSyntaxMacros",
+                  package: "swift-syntax"
+              ),
+              .product(
+                  name: "SwiftCompilerPlugin",
+                  package: "swift-syntax"
+              )
+          ]
+        ),
         .testTarget(
             name: "CoreModelTests",
             dependencies: [
                 "CoreModel",
+                "CoreModelMacros",
                 .byName(
                     name: "CoreDataModel",
                     condition: .when(platforms: [.macOS, .iOS, .macCatalyst, .watchOS, .tvOS, .visionOS])
