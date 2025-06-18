@@ -101,36 +101,50 @@ struct Event: Equatable, Hashable, Codable, Identifiable, Entity {
 }
 
 /// Campground Location
-public struct Campground: Equatable, Hashable, Codable, Identifiable {
+@Entity("Campground")
+public struct Campground: Equatable, Hashable, Codable, Identifiable, Entity {
     
     public let id: UUID
     
+    @Attribute
     public let created: Date
     
+    @Attribute
     public let updated: Date
     
+    @Attribute
     public var name: String
     
+    @Attribute
     public var address: String
     
+    @Attribute(.string)
     public var location: LocationCoordinates
     
+    @Attribute(.string)
     public var amenities: [Amenity]
     
+    @Attribute(.string)
     public var phoneNumber: String?
     
+    @Attribute
     public var descriptionText: String
     
     /// The number of seconds from GMT.
+    @Attribute(.int32)
     public var timeZone: Int
     
+    @Attribute(.string)
     public var notes: String?
     
+    @Attribute(.string)
     public var directions: String?
     
-    public var units: [RentalUnit.ID]
-    
+    @Attribute(.string)
     public var officeHours: Schedule
+    
+    @Relationship(destination: RentalUnit.self, inverse: .campground)
+    public var units: [RentalUnit.ID]
     
     public init(
         id: UUID = UUID(),
@@ -179,37 +193,6 @@ public struct Campground: Equatable, Hashable, Codable, Identifiable {
         case directions
         case units
         case officeHours
-    }
-}
-
-extension Campground: Entity {
-    
-    public static var attributes: [CodingKeys: AttributeType] {
-        [
-            .name : .string,
-            .created : .date,
-            .updated : .date,
-            .address : .string,
-            .location: .string,
-            .amenities: .string,
-            .phoneNumber: .string,
-            .descriptionText: .string,
-            .timeZone: .int32,
-            .notes: .string,
-            .directions: .string,
-            .officeHours: .string
-        ]
-    }
-    
-    public static var relationships: [CodingKeys: Relationship] {
-        [
-            .units : Relationship(
-                id: PropertyKey(CodingKeys.units),
-                type: .toMany,
-                destinationEntity: RentalUnit.entityName,
-                inverseRelationship: PropertyKey(RentalUnit.CodingKeys.campground)
-            )
-        ]
     }
 }
 
