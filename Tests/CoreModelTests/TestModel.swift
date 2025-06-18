@@ -9,7 +9,7 @@ import Foundation
 import CoreModel
 
 @Entity
-struct Person: Equatable, Hashable, Codable, Identifiable, Entity {
+struct Person: Equatable, Hashable, Codable, Identifiable {
     
     let id: UUID
     
@@ -72,7 +72,7 @@ extension Person {
 }
 
 @Entity
-struct Event: Equatable, Hashable, Codable, Identifiable, Entity {
+struct Event: Equatable, Hashable, Codable, Identifiable {
     
     let id: UUID
     
@@ -102,7 +102,7 @@ struct Event: Equatable, Hashable, Codable, Identifiable, Entity {
 
 /// Campground Location
 @Entity("Campground")
-public struct Campground: Equatable, Hashable, Codable, Identifiable, Entity {
+public struct Campground: Equatable, Hashable, Codable, Identifiable {
     
     public let id: UUID
     
@@ -338,7 +338,7 @@ public extension Campground {
     
     /// Campground Rental Unit
     @Entity
-    struct RentalUnit: Equatable, Hashable, Codable, Identifiable, Entity {
+    struct RentalUnit: Equatable, Hashable, Codable, Identifiable {
         
         public let id: UUID
         
