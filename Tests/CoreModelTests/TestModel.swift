@@ -22,7 +22,7 @@ struct Person: Equatable, Hashable, Codable, Identifiable, Entity {
     @Attribute(.int16)
     var age: UInt
     
-    @Relationship(inverse: \Event.people)
+    @Relationship(destination: Event.self, inverse: .people)
     var events: [Event.ID]
     
     init(id: UUID = UUID(), name: String, created: Date = Date(), age: UInt, events: [Event.ID] = []) {
@@ -71,19 +71,19 @@ extension Person {
     }
 }
 
-struct Event: Equatable, Hashable, Codable, Identifiable {
+@Entity
+struct Event: Equatable, Hashable, Codable, Identifiable, Entity {
     
     let id: UUID
     
+    @Attribute
     var name: String
     
+    @Attribute
     var date: Date
     
+    @Relationship(destination: Person.self, inverse: .events)
     var people: [Person.ID]
-    
-    //var speaker: Person.ID?
-    
-    //var notes: String?
     
     init(id: UUID = UUID(), name: String, date: Date, people: [Person.ID] = []) {
         self.id = id
@@ -97,26 +97,6 @@ struct Event: Equatable, Hashable, Codable, Identifiable {
         case name
         case date
         case people
-    }
-}
-
-extension Event: Entity {
-        
-    static var attributes: [CodingKeys: AttributeType] {
-        [
-            .name: .string,
-            .date: .date
-        ]
-    }
-    
-    static var relationships: [CodingKeys: Relationship] {
-        [
-            .people: .init(
-                id: PropertyKey(CodingKeys.people),
-                type: .toMany,
-                destinationEntity: Person.entityName,
-                inverseRelationship: PropertyKey(Person.CodingKeys.events))
-        ]
     }
 }
 
