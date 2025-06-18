@@ -6,16 +6,16 @@
 //
 
 import Foundation
-import XCTest
+import Testing
 @testable import CoreModel
 
-final class CoreModelTests: XCTestCase {
+@Suite struct CoreModelTests {
     
-    func testEntityName() {
+    @Test func entityName() {
         
-        XCTAssertEqual(Person.entityName, "Person")
-        XCTAssertEqual(Event.entityName, "Event")
-        XCTAssertEqual(Campground.entityName, "Campground")
-        XCTAssertEqual(Campground.RentalUnit.entityName, "RentalUnit")
+        #expect(Person.entityName == "Person")
+        #expect(Event.entityName == "Event")
+        #expect(Campground.entityName == "Campground")
+        #expect(Campground.RentalUnit.entityName == "RentalUnit")
     }
 }
