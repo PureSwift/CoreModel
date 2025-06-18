@@ -106,40 +106,22 @@ extension EntityMacro {
 
             let attributes = varDecl.attributes
             
-            let typeName = typeSyntax.description.trimmingCharacters(in: .whitespacesAndNewlines)
+            let rawTypeName = typeSyntax.description.trimmingCharacters(in: .whitespacesAndNewlines)
             
-            let inferredType: String?
-
-            switch typeName {
-            case "String":
-                inferredType = ".string"
-            case "Data":
-                inferredType = ".data"
-            case "Bool":
-                inferredType = ".bool"
-            case "Int16":
-                inferredType = ".int16"
-            case "Int32":
-                inferredType = ".int32"
-            case "Int64":
-                inferredType = ".int64"
-            case "Int":
-                inferredType = ".int64"
-            case "Float":
-                inferredType = ".float"
-            case "Double":
-                inferredType = ".double"
-            case "Date":
-                inferredType = ".date"
-            case "UUID":
-                inferredType = ".uuid"
-            case "URL":
-                inferredType = ".url"
-            case "Decimal":
-                inferredType = ".decimal"
-            default:
-                inferredType = nil
+            // Strip Optional
+            let typeName: String
+            if rawTypeName.hasPrefix("Optional<") {
+                typeName = rawTypeName
+                    .replacingOccurrences(of: "Optional<", with: "")
+                    .dropLast()
+                    .trimmingCharacters(in: .whitespacesAndNewlines)
+            } else if rawTypeName.hasSuffix("?") {
+                typeName = String(rawTypeName.dropLast()).trimmingCharacters(in: .whitespacesAndNewlines)
+            } else {
+                typeName = rawTypeName
             }
+            
+            let inferredType = inferAttributeType(from: typeName)
             
             for attr in attributes.compactMap({ $0.as(AttributeSyntax.self) }) {
                 if attr.attributeName.description == "Attribute" {
