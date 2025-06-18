@@ -9,14 +9,15 @@
 
 import Foundation
 import CoreData
-import XCTest
+import Testing
 @testable import CoreModel
 @testable import CoreDataModel
 
-@available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
-final class CoreDataTests: XCTestCase {
+@Suite
+struct CoreDataTests {
     
-    func testCoreData() async throws {
+    @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
+    @Test func coreData() async throws {
         
         let model = Model(
             entities:
@@ -53,10 +54,10 @@ final class CoreDataTests: XCTestCase {
         var event1Data = try event1.encode(log: { print("Encoder:", $0) })
         try await store.insert(event1Data)
         person1 = try await store.fetch(Person.self, for: person1.id)!
-        XCTAssertEqual(person1.events, [event1.id])
+        #expect(person1.events == [event1.id])
         event1Data = try await store.fetch(Event.entityName, for: ObjectID(event1.id))!
         event1 = try .init(from: event1Data, log: { print("Decoder:", $0) })
-        XCTAssertEqual(event1.people, [person1.id])
+        #expect(event1.people == [person1.id])
         
         var campground = Campground(
             name: "Fair Play RV Park",
@@ -81,21 +82,21 @@ final class CoreDataTests: XCTestCase {
         var campgroundData = try campground.encode(log: { print("Encoder:", $0) })
         try await store.insert(campgroundData)
         let rentalUnitData = try rentalUnit.encode(log: { print("Encoder:", $0) })
-        XCTAssertEqual(rentalUnitData.relationships[PropertyKey(Campground.RentalUnit.CodingKeys.campground)], .toOne(ObjectID(campground.id)))
+        #expect(rentalUnitData.relationships[PropertyKey(Campground.RentalUnit.CodingKeys.campground)] == .toOne(ObjectID(campground.id)))
         try await store.insert(rentalUnitData)
         campgroundData = try await store.fetch(Campground.entityName, for: ObjectID(campground.id))!
         campground = try .init(from: campgroundData, log: { print("Decoder:", $0) })
-        XCTAssertEqual(campground.units, [rentalUnit.id])
-        XCTAssertEqual(campgroundData.relationships[PropertyKey(Campground.CodingKeys.units)], .toMany([ObjectID(rentalUnit.id)]))
+        #expect(campground.units == [rentalUnit.id])
+        #expect(campgroundData.relationships[PropertyKey(Campground.CodingKeys.units)] == .toMany([ObjectID(rentalUnit.id)]))
         let fetchedRentalUnit = try await store.fetch(Campground.RentalUnit.self, for: rentalUnit.id)
-        XCTAssertEqual(fetchedRentalUnit, rentalUnit)
+        #expect(fetchedRentalUnit == rentalUnit)
         
         let rentalUnitFetchRequest = FetchRequest(
             entity: Campground.RentalUnit.entityName,
             predicate: Campground.RentalUnit.CodingKeys.campground.stringValue.compare(.equalTo, .relationship(.toOne(ObjectID(campground.id))))
         )
         let rentalUnitIDs = try await store.fetchID(rentalUnitFetchRequest)
-        XCTAssertEqual(rentalUnitIDs, campground.units.map { ObjectID($0) })
+        #expect(rentalUnitIDs == campground.units.map { ObjectID($0) })
     }
 }
 

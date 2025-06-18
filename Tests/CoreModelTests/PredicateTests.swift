@@ -6,30 +6,31 @@
 //
 
 import Foundation
-import XCTest
+import Testing
 @testable import CoreModel
 
-final class PredicateTests: XCTestCase {
+@Suite
+struct PredicateTests {
     
-    func testDescription() {
+    @Test func description() {
         
-        XCTAssertEqual((.keyPath("name") == .attribute(.string("Coleman"))).description, "name == \"Coleman\"")
-        XCTAssertEqual(((.keyPath("name") != .attribute(.null)) as FetchRequest.Predicate).description, "name != nil")
-        XCTAssertEqual((!(.keyPath("name") == .attribute(.null))).description, "NOT name == nil")
-        XCTAssertEqual(("isValid" == false).description, "isValid == false")
+        #expect((.keyPath("name") == .attribute(.string("Coleman"))).description == "name == \"Coleman\"")
+        #expect(((.keyPath("name") != .attribute(.null)) as FetchRequest.Predicate).description == "name != nil")
+        #expect((!(.keyPath("name") == .attribute(.null))).description == "NOT name == nil")
+        #expect(("isValid" == false).description == "isValid == false")
     }
     
-    func testPredicate1() {
+    @Test func predicate1() {
         
         let predicate: FetchRequest.Predicate = "id" > Int64(0)
             && "id" != Int64(99)
             && "name".compare(.beginsWith, .attribute(.string("C")))
             && "name".compare(.contains, [.diacriticInsensitive, .caseInsensitive], .attribute(.string("COLE")))
         
-        XCTAssertEqual(predicate.description, #"((id > 0 AND id != 99) AND name BEGINSWITH "C") AND name CONTAINS[cd] "COLE""#)
+        #expect(predicate.description == #"((id > 0 AND id != 99) AND name BEGINSWITH "C") AND name CONTAINS[cd] "COLE""#)
     }
     
-    func testPredicate2() {
+    @Test func predicate2() {
         
         let events = [
             Event(
@@ -76,7 +77,7 @@ final class PredicateTests: XCTestCase {
             ]
         
         #if !os(WASI)
-        XCTAssertEqual(predicate.description, #"name MATCHES[c] "event \d" AND start < 4001-01-01 00:00:00 +0000 AND speakers.@count > 0"#)
+        #expect(predicate.description == #"name MATCHES[c] "event \d" AND start < 4001-01-01 00:00:00 +0000 AND speakers.@count > 0"#)
         #endif
     }
 }

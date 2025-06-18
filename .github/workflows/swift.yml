@@ -1,44 +1,37 @@
 name: Swift
-
 on: [push]
-
 jobs:
-  build:
-    name: Build
-    strategy:
-      matrix:
-        swift: [6.0.3]
-        os: [ubuntu-20.04, macos-latest]
-    runs-on: ${{ matrix.os }}
+
+  macos:
+    name: macOS
+    runs-on: macos-15
     steps:
-    - name: Install Swift
-      uses: slashmo/install-swift@v0.3.0
-      with:
-        version: ${{ matrix.swift }}
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
     - name: Swift Version
       run: swift --version
     - name: Build (Debug)
       run: swift build -c debug
     - name: Build (Release)
       run: swift build -c release
-
-  test:
-    name: Test
+    - name: Test (Debug)
+      run: swift test -c debug
+  
+  linux:
+    name: Linux
     strategy:
       matrix:
-        swift: [6.0.3]
-        os: [ubuntu-20.04, macos-latest]
-    runs-on: ${{ matrix.os }}
+        container: ["swift:6.0.3", "swiftlang/swift:nightly"]
+    runs-on: ubuntu-latest
+    container: ${{ matrix.container }}-jammy
     steps:
-    - name: Install Swift
-      uses: slashmo/install-swift@v0.3.0
-      with:
-        version: ${{ matrix.swift }}
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
     - name: Swift Version
       run: swift --version
+    - name: Build (Debug)
+      run: swift build -c debug
+    - name: Build (Release)
+      run: swift build -c release
     - name: Test (Debug)
-      run: swift test --configuration debug
+      run: swift test -c debug

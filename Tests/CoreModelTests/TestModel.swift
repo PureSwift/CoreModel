@@ -8,16 +8,21 @@
 import Foundation
 import CoreModel
 
-struct Person: Equatable, Hashable, Codable, Identifiable {
+@Entity
+struct Person: Equatable, Hashable, Codable, Identifiable, Entity {
     
     let id: UUID
     
+    @Attribute
     var name: String
     
+    @Attribute
     var created: Date
     
+    @Attribute(.int16)
     var age: UInt
     
+    @Relationship(destination: Event.self, inverse: .people)
     var events: [Event.ID]
     
     init(id: UUID = UUID(), name: String, created: Date = Date(), age: UInt, events: [Event.ID] = []) {
@@ -37,27 +42,7 @@ struct Person: Equatable, Hashable, Codable, Identifiable {
     }
 }
 
-extension Person: Entity {
-        
-    static var attributes: [CodingKeys: AttributeType] {
-        [
-            .name: .string,
-            .created: .date,
-            .age: .int16
-        ]
-    }
-    
-    static var relationships: [CodingKeys: Relationship] {
-        [
-            .events: Relationship(
-                id: .events,
-                entity: Person.self,
-                destination: Event.self,
-                type: .toMany,
-                inverseRelationship: .people
-            )
-        ]
-    }
+extension Person {
     
     init(from container: ModelData) throws {
         guard container.entity == Self.entityName else {
@@ -86,19 +71,19 @@ extension Person: Entity {
     }
 }
 
-struct Event: Equatable, Hashable, Codable, Identifiable {
+@Entity
+struct Event: Equatable, Hashable, Codable, Identifiable, Entity {
     
     let id: UUID
     
+    @Attribute
     var name: String
     
+    @Attribute
     var date: Date
     
+    @Relationship(destination: Person.self, inverse: .events)
     var people: [Person.ID]
-    
-    //var speaker: Person.ID?
-    
-    //var notes: String?
     
     init(id: UUID = UUID(), name: String, date: Date, people: [Person.ID] = []) {
         self.id = id
@@ -115,57 +100,51 @@ struct Event: Equatable, Hashable, Codable, Identifiable {
     }
 }
 
-extension Event: Entity {
-        
-    static var attributes: [CodingKeys: AttributeType] {
-        [
-            .name: .string,
-            .date: .date
-        ]
-    }
-    
-    static var relationships: [CodingKeys: Relationship] {
-        [
-            .people: .init(
-                id: PropertyKey(CodingKeys.people),
-                type: .toMany,
-                destinationEntity: Person.entityName,
-                inverseRelationship: PropertyKey(Person.CodingKeys.events))
-        ]
-    }
-}
-
 /// Campground Location
-public struct Campground: Equatable, Hashable, Codable, Identifiable {
+@Entity("Campground")
+public struct Campground: Equatable, Hashable, Codable, Identifiable, Entity {
     
     public let id: UUID
     
+    @Attribute
     public let created: Date
     
+    @Attribute
     public let updated: Date
     
+    @Attribute
     public var name: String
     
+    @Attribute
     public var address: String
     
+    @Attribute(.string)
     public var location: LocationCoordinates
     
+    @Attribute(.string)
     public var amenities: [Amenity]
     
+    @Attribute
     public var phoneNumber: String?
     
+    @Attribute
     public var descriptionText: String
     
     /// The number of seconds from GMT.
+    @Attribute(.int32)
     public var timeZone: Int
     
+    @Attribute
     public var notes: String?
     
+    @Attribute
     public var directions: String?
     
-    public var units: [RentalUnit.ID]
-    
+    @Attribute(.string)
     public var officeHours: Schedule
+    
+    @Relationship(destination: RentalUnit.self, inverse: .campground)
+    public var units: [RentalUnit.ID]
     
     public init(
         id: UUID = UUID(),
@@ -214,37 +193,6 @@ public struct Campground: Equatable, Hashable, Codable, Identifiable {
         case directions
         case units
         case officeHours
-    }
-}
-
-extension Campground: Entity {
-    
-    public static var attributes: [CodingKeys: AttributeType] {
-        [
-            .name : .string,
-            .created : .date,
-            .updated : .date,
-            .address : .string,
-            .location: .string,
-            .amenities: .string,
-            .phoneNumber: .string,
-            .descriptionText: .string,
-            .timeZone: .int32,
-            .notes: .string,
-            .directions: .string,
-            .officeHours: .string
-        ]
-    }
-    
-    public static var relationships: [CodingKeys: Relationship] {
-        [
-            .units : Relationship(
-                id: PropertyKey(CodingKeys.units),
-                type: .toMany,
-                destinationEntity: RentalUnit.entityName,
-                inverseRelationship: PropertyKey(RentalUnit.CodingKeys.campground)
-            )
-        ]
     }
 }
 
@@ -389,18 +337,24 @@ extension Campground.Schedule: AttributeDecodable {
 public extension Campground {
     
     /// Campground Rental Unit
-    struct RentalUnit: Equatable, Hashable, Codable, Identifiable {
+    @Entity
+    struct RentalUnit: Equatable, Hashable, Codable, Identifiable, Entity {
         
         public let id: UUID
         
+        @Relationship(destination: Campground.self, inverse: .units)
         public let campground: Campground.ID
         
+        @Attribute
         public var name: String
         
+        @Attribute
         public var notes: String?
         
+        @Attribute(.string)
         public var amenities: [Amenity]
         
+        @Attribute(.string)
         public var checkout: Schedule
         
         public init(
@@ -428,28 +382,5 @@ public extension Campground {
             case amenities
             case checkout
         }
-    }
-}
-
-extension Campground.RentalUnit: Entity {
-        
-    public static var attributes: [CodingKeys: AttributeType] {
-        [
-            .name : .string,
-            .notes : .string,
-            .amenities : .string,
-            .checkout : .string
-        ]
-    }
-    
-    public static var relationships: [CodingKeys: Relationship] {
-        [
-            .campground : Relationship(
-                id: PropertyKey(CodingKeys.campground),
-                type: .toOne,
-                destinationEntity: Campground.entityName,
-                inverseRelationship: PropertyKey(Campground.CodingKeys.units)
-            )
-        ]
     }
 }

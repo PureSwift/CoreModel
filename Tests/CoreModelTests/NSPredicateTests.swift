@@ -8,23 +8,20 @@
 
 #if canImport(Darwin)
 import Foundation
-import XCTest
+import Testing
 @testable import CoreModel
 @testable import CoreDataModel
 
-final class NSPredicateTests: XCTestCase {
+@Suite struct NSPredicateTests {
     
-    func testDescription() {
+    @Test func description() {
         
-        XCTAssertEqual((.keyPath("name") == .attribute(.string("Coleman"))).description,
-                       NSPredicate(format: "name == \"Coleman\"").description)
-        XCTAssertEqual(((.keyPath("name") != .attribute(.null)) as FetchRequest.Predicate).description,
-                       NSPredicate(format: "name != nil").description)
-        XCTAssertEqual((!(.keyPath("name") == .attribute(.null))).description,
-                       NSPredicate(format: "NOT name == nil").description)
+        #expect((.keyPath("name") == .attribute(.string("Coleman"))).description == NSPredicate(format: "name == \"Coleman\"").description)
+        #expect(((.keyPath("name") != .attribute(.null)) as FetchRequest.Predicate).description == NSPredicate(format: "name != nil").description)
+        #expect((!(.keyPath("name") == .attribute(.null))).description == NSPredicate(format: "NOT name == nil").description)
     }
     
-    func testComparison() {
+    @Test func comparison() {
         
         let predicate: FetchRequest.Predicate = #keyPath(PersonObject.id) > Int64(0)
             && (#keyPath(PersonObject.name)).compare(.notEqualTo, .attribute(.null))
@@ -38,11 +35,11 @@ final class NSPredicateTests: XCTestCase {
         print(predicate)
         print(converted)
         
-        XCTAssertEqual(predicate.description, converted.description)
-        XCTAssert(converted.evaluate(with: PersonObject(id: 1, name: "Coléman")))
+        #expect(predicate.description == converted.description)
+        #expect(converted.evaluate(with: PersonObject(id: 1, name: "Coléman")))
     }
     
-    func testPredicateFilter() {
+    @Test func predicateFilter() {
         
         let events = [
             EventObject(
@@ -78,10 +75,10 @@ final class NSPredicateTests: XCTestCase {
         print(predicate)
         print(nsPredicate)
         
-        XCTAssertEqual((events as NSArray).filtered(using: nsPredicate).count, events.count)
+        #expect((events as NSArray).filtered(using: nsPredicate).count == events.count)
     }
     
-    func testPredicateAggregate() {
+    @Test func predicateAggregate() {
         
         let events = [
             EventObject(
@@ -132,10 +129,10 @@ final class NSPredicateTests: XCTestCase {
         print(predicate)
         print(nsPredicate)
         
-        XCTAssertEqual((events as NSArray).filtered(using: nsPredicate).count, events.count)
+        #expect((events as NSArray).filtered(using: nsPredicate).count == events.count)
     }
     
-    func testPredicateContains() throws {
+    @Test func predicateContains() throws {
         
         let attributes = AttributesObject()
         attributes.data = Data()
@@ -152,7 +149,7 @@ final class NSPredicateTests: XCTestCase {
         print(predicate)
         print(nsPredicate)
         
-        XCTAssertEqual(predicate.description, nsPredicate.description, "Invalid description")
+        #expect(predicate.description == nsPredicate.description, "Invalid description")
         nsPredicate.evaluate(with: attributes)
     }
 }
