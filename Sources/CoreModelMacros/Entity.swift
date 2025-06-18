@@ -203,15 +203,22 @@ extension EntityMacro {
 
             for attr in attributes.compactMap({ $0.as(AttributeSyntax.self) }) {
                 if attr.attributeName.description == "Relationship" {
-                    
+      
                     guard let arguments = attr.arguments?.as(LabeledExprListSyntax.self),
-                       let inverseArg = arguments.first(where: { $0.label?.text == "inverse" }),
-                          let keyPathExpr = inverseArg.expression.as(KeyPathExprSyntax.self),
-                          let lastComponent = keyPathExpr.components.last else {
+                          let inverseArg = arguments.first(where: { $0.label?.text == "inverse" }) else {
                         throw MacroError.unknownInverseRelationship(for: identifier)
                     }
+
+                    let inverseKeyName: String
                     
-                    let inverseKeyName = lastComponent
+                    if let memberAccess = inverseArg.expression.as(MemberAccessExprSyntax.self) {
+                        inverseKeyName = memberAccess.declName.baseName.text
+                    } else if let keyPathExpr = inverseArg.expression.as(KeyPathExprSyntax.self),
+                              let lastComponent = keyPathExpr.components.last {
+                        inverseKeyName = lastComponent.description
+                    } else {
+                        throw MacroError.unknownInverseRelationship(for: identifier)
+                    }
                     
                     let entry = """
                     .\(identifier): Relationship(
@@ -219,7 +226,7 @@ extension EntityMacro {
                         entity: \(entityName).self,
                         destination: \(destinationType).self,
                         type: \(relationshipType),
-                        inverseRelationship: \(inverseKeyName)
+                        inverseRelationship: .\(inverseKeyName)
                     )
                     """
                     relationshipEntries.append(entry)
