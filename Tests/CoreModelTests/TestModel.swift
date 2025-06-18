@@ -124,7 +124,7 @@ public struct Campground: Equatable, Hashable, Codable, Identifiable, Entity {
     @Attribute(.string)
     public var amenities: [Amenity]
     
-    @Attribute(.string)
+    @Attribute
     public var phoneNumber: String?
     
     @Attribute
@@ -134,10 +134,10 @@ public struct Campground: Equatable, Hashable, Codable, Identifiable, Entity {
     @Attribute(.int32)
     public var timeZone: Int
     
-    @Attribute(.string)
+    @Attribute
     public var notes: String?
     
-    @Attribute(.string)
+    @Attribute
     public var directions: String?
     
     @Attribute(.string)
@@ -348,7 +348,7 @@ public extension Campground {
         @Attribute
         public var name: String
         
-        @Attribute(.string)
+        @Attribute
         public var notes: String?
         
         @Attribute(.string)
