@@ -65,12 +65,11 @@ extension EntityMacro {
         providingMembersOf declaration: some DeclGroupSyntax,
         in context: some MacroExpansionContext
     ) throws -> String? {
-        // Extract optional entity name
-        return (node.arguments?.firstToken(viewMode: .sourceAccurate) as? LabeledExprListSyntax)?
-            .first?
-            .expression
-            .description
-            .trimmingCharacters(in: .punctuationCharacters)
+        guard let arguments = node.arguments?.as(LabeledExprListSyntax.self),
+              let first = arguments.first else {
+            return nil
+        }
+        return first.expression.description.trimmingCharacters(in: .punctuationCharacters)
     }
     
     public static func entityNameDeclarationSyntax(
@@ -97,7 +96,7 @@ extension EntityMacro {
     ) throws -> DeclSyntax {
         // Collect @Attribute properties with metadata
         var attributeEntries: [String] = []
-
+/*
         for member in declaration.memberBlock {
             guard let varDecl = member.decl.as(VariableDeclSyntax.self),
                   let binding = varDecl.bindings.first,
@@ -152,7 +151,7 @@ extension EntityMacro {
                 }
             }
         }
-
+*/
         let attributesDecl = """
         static var attributes: [CodingKeys: AttributeType] {
             [\n                \(attributeEntries.joined(separator: ",\n                "))
