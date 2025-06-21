@@ -24,7 +24,7 @@ struct CoreDataTests {
                 Person.self,
                 Event.self,
                 Campground.self,
-                Campground.RentalUnit.self
+                Campground.Unit.self
         )
         
         let managedObjectModel = NSManagedObjectModel(model: model)
@@ -72,7 +72,7 @@ struct CoreDataTests {
             officeHours: Campground.Schedule(start: 60 * 8, end: 60 * 18)
         )
         
-        let rentalUnit = Campground.RentalUnit(
+        let rentalUnit = Campground.Unit(
             campground: campground.id,
             name: "A1",
             amenities: [.amp50, .water, .mail, .river, .laundry],
@@ -82,18 +82,18 @@ struct CoreDataTests {
         var campgroundData = try campground.encode(log: { print("Encoder:", $0) })
         try await store.insert(campgroundData)
         let rentalUnitData = try rentalUnit.encode(log: { print("Encoder:", $0) })
-        #expect(rentalUnitData.relationships[PropertyKey(Campground.RentalUnit.CodingKeys.campground)] == .toOne(ObjectID(campground.id)))
+        #expect(rentalUnitData.relationships[PropertyKey(Campground.Unit.CodingKeys.campground)] == .toOne(ObjectID(campground.id)))
         try await store.insert(rentalUnitData)
         campgroundData = try await store.fetch(Campground.entityName, for: ObjectID(campground.id))!
         campground = try .init(from: campgroundData, log: { print("Decoder:", $0) })
         #expect(campground.units == [rentalUnit.id])
         #expect(campgroundData.relationships[PropertyKey(Campground.CodingKeys.units)] == .toMany([ObjectID(rentalUnit.id)]))
-        let fetchedRentalUnit = try await store.fetch(Campground.RentalUnit.self, for: rentalUnit.id)
+        let fetchedRentalUnit = try await store.fetch(Campground.Unit.self, for: rentalUnit.id)
         #expect(fetchedRentalUnit == rentalUnit)
         
         let rentalUnitFetchRequest = FetchRequest(
-            entity: Campground.RentalUnit.entityName,
-            predicate: Campground.RentalUnit.CodingKeys.campground.stringValue.compare(.equalTo, .relationship(.toOne(ObjectID(campground.id))))
+            entity: Campground.Unit.entityName,
+            predicate: Campground.Unit.CodingKeys.campground.stringValue.compare(.equalTo, .relationship(.toOne(ObjectID(campground.id))))
         )
         let rentalUnitIDs = try await store.fetchID(rentalUnitFetchRequest)
         #expect(rentalUnitIDs == campground.units.map { ObjectID($0) })

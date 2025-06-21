@@ -16,7 +16,7 @@ import Testing
         #expect(Person.entityName == "Person")
         #expect(Event.entityName == "Event")
         #expect(Campground.entityName == "Campground")
-        #expect(Campground.RentalUnit.entityName == "RentalUnit")
+        #expect(Campground.Unit.entityName == "RentalUnit")
     }
     
     @Test func testPersonEntity() {
@@ -32,7 +32,7 @@ import Testing
     }
     
     @Test func testRentalUnitEntity() {
-        validateEntityConformance(Campground.RentalUnit.self)
+        validateEntityConformance(Campground.Unit.self)
     }
 }
 
@@ -107,7 +107,7 @@ extension Event: EntityTestInfo {
     }
     static var expectedRelationships: [String : (type: RelationshipType, destinationEntity: String, inverseRelationshipKey: String?)] {
         [
-            "people": (.toMany, Person.entityName, "events")
+            "people": (.toMany, "Person", "events")
         ]
     }
 }
@@ -137,7 +137,7 @@ extension Campground: EntityTestInfo {
     }
 }
 
-extension Campground.RentalUnit: EntityTestInfo {
+extension Campground.Unit: EntityTestInfo {
     static var expectedEntityName: String { "RentalUnit" }
     static var expectedAttributes: [String : AttributeType] {
         [

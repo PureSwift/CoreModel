@@ -45,7 +45,7 @@ struct Person: Equatable, Hashable, Codable, Identifiable {
 extension Person {
     
     init(from container: ModelData) throws {
-        guard container.entity == Self.entityName else {
+        guard container.entity.rawValue == Self.entityName.rawValue else {
             throw DecodingError.typeMismatch(Self.self, DecodingError.Context(codingPath: [], debugDescription: "Cannot decode \(String(describing: Self.self)) from \(container.entity)"))
         }
         guard let id = UUID(uuidString: container.id.rawValue) else {
@@ -143,8 +143,8 @@ public struct Campground: Equatable, Hashable, Codable, Identifiable {
     @Attribute(.string)
     public var officeHours: Schedule
     
-    @Relationship(destination: RentalUnit.self, inverse: .campground)
-    public var units: [RentalUnit.ID]
+    @Relationship(destination: Unit.self, inverse: .campground)
+    public var units: [Unit.ID]
     
     public init(
         id: UUID = UUID(),
@@ -158,7 +158,7 @@ public struct Campground: Equatable, Hashable, Codable, Identifiable {
         descriptionText: String,
         notes: String? = nil,
         directions: String? = nil,
-        units: [RentalUnit.ID] = [],
+        units: [Unit.ID] = [],
         timeZone: Int = 0,
         officeHours: Schedule
     ) {
@@ -337,8 +337,8 @@ extension Campground.Schedule: AttributeDecodable {
 public extension Campground {
     
     /// Campground Rental Unit
-    @Entity
-    struct RentalUnit: Equatable, Hashable, Codable, Identifiable {
+    @Entity("RentalUnit")
+    struct Unit: Equatable, Hashable, Codable, Identifiable {
         
         public let id: UUID
         
