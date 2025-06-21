@@ -12,6 +12,7 @@ public struct EntityName: RawRepresentable, Codable, Equatable, Hashable, Sendab
     public let rawValue: String
     
     public init(rawValue: String) {
+        assert(rawValue.isEmpty == false)
         self.rawValue = rawValue
     }
 }
