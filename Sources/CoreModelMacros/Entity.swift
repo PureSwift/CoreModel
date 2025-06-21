@@ -112,7 +112,7 @@ extension EntityMacro {
             entityName = try typeName(of: node, providingMembersOf: declaration, in: context)
         }
         let entityNameDecl = """
-        public static var entityName: String { "\(entityName)" }
+        public static var entityName: EntityName { "\(entityName)" }
         """
         return DeclSyntax(stringLiteral: entityNameDecl)
     }
