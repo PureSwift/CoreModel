@@ -12,6 +12,7 @@ public struct PropertyKey: RawRepresentable, Codable, Equatable, Hashable, Senda
     public let rawValue: String
     
     public init(rawValue: String) {
+        assert(rawValue.isEmpty == false)
         self.rawValue = rawValue
     }
 }
