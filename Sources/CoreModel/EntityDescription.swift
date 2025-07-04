@@ -8,7 +8,7 @@
 import Foundation
 
 /// Defines the model for an entity
-public struct EntityDescription: Codable, Identifiable, Hashable {
+public struct EntityDescription: Codable, Identifiable, Hashable, Sendable {
     
     public let id: EntityName
     

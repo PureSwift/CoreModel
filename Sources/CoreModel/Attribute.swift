@@ -8,7 +8,7 @@
 import Foundation
 
 /// CoreModel `Attribute`
-public struct Attribute: Property, Codable, Equatable, Hashable, Identifiable {
+public struct Attribute: Property, Codable, Equatable, Hashable, Identifiable, Sendable {
     
     public let id: PropertyKey
     

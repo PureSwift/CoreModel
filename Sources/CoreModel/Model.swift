@@ -10,7 +10,7 @@ import Foundation
 /**
  The model contains one or more `Entity` objects representing the entities in the schema.
  */
-public struct Model: Hashable {
+public struct Model: Hashable, Sendable {
     
     public var entities: [EntityDescription]
     

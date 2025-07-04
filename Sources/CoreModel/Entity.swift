@@ -9,7 +9,7 @@
 import Foundation
 
 /// CoreModel Entity for Codable types
-public protocol Entity: Identifiable where CodingKeys: Hashable, Self.ID: ObjectIDConvertible {
+public protocol Entity: Identifiable, Sendable where CodingKeys: Hashable, Self.ID: ObjectIDConvertible {
     
     static var entityName: EntityName { get }
     

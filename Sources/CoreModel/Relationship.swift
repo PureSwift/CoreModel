@@ -8,7 +8,7 @@
 import Foundation
 
 /// CoreModel `Relationship`
-public struct Relationship: Property, Codable, Equatable, Hashable, Identifiable {
+public struct Relationship: Property, Codable, Equatable, Hashable, Identifiable, Sendable {
     
     public let id: PropertyKey
     
@@ -31,7 +31,7 @@ public struct Relationship: Property, Codable, Equatable, Hashable, Identifiable
 }
 
 /// CoreModel `Relationship` Type
-public enum RelationshipType: String, Codable, CaseIterable {
+public enum RelationshipType: String, Codable, CaseIterable, Sendable {
     
     case toOne
     case toMany
