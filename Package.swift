@@ -1,6 +1,11 @@
 // swift-tools-version:6.0
 import PackageDescription
 import CompilerPluginSupport
+import class Foundation.ProcessInfo
+
+// force building as dynamic library
+let dynamicLibrary = ProcessInfo.processInfo.environment["SWIFT_BUILD_DYNAMIC_LIBRARY"] != nil
+let libraryType: PackageDescription.Product.Library.LibraryType? = dynamicLibrary ? .dynamic : nil
 
 let package = Package(
     name: "CoreModel",
@@ -13,12 +18,14 @@ let package = Package(
     products: [
         .library(
             name: "CoreModel",
+            type: libraryType,
             targets: [
                 "CoreModel"
             ]
         ),
         .library(
             name: "CoreDataModel",
+            type: libraryType,
             targets: [
                 "CoreDataModel"
             ]
