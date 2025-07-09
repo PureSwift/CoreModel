@@ -5,6 +5,7 @@
 //  Created by Alsey Coleman Miller on 6/17/25.
 //
 
+#if !hasFeature(Embedded) && SWIFTPM_ENABLE_MACROS
 @attached(member, names: arbitrary)
 @attached(extension, conformances: CoreModel.Entity)
 public macro Entity(_ name: String? = nil) = #externalMacro(
@@ -23,3 +24,4 @@ public macro Relationship<T: CoreModel.Entity>(destination: T.Type, inverse: T.C
     module: "CoreModelMacros",
     type: "RelationshipMacro"
 )
+#endif
