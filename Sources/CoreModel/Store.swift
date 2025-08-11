@@ -47,7 +47,7 @@ public extension ModelStorage {
 // MARK: - ModelData
 
 /// CoreModel Object Instance
-public struct ModelData: Equatable, Hashable, Identifiable, Codable {
+public struct ModelData: Equatable, Hashable, Identifiable, Codable, Sendable {
     
     public let entity: EntityName
     
