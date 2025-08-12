@@ -10,7 +10,7 @@ import Foundation
 import CoreData
 import CoreModel
 
-extension NSManagedObjectContext: ModelStorage {
+extension NSManagedObjectContext: ModelStorage, ViewContext {
     
     public func fetch(_ entity: EntityName, for id: ObjectID) throws -> ModelData? {
         try self.find(entity, for: id)
