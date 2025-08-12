@@ -17,7 +17,8 @@ import Testing
 struct CoreDataTests {
     
     @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
-    @Test func coreData() async throws {
+    @Test
+    func coreData() async throws {
         
         let model = Model(
             entities:
@@ -88,14 +89,14 @@ struct CoreDataTests {
         campground = try .init(from: campgroundData, log: { print("Decoder:", $0) })
         #expect(campground.units == [rentalUnit.id])
         #expect(campgroundData.relationships[PropertyKey(Campground.CodingKeys.units)] == .toMany([ObjectID(rentalUnit.id)]))
-        let fetchedRentalUnit = try await store.fetch(Campground.Unit.self, for: rentalUnit.id)
+        let fetchedRentalUnit = try await store.viewContext.fetch(Campground.Unit.self, for: rentalUnit.id)
         #expect(fetchedRentalUnit == rentalUnit)
         
         let rentalUnitFetchRequest = FetchRequest(
             entity: Campground.Unit.entityName,
             predicate: Campground.Unit.CodingKeys.campground.stringValue.compare(.equalTo, .relationship(.toOne(ObjectID(campground.id))))
         )
-        let rentalUnitIDs = try await store.fetchID(rentalUnitFetchRequest)
+        let rentalUnitIDs = try store.viewContext.fetchID(rentalUnitFetchRequest)
         #expect(rentalUnitIDs == campground.units.map { ObjectID($0) })
     }
 }
