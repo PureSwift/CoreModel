@@ -44,6 +44,21 @@ public extension ModelStorage {
     }
 }
 
+public protocol ViewContext {
+    
+    /// Fetch managed object.
+    func fetch(_ entity: EntityName, for id: ObjectID) throws -> ModelData?
+    
+    /// Fetch managed objects.
+    func fetch(_ fetchRequest: FetchRequest) throws -> [ModelData]
+    
+    /// Fetch managed objects IDs.
+    func fetchID(_ fetchRequest: FetchRequest) throws -> [ObjectID]
+    
+    /// Fetch and return result count.
+    func count(_ fetchRequest: FetchRequest) throws -> UInt
+}
+
 // MARK: - ModelData
 
 /// CoreModel Object Instance
@@ -130,5 +145,54 @@ public extension ModelStorage {
     func delete<T>(_ entity: T.Type, for id: T.ID) async throws where T: Entity {
         let objectID = ObjectID(rawValue: id.description)
         try await delete(T.entityName, for: objectID)
+    }
+}
+
+public extension ViewContext {
+    
+    /// Fetch managed object.
+    func fetch<T>(_ entity: T.Type, for id: T.ID) throws -> T? where T: Entity {
+        let objectID = ObjectID(rawValue: id.description)
+        guard let model = try fetch(T.entityName, for: objectID) else {
+            return nil
+        }
+        return try T.init(from: model)
+    }
+    
+    /// Fetch managed objects.
+    func fetch<T>(
+        _ entity: T.Type,
+        sortDescriptors: [FetchRequest.SortDescriptor] = [],
+        predicate: FetchRequest.Predicate? = nil,
+        fetchLimit: Int = 0,
+        fetchOffset: Int = 0
+    ) throws -> [T] where T: Entity {
+        let fetchRequest = FetchRequest(
+            entity: T.entityName,
+            sortDescriptors: sortDescriptors,
+            predicate: predicate,
+            fetchLimit: fetchLimit,
+            fetchOffset: fetchOffset
+        )
+        return try fetch(fetchRequest)
+            .map { try T.init(from: $0) }
+    }
+    
+    /// Fetch and return result count.
+    func count<T>(
+        _ entity: T.Type,
+        sortDescriptors: [FetchRequest.SortDescriptor] = [],
+        predicate: FetchRequest.Predicate? = nil,
+        fetchLimit: Int = 0,
+        fetchOffset: Int = 0
+    ) throws -> UInt where T: Entity {
+        let fetchRequest = FetchRequest(
+            entity: T.entityName,
+            sortDescriptors: sortDescriptors,
+            predicate: predicate,
+            fetchLimit: fetchLimit,
+            fetchOffset: fetchOffset
+        )
+        return try count(fetchRequest)
     }
 }
