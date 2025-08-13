@@ -243,7 +243,11 @@ extension EntityMacro {
                 }
             }
         }
-
+        
+        guard relationshipEntries.isEmpty == false else {
+            return DeclSyntax(stringLiteral: #"public static var relationships: [CodingKeys: Relationship] { [:] }"#)
+        }
+        
         let relationshipsDecl = """
         public static var relationships: [CodingKeys: Relationship] {
             [\n            \(relationshipEntries.joined(separator: ",\n            "))
