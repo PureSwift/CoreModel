@@ -42,7 +42,6 @@ let package = Package(
     ]
 )
 
-#if canImport(Darwin)
 package.products.append(
     .library(
         name: "CoreDataModel",
@@ -81,7 +80,6 @@ package.targets[package.targets.count - 1] = .testTarget(
         )
     ]
 )
-#endif
 
 // SwiftPM plugins
 if buildDocs {
