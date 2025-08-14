@@ -94,7 +94,7 @@ struct CoreDataTests {
         
         let rentalUnitFetchRequest = FetchRequest(
             entity: Campground.Unit.entityName,
-            predicate: Campground.Unit.CodingKeys.campground.stringValue.compare(.equalTo, .relationship(.toOne(ObjectID(campground.id))))
+            predicate: Campground.Unit.CodingKeys.campground.compare(.equalTo, .relationship(.toOne(ObjectID(campground.id))))
         )
         let rentalUnitIDs = try store.viewContext.fetchID(rentalUnitFetchRequest)
         #expect(rentalUnitIDs == campground.units.map { ObjectID($0) })

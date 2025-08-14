@@ -22,10 +22,10 @@ struct PredicateTests {
     
     @Test func predicate1() {
         
-        let predicate: FetchRequest.Predicate = "id" > Int64(0)
+        let predicate: FetchRequest.Predicate = Person.CodingKeys.id > Int64(0)
             && "id" != Int64(99)
-            && "name".compare(.beginsWith, .attribute(.string("C")))
-            && "name".compare(.contains, [.diacriticInsensitive, .caseInsensitive], .attribute(.string("COLE")))
+            && Person.CodingKeys.name.compare(.beginsWith, .attribute(.string("C")))
+            && Person.CodingKeys.name.compare(.contains, [.diacriticInsensitive, .caseInsensitive], .attribute(.string("COLE")))
         
         #expect(predicate.description == #"((id > 0 AND id != 99) AND name BEGINSWITH "C") AND name CONTAINS[cd] "COLE""#)
     }
@@ -71,7 +71,7 @@ struct PredicateTests {
         
         let future = Date.distantFuture
         
-        let predicate: FetchRequest.Predicate = ("name").compare(.matches, [.caseInsensitive], .attribute(.string(#"event \d"#))) && [
+        let predicate: FetchRequest.Predicate = Person.CodingKeys.name.compare(.matches, [.caseInsensitive], .attribute(.string(#"event \d"#))) && [
             ("start") < future,
             ("speakers.@count") > 0
             ]
@@ -104,6 +104,11 @@ internal extension PredicateTests {
             self.id = id
             self.name = name
         }
+        
+        enum CodingKeys: String, CodingKey {
+            case id
+            case name
+        }
     }
 
     struct Event: Equatable, Hashable, Codable {
@@ -118,6 +123,13 @@ internal extension PredicateTests {
             self.name = name
             self.start = start
             self.speakers = speakers
+        }
+        
+        enum CodingKeys: String, CodingKey {
+            case id
+            case name
+            case start
+            case speakers
         }
     }
 }
