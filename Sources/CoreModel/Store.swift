@@ -44,6 +44,7 @@ public extension ModelStorage {
     }
 }
 
+@MainActor
 public protocol ViewContext {
     
     /// Fetch managed object.
