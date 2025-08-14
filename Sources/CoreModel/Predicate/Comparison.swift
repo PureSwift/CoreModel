@@ -266,3 +266,79 @@ public extension String {
         return .comparison(comparison)
     }
 }
+
+public func < <K: CodingKey, T: AttributeEncodable>(lhs: K, rhs: T) -> FetchRequest.Predicate {
+    
+    let comparison = FetchRequest.Predicate.Comparison(left: .keyPath(.init(rawValue: lhs.stringValue)),
+                                  right: .attribute(rhs.attributeValue),
+                                  type: .lessThan)
+    
+    return .comparison(comparison)
+}
+
+public func <= <K: CodingKey, T: AttributeEncodable>(lhs: K, rhs: T) -> FetchRequest.Predicate {
+    
+    let comparison = FetchRequest.Predicate.Comparison(left: .keyPath(.init(rawValue: lhs.stringValue)),
+                                  right: .attribute(rhs.attributeValue),
+                                  type: .lessThanOrEqualTo)
+    
+    return .comparison(comparison)
+}
+
+public func > <K: CodingKey, T: AttributeEncodable>(lhs: K, rhs: T) -> FetchRequest.Predicate {
+    
+    let comparison = FetchRequest.Predicate.Comparison(left: .keyPath(.init(rawValue: lhs.stringValue)),
+                                  right: .attribute(rhs.attributeValue),
+                                  type: .greaterThan)
+    
+    return .comparison(comparison)
+}
+
+public func >= <K: CodingKey, T: AttributeEncodable>(lhs: K, rhs: T) -> FetchRequest.Predicate {
+    
+    let comparison = FetchRequest.Predicate.Comparison(left: .keyPath(.init(rawValue: lhs.stringValue)),
+                                  right: .attribute(rhs.attributeValue),
+                                  type: .greaterThanOrEqualTo)
+    
+    return .comparison(comparison)
+}
+
+public func == <K: CodingKey, T: AttributeEncodable>(lhs: K, rhs: T) -> FetchRequest.Predicate {
+    
+    let comparison = FetchRequest.Predicate.Comparison(left: .keyPath(.init(rawValue: lhs.stringValue)),
+                                  right: .attribute(rhs.attributeValue),
+                                  type: .equalTo)
+    
+    return .comparison(comparison)
+}
+
+public func != <K: CodingKey, T: AttributeEncodable>(lhs: K, rhs: T) -> FetchRequest.Predicate {
+    
+    let comparison = FetchRequest.Predicate.Comparison(left: .keyPath(.init(rawValue: lhs.stringValue)),
+                                  right: .attribute(rhs.attributeValue),
+                                  type: .notEqualTo)
+    
+    return .comparison(comparison)
+}
+
+// Extensions for KeyPath comparisons
+public extension CodingKey {
+    
+    func compare(_ type: FetchRequest.Predicate.Comparison.Operator, _ rhs: FetchRequest.Predicate.Expression) -> FetchRequest.Predicate {
+        
+        let comparison = FetchRequest.Predicate.Comparison(left: .keyPath(.init(rawValue: stringValue)), right: rhs, type: type)
+        return .comparison(comparison)
+    }
+    
+    func compare(_ type: FetchRequest.Predicate.Comparison.Operator, _ options: Set<FetchRequest.Predicate.Comparison.Option>, _ rhs: FetchRequest.Predicate.Expression) -> FetchRequest.Predicate {
+        
+        let comparison = FetchRequest.Predicate.Comparison(left: .keyPath(.init(rawValue: stringValue)), right: rhs, type: type, options: options)
+        return .comparison(comparison)
+    }
+    
+    func compare(_ modifier: FetchRequest.Predicate.Comparison.Modifier, _ type: FetchRequest.Predicate.Comparison.Operator, _ options: Set<FetchRequest.Predicate.Comparison.Option>, _ rhs: FetchRequest.Predicate.Expression) -> FetchRequest.Predicate {
+        
+        let comparison = FetchRequest.Predicate.Comparison(left: .keyPath(.init(rawValue: stringValue)), right: rhs, type: type, modifier: modifier, options: options)
+        return .comparison(comparison)
+    }
+}
