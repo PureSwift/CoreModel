@@ -7,10 +7,11 @@
 
 #if canImport(CoreData)
 import Foundation
+import Combine
 import CoreData
 import CoreModel
 
-extension NSManagedObjectContext: ModelStorage, ViewContext {
+extension NSManagedObjectContext: ModelStorage {
     
     public func fetch(_ entity: EntityName, for id: ObjectID) throws -> ModelData? {
         try self.find(entity, for: id)
@@ -55,6 +56,41 @@ extension NSManagedObjectContext: ModelStorage, ViewContext {
         fetch.propertiesToFetch = [NSManagedObject.BuiltInProperty.id.rawValue]
         fetch.returnsObjectsAsFaults = false
         return try self.fetch(fetchRequest.toFoundation()).map { try $0.modelObjectID }
+    }
+}
+
+@MainActor
+public final class ManagedObjectViewContext: ViewContext, ObservableObject {
+    
+    internal let context: NSManagedObjectContext
+    
+    public init(context: NSManagedObjectContext) {
+        self.context = context
+        assert(context.concurrencyType == .mainQueueConcurrencyType)
+    }
+    
+    public init(persistentContainer: NSPersistentContainer) {
+        self.context = persistentContainer.viewContext
+    }
+    
+    /// Fetch managed object.
+    public func fetch(_ entity: EntityName, for id: ObjectID) throws -> ModelData? {
+        try context.fetch(entity, for: id)
+    }
+    
+    /// Fetch managed objects.
+    public func fetch(_ fetchRequest: FetchRequest) throws -> [ModelData] {
+        try context.fetch(fetchRequest)
+    }
+    
+    /// Fetch managed objects IDs.
+    public func fetchID(_ fetchRequest: FetchRequest) throws -> [ObjectID] {
+        try context.fetchID(fetchRequest)
+    }
+    
+    /// Fetch and return result count.
+    public func count(_ fetchRequest: FetchRequest) throws -> UInt {
+        try context.count(fetchRequest)
     }
 }
 
