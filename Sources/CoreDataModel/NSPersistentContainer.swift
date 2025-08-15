@@ -117,6 +117,12 @@ public actor PersistentContainerStorage: ModelStorage, ObservableObject {
         }
     }
     
+    public func fetchID(_ fetchRequest: FetchRequest) async throws -> [ObjectID] {
+        return try await performBackgroundTask { (context, model) in
+            try context.fetchID(fetchRequest)
+        }
+    }
+    
     public func count(_ fetchRequest: FetchRequest) async throws -> UInt {
         try await performBackgroundTask { (context, model) in
             try context.count(fetchRequest)
@@ -124,26 +130,23 @@ public actor PersistentContainerStorage: ModelStorage, ObservableObject {
     }
     
     public func insert(_ value: ModelData) async throws {
+        defer { objectWillChange.send() }
         try await performBackgroundTask { (context, model) in
             try context.insert(value, model: model)
         }
     }
     
     public func insert(_ values: [ModelData]) async throws {
+        defer { objectWillChange.send() }
         try await performBackgroundTask { (context, model) in
             try context.insert(values, model: model)
         }
     }
     
     public func delete(_ entity: EntityName, for id: ObjectID) async throws {
+        defer { objectWillChange.send() }
         try await performBackgroundTask { (context, model) in
             try context.delete(entity, for: id)
-        }
-    }
-    
-    public func fetchID(_ fetchRequest: FetchRequest) async throws -> [ObjectID] {
-        try await performBackgroundTask { (context, model) in
-            try context.fetchID(fetchRequest)
         }
     }
     
