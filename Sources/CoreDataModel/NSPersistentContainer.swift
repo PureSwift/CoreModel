@@ -68,13 +68,21 @@ public actor PersistentContainerStorage: ModelStorage, ObservableObject {
     
     // MARK: Initialization
     
-    public init(name: String, model: Model) {
+    public init(
+        name: String,
+        model: Model,
+        storeDescriptions: [NSPersistentStoreDescription] = []
+    ) {
         let managedObjectModel = NSManagedObjectModel(model: model)
         let persistentContainer = NSPersistentContainer(
             name: name,
             managedObjectModel: managedObjectModel
         )
         self.persistentContainer = persistentContainer
+        // use custom store descriptions
+        if storeDescriptions.isEmpty == false {
+            persistentContainer.persistentStoreDescriptions = storeDescriptions
+        }
     }
     
     // MARK: Properties
