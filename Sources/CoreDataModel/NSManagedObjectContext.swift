@@ -59,6 +59,8 @@ extension NSManagedObjectContext: ModelStorage {
     }
 }
 
+// MARK: - ManagedObjectViewContext
+
 @MainActor
 public final class ManagedObjectViewContext: ViewContext, ObservableObject {
     
@@ -69,7 +71,7 @@ public final class ManagedObjectViewContext: ViewContext, ObservableObject {
         assert(context.concurrencyType == .mainQueueConcurrencyType)
     }
     
-    public init(persistentContainer: NSPersistentContainer) {
+    public nonisolated init(persistentContainer: NSPersistentContainer) {
         self.context = persistentContainer.viewContext
     }
     
@@ -93,6 +95,8 @@ public final class ManagedObjectViewContext: ViewContext, ObservableObject {
         try context.count(fetchRequest)
     }
 }
+
+// MARK: - Extensions
 
 internal extension NSManagedObjectContext {
     
