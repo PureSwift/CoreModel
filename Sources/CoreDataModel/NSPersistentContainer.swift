@@ -75,20 +75,27 @@ public actor PersistentContainerStorage: ModelStorage, ObservableObject {
             managedObjectModel: managedObjectModel
         )
         self.persistentContainer = persistentContainer
-        self._viewContext = ManagedObjectViewContext(persistentContainer: persistentContainer)
     }
     
     // MARK: Properties
     
     internal let persistentContainer: NSPersistentContainer
     
-    internal let _viewContext: ManagedObjectViewContext
+    internal nonisolated(unsafe) var _viewContext: ManagedObjectViewContext?
     
     @MainActor
     public var viewContext: ManagedObjectViewContext {
         get throws {
+            // lazily load stores
             try loadStores()
-            return _viewContext
+            // lazily load view context
+            if let viewConext = _viewContext {
+                return viewConext
+            } else {
+                let viewContext = ManagedObjectViewContext(persistentContainer: persistentContainer)
+                _viewContext = viewContext
+                return viewContext
+            }
         }
     }
     

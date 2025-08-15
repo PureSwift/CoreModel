@@ -71,7 +71,7 @@ public final class ManagedObjectViewContext: ViewContext, ObservableObject {
         assert(context.concurrencyType == .mainQueueConcurrencyType)
     }
     
-    public nonisolated init(persistentContainer: NSPersistentContainer) {
+    public init(persistentContainer: NSPersistentContainer) {
         self.context = persistentContainer.viewContext
     }
     
