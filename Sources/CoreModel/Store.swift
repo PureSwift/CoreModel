@@ -7,7 +7,7 @@
 //
 
 /// CoreModel Store Protocol
-public protocol ModelStorage {
+public protocol ModelStorage: AnyObject, Sendable {
     
     /// Fetch managed object.
     func fetch(_ entity: EntityName, for id: ObjectID) async throws -> ModelData?
