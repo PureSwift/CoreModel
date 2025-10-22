@@ -6,6 +6,8 @@
 //  Copyright © 2015 PureSwift. All rights reserved.
 //
 
+import Foundation
+
 public extension FetchRequest {
     
     struct SortDescriptor: Codable, Equatable, Hashable, Sendable {
@@ -20,3 +22,18 @@ public extension FetchRequest {
         }
     }
 }
+
+// MARK: - Foundation
+
+#if canImport(Darwin)
+@available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
+public extension FetchRequest.SortDescriptor {
+    
+    /// Creates a ``FetchRequest.SortDescriptor`` from a ``Foundation.SortDescriptor``
+    init<Root: NSObject>(_ sortDescriptor: Foundation.SortDescriptor<Root>) {
+        let sortDescriptor = NSSortDescriptor(sortDescriptor)
+        self.property = PropertyKey(rawValue: sortDescriptor.key ?? "")
+        self.ascending = sortDescriptor.ascending
+    }
+}
+#endif
