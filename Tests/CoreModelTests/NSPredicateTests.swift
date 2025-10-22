@@ -184,6 +184,14 @@ class EventObject: NSObject {
         self.speakers = speakers
         super.init()
     }
+    
+    enum CodingKeys: String, CodingKey, CaseIterable, Sendable {
+        
+        case id
+        case name
+        case start
+        case speakers
+    }
 }
 
 @objc(Attributes)

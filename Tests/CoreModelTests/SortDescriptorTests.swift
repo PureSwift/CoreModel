@@ -53,10 +53,13 @@ import Testing
         ]
         
         let sort = SortDescriptor(\EventObject.id, order: .forward)
-        
+        let sortDescriptor = FetchRequest.SortDescriptor(
+            property: PropertyKey(EventObject.CodingKeys.id),
+            ascending: true
+        )
         let sortedEvents = events.sorted(using: sort)
-        
         #expect(sortedEvents.map(\.id) == [1, 2, 3])
+        #expect(sortDescriptor == FetchRequest.SortDescriptor(sort))
     }
 }
 #endif
