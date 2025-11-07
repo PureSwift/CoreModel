@@ -7,7 +7,7 @@
 
 #if canImport(CoreData)
 import Foundation
-import CoreData
+@preconcurrency import CoreData
 import CoreModel
 
 @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
