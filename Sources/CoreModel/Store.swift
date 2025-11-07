@@ -29,6 +29,9 @@ public protocol ModelStorage: AnyObject, Sendable {
     
     /// Delete the specified managed object. 
     func delete(_ entity: EntityName, for id: ObjectID) async throws
+    
+    /// Delete the specified managed objects.
+    func delete(_ entity: EntityName, for ids: [ObjectID]) async throws
 }
 
 public extension ModelStorage {
