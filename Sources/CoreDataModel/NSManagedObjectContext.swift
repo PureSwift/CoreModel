@@ -44,11 +44,17 @@ extension NSManagedObjectContext: ModelStorage {
     }
     
     public func delete(_ entity: EntityName, for id: ObjectID) throws {
+        try delete(entity, for: [id])
+    }
+    
+    public func delete(_ entity: EntityName, for ids: [ObjectID]) throws {
+        for id in ids {
         guard let managedObject = try self.find(entity, for: id) else {
-            assertionFailure("Object not found for \(id)")
-            throw CocoaError(.coreData)
+                continue
+            }
+            self.delete(managedObject)
         }
-        self.delete(managedObject)
+        try self.save()
     }
     
     public func fetchID(_ fetchRequest: FetchRequest) throws -> [ObjectID] {
