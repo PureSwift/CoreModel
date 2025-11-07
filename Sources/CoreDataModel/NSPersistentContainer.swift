@@ -51,6 +51,12 @@ extension NSPersistentContainer: ModelStorage {
         }
     }
     
+    public func delete(_ entity: EntityName, for ids: [ObjectID]) async throws {
+        try await performBackgroundTask { context in
+            try context.delete(entity, for: ids)
+        }
+    }
+    
     public func fetchID(_ fetchRequest: FetchRequest) async throws -> [ObjectID] {
         try await performBackgroundTask { context in
             try context.fetchID(fetchRequest)
