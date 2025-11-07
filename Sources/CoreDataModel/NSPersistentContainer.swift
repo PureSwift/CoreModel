@@ -164,6 +164,13 @@ public actor PersistentContainerStorage: ModelStorage, ObservableObject {
         }
     }
     
+    public func delete(_ entity: EntityName, for ids: [ObjectID]) async throws {
+        defer { objectWillChange.send() }
+        try await performBackgroundTask { (context, model) in
+            try context.delete(entity, for: ids)
+        }
+    }
+    
     private func performBackgroundTask<T>(
         schedule: NSManagedObjectContext.ScheduledTaskType = .immediate,
         _ task: @escaping (NSManagedObjectContext, NSManagedObjectModel) throws -> T
