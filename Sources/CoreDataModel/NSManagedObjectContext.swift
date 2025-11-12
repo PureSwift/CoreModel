@@ -76,12 +76,16 @@ public final class ManagedObjectViewContext: ViewContext, ObservableObject {
     
     public init(context: NSManagedObjectContext) {
         self.context = context
+        context.automaticallyMergesChangesFromParent = true
+        context.stalenessInterval = 0
         assert(context.concurrencyType == .mainQueueConcurrencyType)
         setupNotificationObservers()
     }
     
     public init(persistentContainer: NSPersistentContainer) {
         self.context = persistentContainer.viewContext
+        context.automaticallyMergesChangesFromParent = true
+        context.stalenessInterval = 0
         assert(context.concurrencyType == .mainQueueConcurrencyType)
         setupNotificationObservers()
     }
