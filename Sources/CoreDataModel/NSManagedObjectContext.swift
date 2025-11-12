@@ -72,13 +72,52 @@ public final class ManagedObjectViewContext: ViewContext, ObservableObject {
     
     internal let context: NSManagedObjectContext
     
+    private var cancellables = Set<AnyCancellable>()
+    
     public init(context: NSManagedObjectContext) {
         self.context = context
         assert(context.concurrencyType == .mainQueueConcurrencyType)
+        setupNotificationObservers()
     }
     
     public init(persistentContainer: NSPersistentContainer) {
         self.context = persistentContainer.viewContext
+        assert(context.concurrencyType == .mainQueueConcurrencyType)
+        setupNotificationObservers()
+    }
+    
+    private func setupNotificationObservers() {
+        // Observe object changes (insertions, deletions, updates)
+        NotificationCenter.default.publisher(for: .NSManagedObjectContextObjectsDidChange, object: context)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] notification in
+                self?.handleContextDidChange(notification)
+            }
+            .store(in: &cancellables)
+        
+        // Observe saves
+        NotificationCenter.default.publisher(for: .NSManagedObjectContextDidSave, object: context)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] notification in
+                self?.handleContextDidSave(notification)
+            }
+            .store(in: &cancellables)
+    }
+    
+    private func handleContextDidChange(_ notification: Notification) {
+        guard let userInfo = notification.userInfo else { return }
+        
+        let hasInsertedObjects = (userInfo[NSInsertedObjectsKey] as? Set<NSManagedObject>)?.isEmpty == false
+        let hasUpdatedObjects = (userInfo[NSUpdatedObjectsKey] as? Set<NSManagedObject>)?.isEmpty == false
+        let hasDeletedObjects = (userInfo[NSDeletedObjectsKey] as? Set<NSManagedObject>)?.isEmpty == false
+        
+        if hasInsertedObjects || hasUpdatedObjects || hasDeletedObjects {
+            objectWillChange.send()
+        }
+    }
+    
+    private func handleContextDidSave(_ notification: Notification) {
+        objectWillChange.send()
     }
     
     /// Fetch managed object.
