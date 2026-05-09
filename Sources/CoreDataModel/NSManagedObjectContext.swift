@@ -78,6 +78,7 @@ public final class ManagedObjectViewContext: ViewContext, ObservableObject {
         self.context = context
         context.automaticallyMergesChangesFromParent = true
         context.stalenessInterval = 0
+        context.undoManager = nil
         assert(context.concurrencyType == .mainQueueConcurrencyType)
         setupNotificationObservers()
     }
@@ -86,6 +87,7 @@ public final class ManagedObjectViewContext: ViewContext, ObservableObject {
         self.context = persistentContainer.viewContext
         context.automaticallyMergesChangesFromParent = true
         context.stalenessInterval = 0
+        context.undoManager = nil
         assert(context.concurrencyType == .mainQueueConcurrencyType)
         setupNotificationObservers()
     }
@@ -166,16 +168,17 @@ internal extension NSManagedObjectContext {
     
     func find(
         _ entityName: EntityName,
-        for id: ObjectID
+        for id: ObjectID,
+        includesPropertyValues: Bool = true
     ) throws -> NSManagedObject? {
         let fetchRequest = FetchRequest(
             entity: entityName,
             predicate: NSManagedObject.BuiltInProperty.id.rawValue == id.rawValue,
             fetchLimit: 1
-        ).toFoundation(NSManagedObjectID.self)
-        assert(fetchRequest.resultType == .managedObjectIDResultType)
-        let objectIDs = try self.fetch(fetchRequest)
-        return objectIDs.first.flatMap { self.object(with: $0) }
+        ).toFoundation(NSManagedObject.self)
+        fetchRequest.includesPropertyValues = includesPropertyValues
+        assert(fetchRequest.resultType == .managedObjectResultType)
+        return try self.fetch(fetchRequest).first
     }
     
     func insert(
@@ -184,7 +187,7 @@ internal extension NSManagedObjectContext {
         shouldSave: Bool = true
     ) throws {
         // find or create
-        let managedObject = try find(value.entity, for: value.id) ?? create(value.entity, for: value.id, in: model)
+        let managedObject = try find(value.entity, for: value.id, includesPropertyValues: false) ?? create(value.entity, for: value.id, in: model)
         // apply attributes
         for (key, value) in value.attributes {
             managedObject.setAttribute(value, for: key)
