@@ -271,6 +271,20 @@ internal extension NSManagedObject {
     }
 }
 
+internal extension NSManagedObject {
+    
+    func setValues(for value: ModelData, in context: NSManagedObjectContext) throws {
+        // apply attributes
+        for (key, value) in value.attributes {
+            setAttribute(value, for: key)
+        }
+        // apply relationships
+        for (key, value) in value.relationships {
+            try setRelationship(value, for: key, in: context)
+        }
+    }
+}
+
 internal extension ModelData {
     
     init(managedObject: NSManagedObject) throws {

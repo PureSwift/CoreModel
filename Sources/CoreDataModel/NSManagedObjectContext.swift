@@ -188,14 +188,7 @@ internal extension NSManagedObjectContext {
     ) throws {
         // find or create
         let managedObject = try find(value.entity, for: value.id, includesPropertyValues: false) ?? create(value.entity, for: value.id, in: model)
-        // apply attributes
-        for (key, value) in value.attributes {
-            managedObject.setAttribute(value, for: key)
-        }
-        // apply relationships
-        for (key, value) in value.relationships {
-            try managedObject.setRelationship(value, for: key, in: self)
-        }
+        try managedObject.setValues(for: value, in: self)
         if shouldSave {
             try self.save()
         }
