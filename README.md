@@ -11,5 +11,5 @@ Swift Object Graph
 ## Backends
 
 - CoreData
-- CloudKit ([WIP](https://github.com/PureSwift/CoreModel/issues/10))
+- [SQLite](https://github.com/PureSwift/CoreModel-SQLite)
 - [MongoDB](https://github.com/PureSwift/CoreModel-MongoDB)
