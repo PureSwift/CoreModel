@@ -198,10 +198,115 @@ internal extension NSManagedObjectContext {
         _ values: [ModelData],
         model: NSManagedObjectModel
     ) throws {
+        guard values.isEmpty == false else { return }
+        // Prefetch every object referenced by the batch (inserted values and their
+        // relationship targets) with one fetch request per entity. Per-object
+        // find-or-create degrades quadratically as pending inserts accumulate,
+        // because each fetch request evaluates its predicate against all unsaved
+        // objects in the context.
+        var cache = try prefetch(for: values, model: model)
+        // find or create the inserted objects first so relationships between
+        // values in the same batch resolve regardless of their order
+        var managedObjects = [NSManagedObject]()
+        managedObjects.reserveCapacity(values.count)
         for value in values {
-            try insert(value, model: model, shouldSave: false)
+            let managedObject: NSManagedObject
+            if let cached = cache[value.entity]?[value.id] {
+                managedObject = cached
+            } else {
+                // the prefetch covered every value identifier, so a cache miss
+                // means the object does not exist yet
+                managedObject = try create(value.entity, for: value.id, in: model, cache: &cache)
+            }
+            managedObjects.append(managedObject)
+        }
+        // apply attributes and relationships
+        for (index, value) in values.enumerated() {
+            try managedObjects[index].setValues(for: value, in: self, cache: &cache)
         }
         try self.save()
+    }
+}
+
+internal extension NSManagedObjectContext {
+
+    /// Realized managed objects by entity and identifier, used to avoid per-object
+    /// fetch requests during batch inserts.
+    typealias ManagedObjectCache = [EntityName: [ObjectID: NSManagedObject]]
+
+    /// Fetch the existing managed objects referenced by the given values
+    /// (both inserted objects and their relationship targets) with a single
+    /// fetch request per entity.
+    func prefetch(
+        for values: [ModelData],
+        model: NSManagedObjectModel
+    ) throws -> ManagedObjectCache {
+        // collect identifiers by entity
+        var idsByEntity = [EntityName: Set<ObjectID>]()
+        for value in values {
+            idsByEntity[value.entity, default: []].insert(value.id)
+            guard value.relationships.isEmpty == false else { continue }
+            let relationshipsByName = try model[value.entity].relationshipsByName
+            for (key, relationship) in value.relationships {
+                guard let destinationEntity = relationshipsByName[key.rawValue]?.destinationEntity?.name.map({ EntityName(rawValue: $0) }) else {
+                    continue
+                }
+                switch relationship {
+                case .null:
+                    continue
+                case let .toOne(id):
+                    idsByEntity[destinationEntity, default: []].insert(id)
+                case let .toMany(ids):
+                    idsByEntity[destinationEntity, default: []].formUnion(ids)
+                }
+            }
+        }
+        // fetch existing objects with a single request per entity
+        var cache = ManagedObjectCache(minimumCapacity: idsByEntity.count)
+        for (entityName, ids) in idsByEntity {
+            let fetchRequest = NSFetchRequest<NSManagedObject>(entityName: entityName.rawValue)
+            fetchRequest.predicate = NSPredicate(
+                format: "%K IN %@",
+                NSManagedObject.BuiltInProperty.id.rawValue,
+                ids.map { $0.rawValue }
+            )
+            fetchRequest.returnsObjectsAsFaults = false
+            var entityCache = [ObjectID: NSManagedObject](minimumCapacity: ids.count)
+            for managedObject in try self.fetch(fetchRequest) {
+                entityCache[try managedObject.modelObjectID] = managedObject
+            }
+            cache[entityName] = entityCache
+        }
+        return cache
+    }
+
+    /// Find the managed object through the cache, falling back to a fetch request
+    /// and caching the result.
+    func find(
+        _ entityName: EntityName,
+        for id: ObjectID,
+        cache: inout ManagedObjectCache
+    ) throws -> NSManagedObject? {
+        if let managedObject = cache[entityName]?[id] {
+            return managedObject
+        }
+        guard let managedObject = try find(entityName, for: id, includesPropertyValues: false) else {
+            return nil
+        }
+        cache[entityName, default: [:]][id] = managedObject
+        return managedObject
+    }
+
+    /// Create the managed object and add it to the cache.
+    func create(
+        _ entityName: EntityName,
+        for id: ObjectID,
+        in model: NSManagedObjectModel,
+        cache: inout ManagedObjectCache
+    ) throws -> NSManagedObject {
+        let managedObject = try create(entityName, for: id, in: model)
+        cache[entityName, default: [:]][id] = managedObject
+        return managedObject
     }
 }
 

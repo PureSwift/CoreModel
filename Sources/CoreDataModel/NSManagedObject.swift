@@ -187,17 +187,27 @@ internal extension NSManagedObject {
         for key: PropertyKey,
         in context: NSManagedObjectContext
     ) throws {
-        
+        var cache = NSManagedObjectContext.ManagedObjectCache()
+        try setRelationship(newValue, for: key, in: context, cache: &cache)
+    }
+
+    func setRelationship(
+        _ newValue: RelationshipValue,
+        for key: PropertyKey,
+        in context: NSManagedObjectContext,
+        cache: inout NSManagedObjectContext.ManagedObjectCache
+    ) throws {
+
         guard let relationship = self.entity.relationshipsByName[key.rawValue],
               let destinationEntity = relationship.destinationEntity?.name.map({ EntityName(rawValue: $0) }) else {
             assertionFailure("Invalid relationship for \"\(key)\"")
             throw CocoaError(.coreData)
         }
-        
+
         let model = self.entity.managedObjectModel
-                
+
         let objectValue: AnyObject?
-        
+
         switch newValue {
         case .null:
             objectValue = nil
@@ -207,7 +217,7 @@ internal extension NSManagedObject {
                 throw CocoaError(.coreData)
             }
             // find managed object
-            let managedObject = try context.find(destinationEntity, for: value)
+            let managedObject = try context.find(destinationEntity, for: value, cache: &cache)
             objectValue = managedObject
         case let .toMany(value):
             guard relationship.isToMany else {
@@ -216,14 +226,14 @@ internal extension NSManagedObject {
             }
             // find or create
             let managedObjects = try value
-                .map { try context.find(destinationEntity, for: $0) ?? context.create(destinationEntity, for: $0, in: model) }
+                .map { try context.find(destinationEntity, for: $0, cache: &cache) ?? context.create(destinationEntity, for: $0, in: model, cache: &cache) }
             if relationship.isOrdered {
                 objectValue = NSOrderedSet(array: managedObjects)
             } else {
                 objectValue = NSSet(array: managedObjects)
             }
         }
-        
+
         self.setValue(objectValue, forKey: key.rawValue)
     }
 }
@@ -274,13 +284,22 @@ internal extension NSManagedObject {
 internal extension NSManagedObject {
     
     func setValues(for value: ModelData, in context: NSManagedObjectContext) throws {
+        var cache = NSManagedObjectContext.ManagedObjectCache()
+        try setValues(for: value, in: context, cache: &cache)
+    }
+
+    func setValues(
+        for value: ModelData,
+        in context: NSManagedObjectContext,
+        cache: inout NSManagedObjectContext.ManagedObjectCache
+    ) throws {
         // apply attributes
         for (key, value) in value.attributes {
             setAttribute(value, for: key)
         }
         // apply relationships
         for (key, value) in value.relationships {
-            try setRelationship(value, for: key, in: context)
+            try setRelationship(value, for: key, in: context, cache: &cache)
         }
     }
 }
