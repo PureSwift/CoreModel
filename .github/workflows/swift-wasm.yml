@@ -47,9 +47,10 @@ jobs:
     - name: Install Embedded WASM SDK
       run: |
         set -eux
-        url="https://download.swift.org/swift-6.3.2-release/wasm-sdk/swift-6.3.2-RELEASE/swift-6.3.2-RELEASE_wasm-embedded.artifactbundle.tar.gz"
-        curl -fsSL "$url" -o wasm-embedded.artifactbundle.tar.gz
-        swift sdk install wasm-embedded.artifactbundle.tar.gz
+        # The embedded SDK identifier ships inside the same artifact bundle as the regular WASM SDK.
+        url="https://download.swift.org/swift-6.3.2-release/wasm-sdk/swift-6.3.2-RELEASE/swift-6.3.2-RELEASE_wasm.artifactbundle.tar.gz"
+        curl -fsSL "$url" -o wasm.artifactbundle.tar.gz
+        swift sdk install wasm.artifactbundle.tar.gz
         swift sdk list
     - name: Build
       run: >-
