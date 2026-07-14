@@ -212,6 +212,11 @@ extension EntityMacro {
                 destinationType = String(rawType.dropFirst().dropLast()).trimmingCharacters(in: .whitespaces)
             }
 
+            // Handle Optional relationships (e.g. "User.ID?")
+            if destinationType.hasSuffix("?") {
+                destinationType = String(destinationType.dropLast())
+            }
+
             // Handle .ID suffix
             if destinationType.hasSuffix(".ID") {
                 destinationType = String(destinationType.dropLast(3)) // remove ".ID"
