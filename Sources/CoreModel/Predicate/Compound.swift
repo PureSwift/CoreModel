@@ -45,18 +45,22 @@ public extension FetchRequest.Predicate.Compound {
 public extension FetchRequest.Predicate.Compound {
     
     /// Possible Compund Predicate types.
-    enum Logical​Type: String, Codable, Sendable {
-        
+    enum Logical​Type: String, Sendable {
+
         /// A logical NOT predicate.
         case not = "NOT"
-        
+
         /// A logical AND predicate.
         case and = "AND"
-        
+
         /// A logical OR predicate.
         case or = "OR"
     }
 }
+
+#if !hasFeature(Embedded)
+extension FetchRequest.Predicate.Compound.Logical​Type: Codable {}
+#endif
 
 // MARK: - CustomStringConvertible
 
@@ -105,19 +109,20 @@ extension FetchRequest.Predicate.Compound: CustomStringConvertible {
 
 // MARK: - Codable
 
+#if !hasFeature(Embedded)
 extension FetchRequest.Predicate.Compound: Codable {
-    
+
     internal enum CodingKeys: String, CodingKey {
-        
+
         case type
         case predicates
     }
-    
+
     public init(from decoder: Decoder) throws {
-        
+
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let type = try container.decode(FetchRequest.Predicate.Compound.Logical​Type.self, forKey: .type)
-        
+
         switch type {
         case .and:
             let predicates = try container.decode([FetchRequest.Predicate].self, forKey: .predicates)
@@ -130,12 +135,12 @@ extension FetchRequest.Predicate.Compound: Codable {
             self = .not(predicate)
         }
     }
-    
+
     public func encode(to encoder: Encoder) throws {
-        
+
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(type, forKey: .type)
-        
+
         switch self {
         case let .and(predicates):
             try container.encode(predicates, forKey: .predicates)
@@ -146,6 +151,7 @@ extension FetchRequest.Predicate.Compound: Codable {
         }
     }
 }
+#endif
 
 // MARK: - Predicate Operators
 
