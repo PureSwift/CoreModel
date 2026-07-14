@@ -34,19 +34,27 @@ public protocol ModelStorage: AnyObject, Sendable {
     func delete(_ entity: EntityName, for ids: [ObjectID]) async throws
 }
 
+#if !hasFeature(Embedded)
+// - Note: Unavailable under Embedded Swift (a compiler bug in SILGen crashes on
+//   an `async` default protocol-extension method calling another `async`
+//   protocol requirement through `Self`, e.g. https://github.com/swiftlang/swift/issues/78811
+//   and related embedded-async SILGen issues). Embedded conformers must
+//   implement `count(_:)` and `insert(_:)` themselves.
 public extension ModelStorage {
-    
+
     func count(_ fetchRequest: FetchRequest) async throws -> UInt {
         return try await UInt(fetch(fetchRequest).count)
     }
-    
+
     func insert(_ values: [ModelData]) async throws {
         for model in values {
             try await insert(model)
         }
     }
 }
+#endif
 
+#if !hasFeature(Embedded)
 @MainActor
 public protocol ViewContext {
     
@@ -62,12 +70,13 @@ public protocol ViewContext {
     /// Fetch and return result count.
     func count(_ fetchRequest: FetchRequest) throws -> UInt
 }
+#endif
 
 // MARK: - ModelData
 
 /// CoreModel Object Instance
-public struct ModelData: Equatable, Hashable, Identifiable, Codable, Sendable {
-    
+public struct ModelData: Equatable, Hashable, Identifiable, Sendable {
+
     public let entity: EntityName
     
     public let id: ObjectID
@@ -89,10 +98,22 @@ public struct ModelData: Equatable, Hashable, Identifiable, Codable, Sendable {
     }
 }
 
+// MARK: - Codable
+
+#if !hasFeature(Embedded)
+extension ModelData: Codable {}
+#endif
+
 // MARK: - ModelStorage Codable Extensions
 
+#if !hasFeature(Embedded)
+// - Note: Unavailable under Embedded Swift (a compiler bug in SILGen crashes on
+//   `async` default protocol-extension methods that call another `async`
+//   protocol requirement through `Self`). Embedded consumers should call the
+//   `ModelStorage` protocol requirements directly with `ModelData`/`ObjectID`
+//   and use `Entity.init(from:)`/`encode()` themselves.
 public extension ModelStorage {
-    
+
     /// Fetch managed object.
     func fetch<T>(_ entity: T.Type, for id: T.ID) async throws -> T? where T: Entity {
         let objectID = ObjectID(rawValue: id.description)
@@ -140,7 +161,7 @@ public extension ModelStorage {
     }
     
     /// Create or edit a managed object.
-    func insert<T>(_ value: T) async throws where T: Entity, T: Encodable {
+    func insert<T>(_ value: T) async throws where T: Entity {
         let model = try value.encode() // should never fail
         try await insert(model)
     }
@@ -151,9 +172,11 @@ public extension ModelStorage {
         try await delete(T.entityName, for: objectID)
     }
 }
+#endif
 
+#if !hasFeature(Embedded)
 public extension ViewContext {
-    
+
     /// Fetch managed object.
     func fetch<T>(_ entity: T.Type, for id: T.ID) throws -> T? where T: Entity {
         let objectID = ObjectID(rawValue: id.description)
@@ -200,3 +223,4 @@ public extension ViewContext {
         return try count(fetchRequest)
     }
 }
+#endif
