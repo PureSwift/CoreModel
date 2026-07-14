@@ -78,6 +78,28 @@ extension ObjectIDConvertible where Self: RawRepresentable, Self.RawValue == Str
     }
 }
 
+extension Optional: ObjectIDConvertible where Wrapped: ObjectIDConvertible {
+
+    public init?(objectID: ObjectID) {
+        guard let wrapped = Wrapped(objectID: objectID) else {
+            return nil
+        }
+        self = .some(wrapped)
+    }
+}
+
+extension Optional: @retroactive CustomStringConvertible where Wrapped: CustomStringConvertible {
+
+    public var description: String {
+        switch self {
+        case .none:
+            return ""
+        case .some(let wrapped):
+            return wrapped.description
+        }
+    }
+}
+
 // MARK: - Codable
 
 #if !hasFeature(Embedded)
