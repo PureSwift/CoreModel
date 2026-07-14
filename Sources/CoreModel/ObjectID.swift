@@ -5,11 +5,15 @@
 //  Created by Alsey Coleman Miller on 8/17/23.
 //
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#elseif canImport(Foundation)
 import Foundation
+#endif
 
 /// CoreModel Object Identifier
-public struct ObjectID: RawRepresentable, Codable, Equatable, Hashable, Sendable {
-    
+public struct ObjectID: RawRepresentable, Equatable, Hashable, Sendable {
+
     public let rawValue: String
     
     public init(rawValue: String) {
@@ -68,8 +72,14 @@ extension String: ObjectIDConvertible {
 }
 
 extension ObjectIDConvertible where Self: RawRepresentable, Self.RawValue == String {
-    
+
     public init?(objectID: ObjectID) {
         self.init(rawValue: objectID.rawValue)
     }
 }
+
+// MARK: - Codable
+
+#if !hasFeature(Embedded)
+extension ObjectID: Codable {}
+#endif

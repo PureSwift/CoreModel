@@ -5,7 +5,11 @@
 //  Created by Alsey Coleman Miller on 8/17/23.
 //
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#elseif canImport(Foundation)
 import Foundation
+#endif
 
 // MARK: - ModelData Encoding
 

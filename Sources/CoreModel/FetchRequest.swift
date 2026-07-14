@@ -6,11 +6,9 @@
 //  Copyright © 2015 PureSwift. All rights reserved.
 //
 
-import Foundation
-
 /// CoreModel Fetch Request
-public struct FetchRequest: Codable, Equatable, Hashable, Sendable {
-    
+public struct FetchRequest: Equatable, Hashable, Sendable {
+
     public var entity: EntityName
     
     public var sortDescriptors: [SortDescriptor]
@@ -34,3 +32,9 @@ public struct FetchRequest: Codable, Equatable, Hashable, Sendable {
         self.fetchOffset = fetchOffset
     }
 }
+
+// MARK: - Codable
+
+#if !hasFeature(Embedded)
+extension FetchRequest: Codable {}
+#endif

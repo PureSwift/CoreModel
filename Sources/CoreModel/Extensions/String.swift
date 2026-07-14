@@ -5,6 +5,7 @@
 //  Created by Alsey Coleman Miller on 4/12/20.
 //
 
+#if canImport(Foundation)
 import Foundation
 
 internal extension String {
@@ -72,3 +73,4 @@ internal extension String.CompareOptions {
         }
     }
 }
+#endif
