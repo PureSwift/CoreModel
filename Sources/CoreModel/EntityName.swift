@@ -5,10 +5,8 @@
 //  Created by Alsey Coleman Miller on 8/16/23.
 //
 
-import Foundation
+public struct EntityName: RawRepresentable, Equatable, Hashable, Sendable {
 
-public struct EntityName: RawRepresentable, Codable, Equatable, Hashable, Sendable {
-    
     public let rawValue: String
     
     public init(rawValue: String) {
@@ -38,3 +36,9 @@ extension EntityName: CustomStringConvertible, CustomDebugStringConvertible {
         rawValue
     }
 }
+
+// MARK: - Codable
+
+#if !hasFeature(Embedded)
+extension EntityName: Codable {}
+#endif
