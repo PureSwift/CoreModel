@@ -5,17 +5,21 @@
 //  Created by Alsey Coleman Miller on 8/17/23.
 //
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#elseif canImport(Foundation)
 import Foundation
+#endif
 
 // MARK: - ModelData Decoding
 
 public extension ModelData {
-    
+
     func decode<T, K>(_ type: T.Type, forKey key: K) throws -> T where T: AttributeDecodable, K: CodingKey {
-        
+
         let property = PropertyKey(key)
         guard let attribute = self.attributes[property] else {
-            throw DecodingError.keyNotFound(key, DecodingError.Context(codingPath: [], debugDescription: "Key \(key.stringValue) not found"))
+            throw coreModelKeyNotFoundError(key)
         }
         // TODO: Optional values
         /*
@@ -23,45 +27,45 @@ public extension ModelData {
             return
         }*/
         guard let decodable = type.init(attributeValue: attribute) else {
-            throw DecodingError.typeMismatch(type, DecodingError.Context(codingPath: [], debugDescription: "Cannot decode \(String(describing: type)) from \(attribute)"))
+            throw coreModelTypeMismatchError(type, forKey: key, from: attribute)
         }
         return decodable
     }
-    
+
     func decodeRelationship<T, K>(_ type: T.Type, forKey key: K) throws -> T where T: ObjectIDConvertible, K: CodingKey {
-        
+
         let property = PropertyKey(key)
         guard let relationship = self.relationships[property] else {
-            throw DecodingError.keyNotFound(key, DecodingError.Context(codingPath: [], debugDescription: "Key \(key.stringValue) not found"))
+            throw coreModelKeyNotFoundError(key)
         }
         switch relationship {
         case .null:
-            throw DecodingError.keyNotFound(key, DecodingError.Context(codingPath: [], debugDescription: "Key \(key.stringValue) not found"))
+            throw coreModelKeyNotFoundError(key)
         case .toMany:
-            throw DecodingError.typeMismatch(type, DecodingError.Context(codingPath: [], debugDescription: "Cannot decode \(String(describing: type)) from \(relationship)"))
+            throw coreModelTypeMismatchError(type, forKey: key, from: relationship)
         case let .toOne(objectID):
             guard let id = type.init(objectID: objectID) else {
-                throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: [], debugDescription: "Cannot decode identifier from \(objectID)"))
+                throw coreModelInvalidIdentifierError(objectID)
             }
             return id
         }
     }
-    
+
     func decodeRelationship<T, K>(_ type: [T].Type, forKey key: K) throws -> [T] where T: ObjectIDConvertible, K: CodingKey {
-        
+
         let property = PropertyKey(key)
         guard let relationship = self.relationships[property] else {
-            throw DecodingError.keyNotFound(key, DecodingError.Context(codingPath: [], debugDescription: "Key \(key.stringValue) not found"))
+            throw coreModelKeyNotFoundError(key)
         }
         switch relationship {
         case .null:
             return []
         case .toOne:
-            throw DecodingError.typeMismatch(type, DecodingError.Context(codingPath: [], debugDescription: "Cannot decode \(String(describing: type)) from \(relationship)"))
+            throw coreModelTypeMismatchError(type, forKey: key, from: relationship)
         case let .toMany(objectIDs):
             return try objectIDs.map {
                 guard let id = T.init(objectID: $0) else {
-                    throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: [], debugDescription: "Cannot decode identifier from \($0)"))
+                    throw coreModelInvalidIdentifierError($0)
                 }
                 return id
             }
