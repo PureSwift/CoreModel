@@ -7,6 +7,7 @@
 
 #if !hasFeature(Embedded)
 import Foundation
+import CoreModel
 
 // MARK: - Default Codable Implementation
 
