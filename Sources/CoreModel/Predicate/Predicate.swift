@@ -19,15 +19,19 @@ public extension FetchRequest {
 }
 
 public extension FetchRequest {
-    
+
     /// Predicate Type
-    enum PredicateType: String, Codable, Sendable {
-        
+    enum PredicateType: String, Sendable {
+
         case comparison
         case compound
         case value
     }
 }
+
+#if !hasFeature(Embedded)
+extension FetchRequest.PredicateType: Codable {}
+#endif
 
 public extension FetchRequest.Predicate {
     
@@ -57,19 +61,20 @@ extension FetchRequest.Predicate: CustomStringConvertible {
 
 // MARK: - Codable
 
+#if !hasFeature(Embedded)
 extension FetchRequest.Predicate: Codable {
-    
+
     internal enum CodingKeys: String, CodingKey {
-        
+
         case type
         case predicate
     }
-    
+
     public init(from decoder: Decoder) throws {
-        
+
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let type = try container.decode(FetchRequest.PredicateType.self, forKey: .type)
-        
+
         switch type {
         case .comparison:
             let predicate = try container.decode(Comparison.self, forKey: .predicate)
@@ -82,12 +87,12 @@ extension FetchRequest.Predicate: Codable {
             self = .value(value)
         }
     }
-    
+
     public func encode(to encoder: Encoder) throws {
-        
+
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(type, forKey: .type)
-        
+
         switch self {
         case let .comparison(predicate):
             try container.encode(predicate, forKey: .predicate)
@@ -98,3 +103,4 @@ extension FetchRequest.Predicate: Codable {
         }
     }
 }
+#endif
