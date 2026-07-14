@@ -22,12 +22,23 @@ public extension ModelData {
     }
     
     mutating func encodeRelationship<T, K>(_ value: T, forKey key: K) where T: CustomStringConvertible, K: CodingKey {
-        
+
         let property = PropertyKey(key)
         let objectID = ObjectID(rawValue: value.description)
         self.relationships[property] = .toOne(objectID)
     }
-    
+
+    mutating func encodeRelationship<T, K>(_ value: T?, forKey key: K) where T: CustomStringConvertible, K: CodingKey {
+
+        let property = PropertyKey(key)
+        guard let value else {
+            self.relationships[property] = .null
+            return
+        }
+        let objectID = ObjectID(rawValue: value.description)
+        self.relationships[property] = .toOne(objectID)
+    }
+
     mutating func encodeRelationship<T, K>(_ value: [T], forKey key: K) where T: CustomStringConvertible, K: CodingKey {
         
         let property = PropertyKey(key)
