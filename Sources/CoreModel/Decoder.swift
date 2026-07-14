@@ -5,6 +5,7 @@
 //  Created by Alsey Coleman Miller on 8/18/23.
 //
 
+#if !hasFeature(Embedded)
 import Foundation
 
 // MARK: - Default Codable Implementation
@@ -687,7 +688,6 @@ internal struct IndexCodingKey: CodingKey, RawRepresentable, Equatable, Hashable
     init?(intValue: Int) {
         self.init(rawValue: intValue)
     }
-    
-    
-    
+
 }
+#endif
