@@ -51,6 +51,25 @@ public extension ModelData {
         }
     }
 
+    func decodeRelationship<T, K>(_ type: T?.Type, forKey key: K) throws -> T? where T: ObjectIDConvertible, K: CodingKey {
+
+        let property = PropertyKey(key)
+        guard let relationship = self.relationships[property] else {
+            return nil
+        }
+        switch relationship {
+        case .null:
+            return nil
+        case .toMany:
+            throw coreModelTypeMismatchError(type, forKey: key, from: relationship)
+        case let .toOne(objectID):
+            guard let id = T.init(objectID: objectID) else {
+                throw coreModelInvalidIdentifierError(objectID)
+            }
+            return id
+        }
+    }
+
     func decodeRelationship<T, K>(_ type: [T].Type, forKey key: K) throws -> [T] where T: ObjectIDConvertible, K: CodingKey {
 
         let property = PropertyKey(key)
