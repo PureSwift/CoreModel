@@ -5,6 +5,7 @@
 //  Created by Alsey Coleman Miller on 8/18/23.
 //
 
+#if !hasFeature(Embedded)
 import Foundation
 
 extension Entity where Self: Encodable {
@@ -523,3 +524,4 @@ internal final class ModelUnkeyedEncodingContainer: UnkeyedEncodingContainer {
         encoder.data.relationships[key] = value
     }
 }
+#endif
