@@ -6,41 +6,45 @@
 //  Copyright © 2015 PureSwift. All rights reserved.
 //
 
-import Foundation
-
 /// CoreModel Entity for Codable types
 public protocol Entity: Identifiable, Sendable where CodingKeys: Hashable, Self.ID: ObjectIDConvertible {
-    
+
     static var entityName: EntityName { get }
-    
+
     static var attributes: [CodingKeys: AttributeType] { get }
-    
+
     static var relationships: [CodingKeys: Relationship] { get }
-    
+
     associatedtype CodingKeys: CodingKey
-    
+
     init(from model: ModelData) throws
-    
+
     func encode() throws -> ModelData
 }
 
 public extension Entity {
-    
+
+    #if !hasFeature(Embedded)
+    /// - Note: Unavailable under Embedded Swift (relies on runtime type metadata). Implement explicitly.
     static var entityName: EntityName {
         EntityName(rawValue: String(describing: Self.self))
     }
-    
+    #endif
+
     static var attributes: [CodingKeys: AttributeType] { [:] }
-    
+
     static var relationships: [CodingKeys: Relationship] { [:] }
 }
 
+#if !hasFeature(Embedded)
 public extension Model {
-    
+
+    /// - Note: Unavailable under Embedded Swift (calls a generic initializer through an existential metatype). Construct `Model(entities:)` from concrete `EntityDescription` values instead.
     init(entities: any Entity.Type...) {
         self.init(entities: entities.map { .init(entity: $0) })
     }
 }
+#endif
 
 public extension EntityDescription {
     
