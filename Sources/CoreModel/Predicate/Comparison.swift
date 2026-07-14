@@ -9,7 +9,7 @@
 public extension FetchRequest.Predicate {
     
     /// Comparison Predicate
-    struct Comparison: Equatable, Hashable, Codable, Sendable {
+    struct Comparison: Equatable, Hashable, Sendable {
         
         public var left: Expression
         
@@ -40,29 +40,29 @@ public extension FetchRequest.Predicate {
 
 public extension FetchRequest.Predicate.Comparison {
 
-    enum Modifier: String, Codable, Sendable {
-        
+    enum Modifier: String, Sendable {
+
         case all        = "ALL"
         case any        = "ANY"
     }
-    
-    enum Option: String, Codable, Sendable {
-        
+
+    enum Option: String, Sendable {
+
         /// A case-insensitive predicate.
         case caseInsensitive        = "c"
-        
+
         /// A diacritic-insensitive predicate.
         case diacriticInsensitive   = "d"
-        
+
         /// Indicates that the strings to be compared have been preprocessed.
         case normalized             = "n"
-        
+
         /// Indicates that strings to be compared using `<`, `<=`, `=`, `=>`, `>`
         /// should be handled in a locale-aware fashion.
         case localeSensitive        = "l"
     }
-    
-    enum Operator: String, Codable, Sendable {
+
+    enum Operator: String, Sendable {
         
         /// A less-than predicate.
         case lessThan               = "<"
@@ -111,6 +111,15 @@ public extension FetchRequest.Predicate.Comparison {
         case between                = "BETWEEN"
     }
 }
+
+// MARK: - Codable
+
+#if !hasFeature(Embedded)
+extension FetchRequest.Predicate.Comparison: Codable {}
+extension FetchRequest.Predicate.Comparison.Modifier: Codable {}
+extension FetchRequest.Predicate.Comparison.Option: Codable {}
+extension FetchRequest.Predicate.Comparison.Operator: Codable {}
+#endif
 
 // MARK: - CustomStringConvertible
 
