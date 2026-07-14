@@ -19,7 +19,9 @@ public struct EntityMacro: MemberMacro, ExtensionMacro {
         [
             "entityName",
             "attributes",
-            "relationships"
+            "relationships",
+            "init(from:)",
+            "encode()"
         ]
     }
     
@@ -59,10 +61,14 @@ public struct EntityMacro: MemberMacro, ExtensionMacro {
         let entityNameDeclarationSyntax = try entityNameDeclarationSyntax(of: node, providingMembersOf: declaration, in: context)
         let attributesDeclarationSyntax = try attributesDeclarationSyntax(of: node, providingMembersOf: declaration, in: context)
         let relationshipsDeclarationSyntax = try relationshipsDeclarationSyntax(of: node, providingMembersOf: declaration, in: context)
+        let initDeclarationSyntax = try initDeclarationSyntax(of: node, providingMembersOf: declaration, in: context)
+        let encodeDeclarationSyntax = try encodeDeclarationSyntax(of: node, providingMembersOf: declaration, in: context)
         return [
             entityNameDeclarationSyntax,
             attributesDeclarationSyntax,
-            relationshipsDeclarationSyntax
+            relationshipsDeclarationSyntax,
+            initDeclarationSyntax,
+            encodeDeclarationSyntax
         ]
     }
 }
@@ -256,6 +262,89 @@ extension EntityMacro {
         """
 
         return DeclSyntax(stringLiteral: relationshipsDecl)
+    }
+
+    /// Collects `@Attribute`/`@Relationship` properties as (name, raw type, isRelationship) tuples,
+    /// in declaration order.
+    public static func codableProperties(
+        of declaration: some DeclGroupSyntax
+    ) -> [(name: String, type: String, isRelationship: Bool)] {
+        var properties: [(name: String, type: String, isRelationship: Bool)] = []
+        for member in declaration.memberBlock.members {
+            guard let varDecl = member.decl.as(VariableDeclSyntax.self),
+                  let binding = varDecl.bindings.first,
+                  let identifier = binding.pattern.as(IdentifierPatternSyntax.self)?.identifier.text,
+                  let typeSyntax = binding.typeAnnotation?.type
+                  else { continue }
+            let rawTypeName = typeSyntax.description.trimmingCharacters(in: .whitespacesAndNewlines)
+            for attr in varDecl.attributes.compactMap({ $0.as(AttributeSyntax.self) }) {
+                switch attr.attributeName.description {
+                case "Attribute":
+                    properties.append((identifier, rawTypeName, false))
+                case "Relationship":
+                    properties.append((identifier, rawTypeName, true))
+                default:
+                    continue
+                }
+            }
+        }
+        return properties
+    }
+
+    public static func initDeclarationSyntax(
+        of node: AttributeSyntax,
+        providingMembersOf declaration: some DeclGroupSyntax,
+        in context: some MacroExpansionContext
+    ) throws -> DeclSyntax {
+        let typeName = try typeName(of: node, providingMembersOf: declaration, in: context)
+        let lines = codableProperties(of: declaration).map { property -> String in
+            if property.isRelationship {
+                return "self.\(property.name) = try container.decodeRelationship(\(property.type).self, forKey: \(typeName).CodingKeys.\(property.name))"
+            } else {
+                return "self.\(property.name) = try container.decode(\(property.type).self, forKey: \(typeName).CodingKeys.\(property.name))"
+            }
+        }
+        let body = lines.joined(separator: "\n        ")
+        let initDecl = """
+        public init(from container: ModelData) throws {
+            guard container.entity.rawValue == Self.entityName.rawValue else {
+                throw CoreModel.CoreModelError.invalidEntity(container.entity)
+            }
+            guard let id = Self.ID(objectID: container.id) else {
+                throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: [], debugDescription: "Cannot decode identifier from \\(container.id)"))
+            }
+            self.id = id
+            \(body)
+        }
+        """
+        return DeclSyntax(stringLiteral: initDecl)
+    }
+
+    public static func encodeDeclarationSyntax(
+        of node: AttributeSyntax,
+        providingMembersOf declaration: some DeclGroupSyntax,
+        in context: some MacroExpansionContext
+    ) throws -> DeclSyntax {
+        let typeName = try typeName(of: node, providingMembersOf: declaration, in: context)
+        let lines = codableProperties(of: declaration).map { property -> String in
+            if property.isRelationship {
+                return "container.encodeRelationship(self.\(property.name), forKey: \(typeName).CodingKeys.\(property.name))"
+            } else {
+                return "container.encode(self.\(property.name), forKey: \(typeName).CodingKeys.\(property.name))"
+            }
+        }
+        let body = lines.joined(separator: "\n        ")
+        let encodeDecl = """
+        public func encode() -> ModelData {
+            var container = ModelData(
+                entity: Self.entityName,
+                id: ObjectID(self.id)
+            )
+            \(body)
+            return container
+        }
+        """
+        return DeclSyntax(stringLiteral: encodeDecl)
     }
 
 }
