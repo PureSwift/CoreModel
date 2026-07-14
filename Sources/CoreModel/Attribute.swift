@@ -5,15 +5,13 @@
 //  Created by Alsey Coleman Miller on 8/16/23.
 //
 
-import Foundation
-
 /// CoreModel `Attribute`
-public struct Attribute: Property, Codable, Equatable, Hashable, Identifiable, Sendable {
-    
+public struct Attribute: Property, Equatable, Hashable, Identifiable, Sendable {
+
     public let id: PropertyKey
-    
+
     public var type: AttributeType
-    
+
     public init(
         id: PropertyKey,
         type: AttributeType
@@ -22,3 +20,9 @@ public struct Attribute: Property, Codable, Equatable, Hashable, Identifiable, S
         self.type = type
     }
 }
+
+// MARK: - Codable
+
+#if !hasFeature(Embedded)
+extension Attribute: Codable {}
+#endif
