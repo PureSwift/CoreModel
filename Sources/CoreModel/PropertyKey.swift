@@ -5,10 +5,8 @@
 //  Created by Alsey Coleman Miller on 8/16/23.
 //
 
-import Foundation
+public struct PropertyKey: RawRepresentable, Equatable, Hashable, Sendable {
 
-public struct PropertyKey: RawRepresentable, Codable, Equatable, Hashable, Sendable {
-    
     public let rawValue: String
     
     public init(rawValue: String) {
@@ -42,9 +40,15 @@ extension PropertyKey: CustomStringConvertible, CustomDebugStringConvertible {
 // MARK: - Coding Key
 
 public extension PropertyKey {
-    
+
     /// Initialize from ``Swift.CodingKey``.
     init<K: CodingKey>(_ key: K) {
         self.init(rawValue: key.stringValue)
     }
 }
+
+// MARK: - Codable
+
+#if !hasFeature(Embedded)
+extension PropertyKey: Codable {}
+#endif
