@@ -81,6 +81,29 @@ package.targets[package.targets.count - 1] = .testTarget(
     ]
 )
 
+// Skip (skip.dev) Fuse (native) transpilation support
+let enableSkipFuse = environment["SKIP_FUSE"] == "1"
+if enableSkipFuse {
+    // Skip requires higher minimum deployment targets
+    package.platforms = [
+        .macOS(.v13),
+        .iOS(.v16),
+        .watchOS(.v9),
+        .tvOS(.v16),
+        .macCatalyst(.v16),
+    ]
+    package.dependencies += [
+        .package(url: "https://source.skip.tools/skip.git", from: "1.9.0"),
+        .package(url: "https://source.skip.tools/skip-fuse.git", from: "1.0.0"),
+    ]
+    package.targets[0].dependencies += [
+        .product(name: "SkipFuse", package: "skip-fuse")
+    ]
+    package.targets[0].plugins = (package.targets[0].plugins ?? []) + [
+        .plugin(name: "skipstone", package: "skip")
+    ]
+}
+
 // SwiftPM plugins
 if buildDocs {
     package.dependencies += [
