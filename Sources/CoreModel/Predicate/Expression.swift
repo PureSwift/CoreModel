@@ -22,13 +22,17 @@ public extension FetchRequest.Predicate {
     }
     
     /// Type of predicate expression.
-    enum ExpressionType: String, Codable, Sendable {
-        
+    enum ExpressionType: String, Sendable {
+
         case attribute
         case relationship
         case keyPath
     }
 }
+
+#if !hasFeature(Embedded)
+extension FetchRequest.Predicate.ExpressionType: Codable {}
+#endif
 
 public extension FetchRequest.Predicate.Expression {
     
@@ -94,19 +98,20 @@ internal extension RelationshipValue {
 
 // MARK: - Codable
 
+#if !hasFeature(Embedded)
 extension FetchRequest.Predicate.Expression: Codable {
-    
+
     internal enum CodingKeys: String, CodingKey {
-        
+
         case type
         case expression
     }
-    
+
     public init(from decoder: Decoder) throws {
-        
+
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let type = try container.decode(FetchRequest.Predicate.ExpressionType.self, forKey: .type)
-        
+
         switch type {
         case .attribute:
             let expression = try container.decode(AttributeValue.self, forKey: .expression)
@@ -119,12 +124,12 @@ extension FetchRequest.Predicate.Expression: Codable {
             self = .keyPath(PredicateKeyPath(rawValue: keyPath))
         }
     }
-    
+
     public func encode(to encoder: Encoder) throws {
-        
+
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(type, forKey: .type)
-        
+
         switch self {
         case let .attribute(value):
             try container.encode(value, forKey: .expression)
@@ -135,6 +140,7 @@ extension FetchRequest.Predicate.Expression: Codable {
         }
     }
 }
+#endif
 
 // MARK: - Extensions
 
