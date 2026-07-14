@@ -5,10 +5,8 @@
 //  Created by Alsey Coleman Miller on 8/16/23.
 //
 
-import Foundation
-
 /// CoreModel Attribute type
-public enum AttributeType: String, Codable, CaseIterable, Sendable {
+public enum AttributeType: String, CaseIterable, Sendable {
     
     /// Boolean number type.
     case bool
@@ -46,3 +44,9 @@ public enum AttributeType: String, Codable, CaseIterable, Sendable {
     /// Decimal
     case decimal
 }
+
+// MARK: - Codable
+
+#if !hasFeature(Embedded)
+extension AttributeType: Codable {}
+#endif
