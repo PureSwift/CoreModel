@@ -32,6 +32,14 @@ public protocol ModelStorage: AnyObject, Sendable {
     
     /// Delete the specified managed objects.
     func delete(_ entity: EntityName, for ids: [ObjectID]) async throws
+
+    /// Register a custom function so it can be invoked from a predicate or sort descriptor
+    /// via ``FetchRequest/Predicate/Expression/function(_:)``.
+    ///
+    /// Backends that can execute the function as part of a native query (e.g. a SQL-backed
+    /// store) should do so; backends that cannot should fall back to calling `function.evaluate`
+    /// in memory against fetched values.
+    func register(function: DatabaseFunction) async throws
 }
 
 #if !hasFeature(Embedded)

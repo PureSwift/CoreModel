@@ -19,14 +19,19 @@ public extension FetchRequest.Predicate {
         
         /// Expression that invokes `value​For​Key​Path:​` with a given key path.
         case keyPath(PredicateKeyPath)
+
+        /// Expression that invokes a named function (e.g. a custom function registered
+        /// with the underlying store) with a list of argument expressions.
+        case function(FunctionExpression)
     }
-    
+
     /// Type of predicate expression.
     enum ExpressionType: String, Sendable {
 
         case attribute
         case relationship
         case keyPath
+        case function
     }
 }
 
@@ -41,6 +46,7 @@ public extension FetchRequest.Predicate.Expression {
         case .attribute: return .attribute
         case .relationship: return .relationship
         case .keyPath: return .keyPath
+        case .function: return .function
         }
     }
 }
@@ -55,6 +61,7 @@ extension FetchRequest.Predicate.Expression: CustomStringConvertible {
         case let .attribute(value):     return value.predicateDescription
         case let .relationship(value):  return value.predicateDescription
         case let .keyPath(value):       return value.description
+        case let .function(value):      return value.description
         }
     }
 }
@@ -122,6 +129,9 @@ extension FetchRequest.Predicate.Expression: Codable {
         case .keyPath:
             let keyPath = try container.decode(String.self, forKey: .expression)
             self = .keyPath(PredicateKeyPath(rawValue: keyPath))
+        case .function:
+            let expression = try container.decode(FetchRequest.Predicate.FunctionExpression.self, forKey: .expression)
+            self = .function(expression)
         }
     }
 
@@ -137,6 +147,8 @@ extension FetchRequest.Predicate.Expression: Codable {
             try container.encode(value, forKey: .expression)
         case let .keyPath(keyPath):
             try container.encode(keyPath.rawValue, forKey: .expression)
+        case let .function(value):
+            try container.encode(value, forKey: .expression)
         }
     }
 }

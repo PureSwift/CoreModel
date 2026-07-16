@@ -63,6 +63,25 @@ extension NSManagedObjectContext: ModelStorage {
         fetch.returnsObjectsAsFaults = false
         return try self.fetch(fetchRequest.toFoundation()).map { try $0.modelObjectID }
     }
+
+    /// Registers a custom function. CoreData cannot execute custom functions as part of
+    /// a native fetch, so the function is only recorded for later in-memory evaluation.
+    public func register(function: DatabaseFunction) throws {
+        registeredFunctions[function.name] = function
+    }
+}
+
+// MARK: - Function Registry
+
+private nonisolated(unsafe) var functionRegistryKey: UInt8 = 0
+
+internal extension NSManagedObjectContext {
+
+    /// Functions registered via ``ModelStorage/register(function:)``, keyed by name.
+    var registeredFunctions: [String: DatabaseFunction] {
+        get { (objc_getAssociatedObject(self, &functionRegistryKey) as? [String: DatabaseFunction]) ?? [:] }
+        set { objc_setAssociatedObject(self, &functionRegistryKey, newValue, .OBJC_ASSOCIATION_RETAIN) }
+    }
 }
 
 // MARK: - ManagedObjectViewContext
