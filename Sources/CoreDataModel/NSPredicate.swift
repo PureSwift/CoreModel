@@ -126,6 +126,7 @@ internal extension FetchRequest.Predicate.Expression {
         case let .keyPath(keyPath): return NSExpression(forKeyPath: keyPath.rawValue)
         case let .attribute(value): return NSExpression(forConstantValue: value.toFoundation())
         case let .relationship(value): return NSExpression(forConstantValue: value.toFoundation())
+        case let .function(value): return NSExpression(forFunction: value.name, arguments: value.arguments.map { $0.toFoundation() })
         }
     }
 }

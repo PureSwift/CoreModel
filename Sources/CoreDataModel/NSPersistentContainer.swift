@@ -62,6 +62,12 @@ extension NSPersistentContainer: ModelStorage {
             try context.fetchID(fetchRequest)
         }
     }
+
+    public func register(function: DatabaseFunction) async throws {
+        try await performBackgroundTask { context in
+            try context.register(function: function)
+        }
+    }
 }
 
 // MARK: - PersistentContainerStorage
@@ -170,7 +176,13 @@ public actor PersistentContainerStorage: ModelStorage, ObservableObject {
             try context.delete(entity, for: ids)
         }
     }
-    
+
+    public func register(function: DatabaseFunction) async throws {
+        try await performBackgroundTask { (context, model) in
+            try context.register(function: function)
+        }
+    }
+
     private func performBackgroundTask<T>(
         schedule: NSManagedObjectContext.ScheduledTaskType = .immediate,
         _ task: @escaping (NSManagedObjectContext, NSManagedObjectModel) throws -> T

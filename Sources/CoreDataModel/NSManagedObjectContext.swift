@@ -19,12 +19,18 @@ extension NSManagedObjectContext: ModelStorage {
     }
     
     public func fetch(_ fetchRequest: FetchRequest) throws -> [ModelData] {
-        try self.fetchObjects(fetchRequest)
-            .map { try ModelData(managedObject: $0) }
+        guard fetchRequest.requiresInMemoryEvaluation else {
+            return try self.fetchObjects(fetchRequest)
+                .map { try ModelData(managedObject: $0) }
+        }
+        return try fetchInMemory(fetchRequest)
     }
-    
+
     public func count(_ fetchRequest: FetchRequest) throws -> UInt {
-        return UInt(try self.count(for: fetchRequest.toFoundation()))
+        guard fetchRequest.requiresInMemoryEvaluation else {
+            return UInt(try self.count(for: fetchRequest.toFoundation()))
+        }
+        return UInt(try fetchInMemory(fetchRequest).count)
     }
     
     public func insert(_ value: ModelData) throws {
@@ -58,10 +64,63 @@ extension NSManagedObjectContext: ModelStorage {
     }
     
     public func fetchID(_ fetchRequest: FetchRequest) throws -> [ObjectID] {
-        let fetch = fetchRequest.toFoundation()
-        fetch.propertiesToFetch = [NSManagedObject.BuiltInProperty.id.rawValue]
-        fetch.returnsObjectsAsFaults = false
-        return try self.fetch(fetchRequest.toFoundation()).map { try $0.modelObjectID }
+        guard fetchRequest.requiresInMemoryEvaluation else {
+            let fetch = fetchRequest.toFoundation()
+            fetch.propertiesToFetch = [NSManagedObject.BuiltInProperty.id.rawValue]
+            fetch.returnsObjectsAsFaults = false
+            return try self.fetch(fetchRequest.toFoundation()).map { try $0.modelObjectID }
+        }
+        return try fetchInMemory(fetchRequest).map { $0.id }
+    }
+
+    /// Execute a fetch whose predicate or sort references a custom function.
+    ///
+    /// CoreData can't run custom functions, so the request is split: it fetches a
+    /// superset natively (function comparisons replaced with `TRUE`, function sorts and
+    /// limit/offset dropped), then filters, sorts, and paginates the results in memory
+    /// using the registered functions.
+    private func fetchInMemory(_ fetchRequest: FetchRequest) throws -> [ModelData] {
+        let functions = registeredFunctions
+        var native = fetchRequest
+        native.predicate = fetchRequest.predicate?.strippingFunctionComparisons()
+        native.sortDescriptors = []
+        native.fetchLimit = 0
+        native.fetchOffset = 0
+        var results = try self.fetchObjects(native).map { try ModelData(managedObject: $0) }
+        if let predicate = fetchRequest.predicate {
+            results = results.filter { predicate.evaluate(with: $0, functions: functions) }
+        }
+        results = results.sortedInMemory(by: fetchRequest.sortDescriptors, functions: functions)
+        if fetchRequest.fetchOffset > 0 {
+            results = Array(results.dropFirst(fetchRequest.fetchOffset))
+        }
+        if fetchRequest.fetchLimit > 0 {
+            results = Array(results.prefix(fetchRequest.fetchLimit))
+        }
+        return results
+    }
+
+    /// Registers a custom function. CoreData cannot execute custom functions as part of
+    /// a native fetch, so the function is only recorded for later in-memory evaluation.
+    public func register(function: DatabaseFunction) throws {
+        registeredFunctions[function.name] = function
+    }
+}
+
+// MARK: - Function Registry
+
+internal extension NSManagedObjectContext {
+
+    /// Key under which the function registry is stored in the context's `userInfo`.
+    private static let functionRegistryKey = "org.pureswift.CoreDataModel.registeredFunctions"
+
+    /// Functions registered via ``ModelStorage/register(function:)``, keyed by name.
+    ///
+    /// Stored in the context's `userInfo`, the dictionary CoreData provides for
+    /// associating custom data with a managed object context.
+    var registeredFunctions: [String: DatabaseFunction] {
+        get { (userInfo[Self.functionRegistryKey] as? [String: DatabaseFunction]) ?? [:] }
+        set { userInfo[Self.functionRegistryKey] = newValue }
     }
 }
 
