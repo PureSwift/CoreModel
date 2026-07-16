@@ -5,7 +5,13 @@
 //  Created by Alsey Coleman Miller on 4/12/20.
 //
 
-#if canImport(Foundation)
+// NSString-bridged locale-sensitive comparison (`compare(_:options:range:locale:)`,
+// `range(of:options:range:locale:)`) requires the full `Foundation` module — not
+// available via `FoundationEssentials` alone — so this is Android-excluded.
+// Not currently called anywhere in this module (verified: the only textual match
+// on `begins(with:)` elsewhere is `PredicateKeyPath.begins(with:)`, which operates
+// on `[Key]`, a different overload entirely).
+#if canImport(Foundation) && !os(Android)
 import Foundation
 
 internal extension String {
