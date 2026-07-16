@@ -73,14 +73,18 @@ extension NSManagedObjectContext: ModelStorage {
 
 // MARK: - Function Registry
 
-private nonisolated(unsafe) var functionRegistryKey: UInt8 = 0
-
 internal extension NSManagedObjectContext {
 
+    /// Key under which the function registry is stored in the context's `userInfo`.
+    private static let functionRegistryKey = "org.pureswift.CoreDataModel.registeredFunctions"
+
     /// Functions registered via ``ModelStorage/register(function:)``, keyed by name.
+    ///
+    /// Stored in the context's `userInfo`, the dictionary CoreData provides for
+    /// associating custom data with a managed object context.
     var registeredFunctions: [String: DatabaseFunction] {
-        get { (objc_getAssociatedObject(self, &functionRegistryKey) as? [String: DatabaseFunction]) ?? [:] }
-        set { objc_setAssociatedObject(self, &functionRegistryKey, newValue, .OBJC_ASSOCIATION_RETAIN) }
+        get { (userInfo[Self.functionRegistryKey] as? [String: DatabaseFunction]) ?? [:] }
+        set { userInfo[Self.functionRegistryKey] = newValue }
     }
 }
 
