@@ -61,28 +61,45 @@ fi
 # 3. Locate the instrumented test binary (differs by platform: on macOS it lives
 #    inside the .xctest bundle, on Linux the .xctest file is the binary itself).
 BIN_PATH="$(swift build --show-bin-path)"
-TEST_BINARY=""
+TEST_BINARIES=()
 for candidate in \
     "$BIN_PATH"/*Tests.xctest/Contents/MacOS/*Tests \
     "$BIN_PATH"/*Tests.xctest; do
     if [ -f "$candidate" ]; then
-        TEST_BINARY="$candidate"
-        break
+        TEST_BINARIES+=("$candidate")
     fi
+done
+
+# llvm-cov takes the first binary as a positional argument and the rest via
+# -object; a package can have several test products and all must be merged.
+OBJECT_ARGS=()
+for bin in "${TEST_BINARIES[@]:1}"; do
+    OBJECT_ARGS+=(-object "$bin")
 done
 
 # 4. Export an LCOV report (for Codecov / Coveralls / editors).
 mkdir -p "$(dirname "$OUTPUT")"
-if [ -n "$TEST_BINARY" ] && [ -f "$PROFDATA" ]; then
+if [ "${#TEST_BINARIES[@]}" -gt 0 ] && [ -f "$PROFDATA" ]; then
     echo "==> Exporting LCOV report to $OUTPUT"
     $LLVM_COV export \
         -format=lcov \
         -instr-profile "$PROFDATA" \
-        "$TEST_BINARY" \
+        "${TEST_BINARIES[0]}" "${OBJECT_ARGS[@]}" \
         -ignore-filename-regex='.build/(checkouts|.*\.build)/|Tests/|\.derived/|DerivedSources/' \
         > "$OUTPUT"
+    # SwiftPM's own codecov JSON only reflects a single test binary when the
+    # package has multiple test products, so export a merged JSON ourselves and
+    # use it for the Cobertura report and the threshold below.
+    echo "==> Exporting merged llvm-cov JSON"
+    $LLVM_COV export \
+        -format=text \
+        -instr-profile "$PROFDATA" \
+        "${TEST_BINARIES[0]}" "${OBJECT_ARGS[@]}" \
+        -ignore-filename-regex='.build/(checkouts|.*\.build)/|Tests/|\.derived/|DerivedSources/' \
+        > "$(dirname "$OUTPUT")/coverage.json"
+    CODECOV_JSON="$(dirname "$OUTPUT")/coverage.json"
 else
-    echo "warning: could not locate test binary or profdata; skipping LCOV export" >&2
+    echo "warning: could not locate test binaries or profdata; skipping LCOV export" >&2
 fi
 
 # 5. Generate a Cobertura XML report (for GitHub Code Quality / upload-code-coverage).
