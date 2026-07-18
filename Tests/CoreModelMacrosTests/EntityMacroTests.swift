@@ -5,6 +5,11 @@
 //  Created by Alsey Coleman Miller on 7/17/25.
 //
 
+// Macro expansion tests depend on the swift-syntax host tooling and only run
+// where the test suite is executed (macOS and Linux); other CI platforms
+// cross-compile the package and never run `swift test`.
+#if os(macOS) || os(Linux)
+
 import Foundation
 import XCTest
 import SwiftSyntax
@@ -338,3 +343,5 @@ private extension EntityMacroTests {
         try EntityMacro.expansion(of: node, providingMembersOf: declaration, in: context)
     }
 }
+
+#endif
