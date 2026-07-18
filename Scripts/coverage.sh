@@ -71,11 +71,18 @@ for candidate in \
 done
 
 # llvm-cov takes the first binary as a positional argument and the rest via
-# -object; a package can have several test products and all must be merged.
+# -object. On macOS/Linux SwiftPM normally merges every test target into one
+# `<Package>PackageTests` bundle, so there's usually a single binary and
+# OBJECT_ARGS stays empty; the extra binaries only appear in multi-product
+# setups. The `${arr[@]+…}` guards below keep empty-array expansions from
+# tripping `set -u` on the macOS system bash (3.2), where "${empty[@]}" is
+# otherwise treated as an unbound variable.
 OBJECT_ARGS=()
-for bin in "${TEST_BINARIES[@]:1}"; do
-    OBJECT_ARGS+=(-object "$bin")
-done
+if [ "${#TEST_BINARIES[@]}" -gt 1 ]; then
+    for bin in "${TEST_BINARIES[@]:1}"; do
+        OBJECT_ARGS+=(-object "$bin")
+    done
+fi
 
 # 4. Export an LCOV report (for Codecov / Coveralls / editors).
 mkdir -p "$(dirname "$OUTPUT")"
@@ -84,7 +91,7 @@ if [ "${#TEST_BINARIES[@]}" -gt 0 ] && [ -f "$PROFDATA" ]; then
     $LLVM_COV export \
         -format=lcov \
         -instr-profile "$PROFDATA" \
-        "${TEST_BINARIES[0]}" "${OBJECT_ARGS[@]}" \
+        "${TEST_BINARIES[0]}" ${OBJECT_ARGS[@]+"${OBJECT_ARGS[@]}"} \
         -ignore-filename-regex='.build/(checkouts|.*\.build)/|Tests/|\.derived/|DerivedSources/' \
         > "$OUTPUT"
     # SwiftPM's own codecov JSON only reflects a single test binary when the
@@ -94,7 +101,7 @@ if [ "${#TEST_BINARIES[@]}" -gt 0 ] && [ -f "$PROFDATA" ]; then
     $LLVM_COV export \
         -format=text \
         -instr-profile "$PROFDATA" \
-        "${TEST_BINARIES[0]}" "${OBJECT_ARGS[@]}" \
+        "${TEST_BINARIES[0]}" ${OBJECT_ARGS[@]+"${OBJECT_ARGS[@]}"} \
         -ignore-filename-regex='.build/(checkouts|.*\.build)/|Tests/|\.derived/|DerivedSources/' \
         > "$(dirname "$OUTPUT")/coverage.json"
     CODECOV_JSON="$(dirname "$OUTPUT")/coverage.json"
