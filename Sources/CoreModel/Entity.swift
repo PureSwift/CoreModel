@@ -17,7 +17,7 @@ public protocol Entity: Identifiable, Sendable where CodingKeys: Hashable, Self.
 
     associatedtype CodingKeys: CodingKey
 
-    init(from model: ModelData) throws
+    init(from model: ModelData) throws(ModelDataDecodingError)
 
     func encode() throws -> ModelData
 }
