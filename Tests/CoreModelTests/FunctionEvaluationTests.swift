@@ -127,6 +127,7 @@ final class FunctionEvaluationTests: XCTestCase {
         XCTAssert(evaluate(.equalTo, .attribute(.null), .attribute(.null)))
         XCTAssert(evaluate(.equalTo, .keyPath("missing"), .attribute(.null)))
         XCTAssertFalse(evaluate(.equalTo, name, .attribute(.null)))
+        XCTAssertFalse(evaluate(.equalTo, name, .keyPath("missing")))
         // ordering (numeric)
         XCTAssert(evaluate(.lessThan, age, .attribute(.int64(40))))
         XCTAssertFalse(evaluate(.lessThan, age, .attribute(.int64(30))))
