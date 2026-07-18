@@ -31,7 +31,7 @@ jobs:
     - name: Swift Version
       run: swift --version
     - name: Export coverage and enforce threshold
-      run: Scripts/coverage.sh 40
+      run: Scripts/coverage.sh 90
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v5
       with:
