@@ -22,6 +22,18 @@ public enum CoreModelError: Error {
 // MARK: - Decoding Error Factories
 
 #if hasFeature(Embedded)
+/// The concrete error type thrown by `ModelData.decode`/`decodeRelationship`
+/// and by hand-written `Entity.init(from:)` witnesses under Embedded Swift,
+/// where `any Error` existentials are disallowed. Resolves to `any Swift.Error`
+/// on non-Embedded platforms, where the existing untyped-`throws` behavior is
+/// unchanged.
+public typealias ModelDataDecodingError = CoreModelError
+#else
+/// See the Embedded branch of this typealias above.
+public typealias ModelDataDecodingError = any Swift.Error
+#endif
+
+#if hasFeature(Embedded)
 
 // - Note: Embedded Swift disallows `any Error` as a value/return type (existential
 //   restriction), so these return the concrete `CoreModelError` instead of `any Error`.
