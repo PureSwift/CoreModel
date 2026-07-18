@@ -152,4 +152,28 @@ if enableMacros {
     package.targets[0].dependencies += [
         "CoreModelMacros"
     ]
+    package.targets += [
+        .testTarget(
+            name: "CoreModelMacrosTests",
+            dependencies: [
+                "CoreModelMacros",
+                .product(
+                    name: "SwiftSyntaxMacros",
+                    package: "swift-syntax"
+                ),
+                .product(
+                    name: "SwiftSyntaxMacroExpansion",
+                    package: "swift-syntax"
+                ),
+                .product(
+                    name: "SwiftParser",
+                    package: "swift-syntax"
+                ),
+                .product(
+                    name: "SwiftSyntaxMacrosTestSupport",
+                    package: "swift-syntax"
+                )
+            ]
+        )
+    ]
 }
