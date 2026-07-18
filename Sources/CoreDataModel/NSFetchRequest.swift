@@ -22,6 +22,7 @@ public extension FetchRequest {
         let fetchRequest = NSFetchRequest<ResultType>(entityName: entity.rawValue)
         fetchRequest.predicate = predicate?.toFoundation()
         fetchRequest.fetchLimit = fetchLimit
+        fetchRequest.fetchOffset = fetchOffset
         var sortDescriptors = sortDescriptors.compactMap { sort -> NSSortDescriptor? in
             guard let property = sort.property else {
                 // Function-based sort terms are not supported by NSFetchRequest;
