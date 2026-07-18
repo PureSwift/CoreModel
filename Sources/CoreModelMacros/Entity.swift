@@ -236,7 +236,7 @@ extension EntityMacro {
                         inverseKeyName = memberAccess.declName.baseName.text
                     } else if let keyPathExpr = inverseArg.expression.as(KeyPathExprSyntax.self),
                               let lastComponent = keyPathExpr.components.last {
-                        inverseKeyName = lastComponent.description
+                        inverseKeyName = lastComponent.component.trimmedDescription
                     } else {
                         throw MacroError.unknownInverseRelationship(for: identifier)
                     }
