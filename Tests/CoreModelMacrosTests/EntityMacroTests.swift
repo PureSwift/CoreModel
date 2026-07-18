@@ -198,6 +198,24 @@ final class EntityMacroTests: XCTestCase {
         XCTAssert(encodeDecl.description.contains("container.encodeRelationship(self.pets, forKey: Person.CodingKeys.pets)"))
     }
 
+    func testUnrelatedPropertyAttributeIgnored() throws {
+        let (node, declaration) = try parse("""
+        @Entity
+        struct Person {
+            var id: UUID
+            @Attribute
+            var name: String
+            @Published
+            var ignored: Int
+        }
+        """)
+        let context = BasicMacroExpansionContext()
+        let properties = EntityMacro.codableProperties(of: declaration)
+        XCTAssertEqual(properties.map { $0.name }, ["name"])
+        let initDecl = try EntityMacro.initDeclarationSyntax(of: node, providingMembersOf: declaration, in: context)
+        XCTAssertFalse(initDecl.description.contains("ignored"))
+    }
+
     func testClassTypeName() throws {
         let (node, declaration) = try parse("""
         @Entity
