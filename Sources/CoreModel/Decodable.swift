@@ -15,7 +15,7 @@ import Foundation
 
 public extension ModelData {
 
-    func decode<T, K>(_ type: T.Type, forKey key: K) throws -> T where T: AttributeDecodable, K: CodingKey {
+    func decode<T, K>(_ type: T.Type, forKey key: K) throws(ModelDataDecodingError) -> T where T: AttributeDecodable, K: CodingKey {
 
         let property = PropertyKey(key)
         guard let attribute = self.attributes[property] else {
@@ -32,7 +32,7 @@ public extension ModelData {
         return decodable
     }
 
-    func decodeRelationship<T, K>(_ type: T.Type, forKey key: K) throws -> T where T: ObjectIDConvertible, K: CodingKey {
+    func decodeRelationship<T, K>(_ type: T.Type, forKey key: K) throws(ModelDataDecodingError) -> T where T: ObjectIDConvertible, K: CodingKey {
 
         let property = PropertyKey(key)
         guard let relationship = self.relationships[property] else {
@@ -51,7 +51,7 @@ public extension ModelData {
         }
     }
 
-    func decodeRelationship<T, K>(_ type: T?.Type, forKey key: K) throws -> T? where T: ObjectIDConvertible, K: CodingKey {
+    func decodeRelationship<T, K>(_ type: T?.Type, forKey key: K) throws(ModelDataDecodingError) -> T? where T: ObjectIDConvertible, K: CodingKey {
 
         let property = PropertyKey(key)
         guard let relationship = self.relationships[property] else {
@@ -70,7 +70,7 @@ public extension ModelData {
         }
     }
 
-    func decodeRelationship<T, K>(_ type: [T].Type, forKey key: K) throws -> [T] where T: ObjectIDConvertible, K: CodingKey {
+    func decodeRelationship<T, K>(_ type: [T].Type, forKey key: K) throws(ModelDataDecodingError) -> [T] where T: ObjectIDConvertible, K: CodingKey {
 
         let property = PropertyKey(key)
         guard let relationship = self.relationships[property] else {
@@ -82,12 +82,19 @@ public extension ModelData {
         case .toOne:
             throw coreModelTypeMismatchError(type, forKey: key, from: relationship)
         case let .toMany(objectIDs):
-            return try objectIDs.map {
-                guard let id = T.init(objectID: $0) else {
-                    throw coreModelInvalidIdentifierError($0)
+            // - Note: An explicit loop rather than `objectIDs.map`, because the
+            //   `rethrows` closure overload erases the thrown error back to
+            //   `any Error`, which cannot convert to the typed `throws` clause
+            //   under Embedded Swift.
+            var ids = [T]()
+            ids.reserveCapacity(objectIDs.count)
+            for objectID in objectIDs {
+                guard let id = T.init(objectID: objectID) else {
+                    throw coreModelInvalidIdentifierError(objectID)
                 }
-                return id
+                ids.append(id)
             }
+            return ids
         }
     }
 }
