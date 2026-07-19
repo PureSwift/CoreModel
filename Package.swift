@@ -81,6 +81,23 @@ package.targets[package.targets.count - 1] = .testTarget(
     ]
 )
 
+// Embedded Swift support (Foundation-free builds)
+let enableEmbedded = environment["SWIFT_EMBEDDED"] == "1"
+if enableEmbedded {
+    package.dependencies += [
+        .package(
+            url: "https://github.com/PureSwift/swift-embedded-foundation.git",
+            from: "0.1.0"
+        )
+    ]
+    package.targets[0].dependencies += [
+        .product(
+            name: "FoundationEmbedded",
+            package: "swift-embedded-foundation"
+        )
+    ]
+}
+
 // Skip (skip.dev) Fuse (native) transpilation support
 let enableSkipFuse = environment["SKIP_FUSE"] == "1"
 if enableSkipFuse {
