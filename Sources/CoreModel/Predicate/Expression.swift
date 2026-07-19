@@ -6,6 +6,14 @@
 //  Copyright © 2017 PureSwift. All rights reserved.
 //
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#elseif canImport(Foundation)
+import Foundation
+#elseif canImport(FoundationEmbedded)
+import FoundationEmbedded
+#endif
+
 public extension FetchRequest.Predicate {
     
     /// Used to represent expressions in a predicate.
