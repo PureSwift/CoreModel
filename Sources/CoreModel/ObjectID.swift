@@ -9,6 +9,8 @@
 import FoundationEssentials
 #elseif canImport(Foundation)
 import Foundation
+#elseif canImport(FoundationEmbedded)
+import FoundationEmbedded
 #endif
 
 /// CoreModel Object Identifier
