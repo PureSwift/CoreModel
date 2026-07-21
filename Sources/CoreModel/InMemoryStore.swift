@@ -16,15 +16,15 @@
 /// on platforms without a persistence backend.
 public actor InMemoryModelStorage {
 
-    /// The schema this store validates entities against, if any.
-    public let model: Model?
+    /// The schema this store validates entities against.
+    public let model: Model
 
     private var storage = [EntityName: [ObjectID: ModelData]]()
 
     private var functions = [String: DatabaseFunction]()
 
-    /// Initialize an empty store, optionally validating entities against a schema.
-    public init(model: Model? = nil) {
+    /// Initialize an empty store that validates entities against the given schema.
+    public init(model: Model) {
         self.model = model
     }
 
@@ -84,7 +84,7 @@ public actor InMemoryModelStorage {
     }
 
     private func validate(_ entity: EntityName) throws(CoreModelError) {
-        if let model, model[entity] == nil {
+        guard model[entity] != nil else {
             throw CoreModelError.invalidEntity(entity)
         }
     }
