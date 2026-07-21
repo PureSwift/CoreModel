@@ -90,7 +90,9 @@ extension NSManagedObjectContext: ModelStorage {
         if let predicate = fetchRequest.predicate {
             results = results.filter { predicate.evaluate(with: $0, functions: functions) }
         }
-        results = results.sortedInMemory(by: fetchRequest.sortDescriptors, functions: functions)
+        if fetchRequest.sortDescriptors.isEmpty == false {
+            results = results.sorted(by: fetchRequest.sortDescriptors, functions: functions)
+        }
         if fetchRequest.fetchOffset > 0 {
             results = Array(results.dropFirst(fetchRequest.fetchOffset))
         }
