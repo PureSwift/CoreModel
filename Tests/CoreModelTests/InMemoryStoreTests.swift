@@ -11,8 +11,13 @@ import XCTest
 
 final class InMemoryStoreTests: XCTestCase {
 
+    static let model = Model(entities: [
+        EntityDescription(entity: Person.self),
+        EntityDescription(entity: Event.self)
+    ])
+
     func testInsertAndFetch() async throws {
-        let store = InMemoryModelStorage()
+        let store = InMemoryModelStorage(model: Self.model)
         let person = Person(name: "Alice", age: 30)
         try await store.insert(person)
         let fetched = try await store.fetch(Person.self, for: person.id)
@@ -23,7 +28,7 @@ final class InMemoryStoreTests: XCTestCase {
     }
 
     func testUpdate() async throws {
-        let store = InMemoryModelStorage()
+        let store = InMemoryModelStorage(model: Self.model)
         var person = Person(name: "Alice", age: 30)
         try await store.insert(person)
         person.age = 31
@@ -35,7 +40,7 @@ final class InMemoryStoreTests: XCTestCase {
     }
 
     func testBatchInsert() async throws {
-        let store = InMemoryModelStorage()
+        let store = InMemoryModelStorage(model: Self.model)
         let people = (1...10).map { Person(name: "Person \($0)", age: UInt(20 + $0)) }
         try await store.insert(people.map { try $0.encode() })
         let count = try await store.count(FetchRequest(entity: Person.entityName))
@@ -43,7 +48,7 @@ final class InMemoryStoreTests: XCTestCase {
     }
 
     func testFetchRequest() async throws {
-        let store = InMemoryModelStorage()
+        let store = InMemoryModelStorage(model: Self.model)
         let people = (1...5).map { Person(name: "Person \($0)", age: UInt(20 + $0)) }
         try await store.insert(people.map { try $0.encode() })
         // predicate
@@ -73,7 +78,7 @@ final class InMemoryStoreTests: XCTestCase {
     }
 
     func testFetchID() async throws {
-        let store = InMemoryModelStorage()
+        let store = InMemoryModelStorage(model: Self.model)
         let person = Person(name: "Alice", age: 30)
         try await store.insert(person)
         let ids = try await store.fetchID(FetchRequest(entity: Person.entityName))
@@ -81,7 +86,7 @@ final class InMemoryStoreTests: XCTestCase {
     }
 
     func testDelete() async throws {
-        let store = InMemoryModelStorage()
+        let store = InMemoryModelStorage(model: Self.model)
         let people = (1...3).map { Person(name: "Person \($0)", age: UInt(20 + $0)) }
         try await store.insert(people.map { try $0.encode() })
         try await store.delete(Person.self, for: people[0].id)
@@ -94,7 +99,7 @@ final class InMemoryStoreTests: XCTestCase {
     }
 
     func testRelationshipPredicate() async throws {
-        let store = InMemoryModelStorage()
+        let store = InMemoryModelStorage(model: Self.model)
         let event = Event(name: "WWDC", date: Date())
         let attendee = Person(name: "Alice", age: 30, events: [event.id])
         let outsider = Person(name: "Bob", age: 25)
@@ -107,7 +112,7 @@ final class InMemoryStoreTests: XCTestCase {
     }
 
     func testCustomFunction() async throws {
-        let store = InMemoryModelStorage()
+        let store = InMemoryModelStorage(model: Self.model)
         let stringLength = DatabaseFunction(name: "LENGTH", argumentCount: 1) { arguments in
             guard case let .string(value)? = arguments.first ?? nil else { return nil }
             return .int64(Int64(value.count))
@@ -132,8 +137,7 @@ final class InMemoryStoreTests: XCTestCase {
     }
 
     func testModelValidation() async throws {
-        let model = Model(entities: [EntityDescription(entity: Person.self)])
-        let store = InMemoryModelStorage(model: model)
+        let store = InMemoryModelStorage(model: Self.model)
         let person = Person(name: "Alice", age: 30)
         try await store.insert(person)
         let count = try await store.count(FetchRequest(entity: Person.entityName))
