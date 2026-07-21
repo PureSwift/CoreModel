@@ -95,14 +95,14 @@ final class FunctionEvaluationTests: XCTestCase {
 
     func testExpressionEvaluation() {
         let data = Self.makeData()
-        XCTAssertEqual(Predicate.Expression.attribute(.int64(1)).evaluate(with: data, functions: [:]), .int64(1))
-        XCTAssertEqual(Predicate.Expression.keyPath("name").evaluate(with: data, functions: [:]), .string("Alice"))
+        XCTAssertEqual(Predicate.Expression.attribute(.int64(1)).evaluate(with: data, functions: [:]), .attribute(.int64(1)))
+        XCTAssertEqual(Predicate.Expression.keyPath("name").evaluate(with: data, functions: [:]), .attribute(.string("Alice")))
         XCTAssertNil(Predicate.Expression.keyPath("missing").evaluate(with: data, functions: [:]))
-        XCTAssertEqual(Self.functionExpression.evaluate(with: data, functions: Self.functions), .string("alice"))
+        XCTAssertEqual(Self.functionExpression.evaluate(with: data, functions: Self.functions), .attribute(.string("alice")))
         // unregistered function
         XCTAssertNil(Self.functionExpression.evaluate(with: data, functions: [:]))
-        // relationships aren't evaluated
-        XCTAssertNil(Predicate.Expression.relationship(.toOne("x")).evaluate(with: data, functions: [:]))
+        // relationship expressions resolve to relationship values
+        XCTAssertEqual(Predicate.Expression.relationship(.toOne("x")).evaluate(with: data, functions: [:]), .relationship(.toOne("x")))
     }
 
     func testOperatorEvaluation() {
@@ -162,8 +162,10 @@ final class FunctionEvaluationTests: XCTestCase {
         XCTAssertFalse(evaluate(.like, name, .attribute(.string("B*"))))
         XCTAssert(evaluate(.matches, name, .attribute(.string("^A[a-z]+e$"))))
         XCTAssertFalse(evaluate(.matches, name, .attribute(.string("^[0-9]+$"))))
-        // unsupported collection operators
-        XCTAssertFalse(evaluate(.in, name, .attribute(.string("Alice"))))
+        // IN: left hand side is a substring of the right hand side
+        XCTAssert(evaluate(.in, name, .attribute(.string("Alice in Wonderland"))))
+        XCTAssertFalse(evaluate(.in, name, .attribute(.string("Bob"))))
+        // BETWEEN bounds aren't representable as a single expression value
         XCTAssertFalse(evaluate(.between, age, .attribute(.int64(50))))
     }
 
@@ -173,22 +175,22 @@ final class FunctionEvaluationTests: XCTestCase {
             Self.makeData(name: "alice", age: 30, id: "1"),
             Self.makeData(name: "Bob", age: 30, id: "2")
         ]
-        // no descriptors returns as-is
-        XCTAssertEqual(people.sortedInMemory(by: [], functions: [:]), people)
+        // no descriptors sorts by identifier
+        XCTAssertEqual(people.sorted(by: [], functions: [:]).map { $0.id.rawValue }, ["1", "2", "3"])
         // property ascending
-        let byAge = people.sortedInMemory(by: [.init(property: "age", ascending: true)], functions: [:])
+        let byAge = people.sorted(by: [.init(property: "age", ascending: true)], functions: [:])
         XCTAssertEqual(byAge.map { $0.id.rawValue }, ["1", "2", "3"])
         // property descending
-        let byAgeDesc = people.sortedInMemory(by: [.init(property: "age", ascending: false)], functions: [:])
+        let byAgeDesc = people.sorted(by: [.init(property: "age", ascending: false)], functions: [:])
         XCTAssertEqual(byAgeDesc.first?.id.rawValue, "3")
         // function term (case-insensitive name order)
-        let byName = people.sortedInMemory(
+        let byName = people.sorted(
             by: [.init(term: .function(.init(name: "lowercase", arguments: [.keyPath("name")])), ascending: true)],
             functions: Self.functions
         )
         XCTAssertEqual(byName.map { $0.id.rawValue }, ["1", "2", "3"])
         // ties fall back to id ordering
-        let tied = people.sortedInMemory(by: [.init(property: "missing", ascending: true)], functions: [:])
+        let tied = people.sorted(by: [.init(property: "missing", ascending: true)], functions: [:])
         XCTAssertEqual(tied.map { $0.id.rawValue }, ["1", "2", "3"])
     }
 }
