@@ -137,6 +137,25 @@ final class InMemoryViewContextTests: XCTestCase {
         XCTAssertEqual(longNames.map { $0.name }, ["Alexandra"])
     }
 
+    func testSharedDataWithStore() async throws {
+        let store = InMemoryModelStorage(model: Self.model)
+        let context = store.viewContext
+        // objects inserted through the store are visible to the view context
+        let alice = Person(name: "Alice", age: 30)
+        try await store.insert(alice)
+        XCTAssertEqual(try context.fetch(Person.self, for: alice.id), alice)
+        XCTAssertEqual(try context.count(FetchRequest(entity: Person.entityName)), 1)
+        // objects inserted through the view context are visible to the store
+        let bob = Person(name: "Bob", age: 25)
+        try context.insert(bob.encode())
+        let fetchedByStore = try await store.fetch(Person.self, for: bob.id)
+        XCTAssertEqual(fetchedByStore, bob)
+        // deletes propagate as well
+        try await store.delete(Person.self, for: alice.id)
+        XCTAssertNil(try context.fetch(Person.self, for: alice.id))
+        XCTAssertEqual(try context.count(FetchRequest(entity: Person.entityName)), 1)
+    }
+
     func testModelValidation() throws {
         let context = InMemoryViewContext(model: Self.model)
         let person = Person(name: "Alice", age: 30)
