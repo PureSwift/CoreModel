@@ -6,6 +6,11 @@
 //  Copyright © 2015 PureSwift. All rights reserved.
 //
 
+// - Note: Requires the `_Concurrency` runtime (`async` requirements). Embedded
+//   targets whose stdlib ships no `_Concurrency` slice (e.g. bare-metal ARM)
+//   have no asynchronous storage abstraction — they use a concrete synchronous
+//   store such as ``InMemoryStorage`` directly.
+#if canImport(_Concurrency)
 /// CoreModel Store Protocol
 public protocol ModelStorage: AnyObject, Sendable {
     
@@ -41,6 +46,7 @@ public protocol ModelStorage: AnyObject, Sendable {
     /// in memory against fetched values.
     func register(function: DatabaseFunction) async throws
 }
+#endif // canImport(_Concurrency)
 
 #if !hasFeature(Embedded)
 // - Note: Unavailable under Embedded Swift (a compiler bug in SILGen crashes on

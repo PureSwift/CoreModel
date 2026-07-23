@@ -19,13 +19,15 @@ import Foundation
 ///
 /// The type is thread-safe: all access is serialized so the actor-isolated
 /// ``InMemoryModelStorage`` and the main-actor ``InMemoryViewContext`` can operate
-/// on the same instance concurrently. Under Embedded Swift, where the view context is
-/// unavailable, the backing is only ever touched from within its owning actor and the
-/// lock is elided.
-final class InMemoryStorage {
+/// on the same instance concurrently. Under Embedded Swift the lock is elided:
+/// with a concurrency runtime the backing is only ever touched from within its
+/// owning actor, and without one (e.g. bare-metal ARM, where ``ModelStorage``
+/// itself is unavailable) this synchronous store is the storage API, used
+/// directly from the single-threaded main loop.
+public final class InMemoryStorage {
 
     /// The schema entities are validated against.
-    let model: Model
+    public let model: Model
 
     private var objects = [EntityName: [ObjectID: ModelData]]()
 
@@ -35,7 +37,7 @@ final class InMemoryStorage {
     private let lock = NSLock()
     #endif
 
-    init(model: Model) {
+    public init(model: Model) {
         self.model = model
     }
 
@@ -47,14 +49,14 @@ final class InMemoryStorage {
         return try body()
     }
 
-    func fetch(_ entity: EntityName, for id: ObjectID) throws(CoreModelError) -> ModelData? {
+    public func fetch(_ entity: EntityName, for id: ObjectID) throws(CoreModelError) -> ModelData? {
         try withLock { () throws(CoreModelError) in
             try validate(entity)
             return objects[entity]?[id]
         }
     }
 
-    func fetch(_ fetchRequest: FetchRequest) throws(CoreModelError) -> [ModelData] {
+    public func fetch(_ fetchRequest: FetchRequest) throws(CoreModelError) -> [ModelData] {
         try withLock { () throws(CoreModelError) in
             try validate(fetchRequest.entity)
             let values = objects[fetchRequest.entity].map { Array($0.values) } ?? []
@@ -62,35 +64,35 @@ final class InMemoryStorage {
         }
     }
 
-    func fetchID(_ fetchRequest: FetchRequest) throws(CoreModelError) -> [ObjectID] {
+    public func fetchID(_ fetchRequest: FetchRequest) throws(CoreModelError) -> [ObjectID] {
         try fetch(fetchRequest).map { $0.id }
     }
 
-    func count(_ fetchRequest: FetchRequest) throws(CoreModelError) -> UInt {
+    public func count(_ fetchRequest: FetchRequest) throws(CoreModelError) -> UInt {
         try UInt(fetch(fetchRequest).count)
     }
 
-    func insert(_ value: ModelData) throws(CoreModelError) {
+    public func insert(_ value: ModelData) throws(CoreModelError) {
         try withLock { () throws(CoreModelError) in
             try validate(value.entity)
             objects[value.entity, default: [:]][value.id] = value
         }
     }
 
-    func insert(_ values: [ModelData]) throws(CoreModelError) {
+    public func insert(_ values: [ModelData]) throws(CoreModelError) {
         for value in values {
             try insert(value)
         }
     }
 
-    func delete(_ entity: EntityName, for id: ObjectID) throws(CoreModelError) {
+    public func delete(_ entity: EntityName, for id: ObjectID) throws(CoreModelError) {
         try withLock { () throws(CoreModelError) in
             try validate(entity)
             objects[entity]?[id] = nil
         }
     }
 
-    func delete(_ entity: EntityName, for ids: [ObjectID]) throws(CoreModelError) {
+    public func delete(_ entity: EntityName, for ids: [ObjectID]) throws(CoreModelError) {
         try withLock { () throws(CoreModelError) in
             try validate(entity)
             for id in ids {
@@ -99,7 +101,7 @@ final class InMemoryStorage {
         }
     }
 
-    func register(function: DatabaseFunction) {
+    public func register(function: DatabaseFunction) {
         withLock {
             functions[function.name] = function
         }
