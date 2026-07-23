@@ -253,7 +253,17 @@ final class PredicateCodingTests: XCTestCase {
     func testCollectionHelpers() {
         XCTAssert([1, 2, 3].begins(with: [1, 2]))
         XCTAssertFalse([1, 2, 3].begins(with: [2]))
-        XCTAssert([1, 2, 3].contains([3, 1]))
+        // contains(_:) is a *contiguous subsequence* search — the string
+        // `.contains` predicate resolves to it on platforms without
+        // Foundation's `StringProtocol.contains` (Embedded Swift), so
+        // every-element membership is not enough: searching locations for
+        // "mill" must not match "1150 Timber Lane" just because all of
+        // m/i/l/l appear somewhere in it.
+        XCTAssert([1, 2, 3].contains([2, 3]))
+        XCTAssert([1, 2, 3].contains([1, 2, 3]))
+        XCTAssertFalse([1, 2, 3].contains([3, 1]))
         XCTAssertFalse([1, 2].contains([1, 4]))
+        XCTAssert(Array("millbrook").contains(Array("mill")))
+        XCTAssertFalse(Array("1150 timber lane").contains(Array("mill")))
     }
 }
