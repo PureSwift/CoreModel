@@ -140,6 +140,8 @@ final class InMemoryViewContextTests: XCTestCase {
     func testSharedDataWithStore() async throws {
         let store = InMemoryModelStorage(model: Self.model)
         let context = store.viewContext
+        // the same cached instance is returned on every access
+        XCTAssertTrue(context === store.viewContext)
         // objects inserted through the store are visible to the view context
         let alice = Person(name: "Alice", age: 30)
         try await store.insert(alice)
