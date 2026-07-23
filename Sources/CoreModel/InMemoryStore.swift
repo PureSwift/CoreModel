@@ -21,6 +21,11 @@ public actor InMemoryModelStorage {
 
     internal let backing: InMemoryStorage
 
+    #if !hasFeature(Embedded)
+    /// Cached view context shared by this store. Only ever accessed from the main actor.
+    private nonisolated(unsafe) var _viewContext: InMemoryViewContext?
+    #endif
+
     /// The schema this store validates entities against.
     public nonisolated var model: Model {
         backing.model
@@ -84,10 +89,16 @@ public extension InMemoryModelStorage {
 
     /// A synchronous, main-actor view context backed by the same data as this store.
     ///
-    /// Objects inserted or deleted through the store are visible to the returned
-    /// view context, and vice versa, because both share the same in-memory backing.
+    /// The same instance is returned on every access. Objects inserted or deleted
+    /// through the store are visible to the view context, and vice versa, because
+    /// both share the same in-memory backing.
     @MainActor var viewContext: InMemoryViewContext {
-        InMemoryViewContext(backing: backing)
+        if let existing = _viewContext {
+            return existing
+        }
+        let context = InMemoryViewContext(backing: backing)
+        _viewContext = context
+        return context
     }
 }
 #endif
