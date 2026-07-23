@@ -6,6 +6,11 @@
 //  Copyright © 2026 PureSwift. All rights reserved.
 //
 
+// - Note: Requires the `_Concurrency` runtime (an `actor`). Embedded targets
+//   without a concurrency runtime (e.g. bare-metal ARM) use the synchronous
+//   ``InMemoryStorage`` backing directly instead.
+#if canImport(_Concurrency)
+
 /// CoreModel In-Memory Store
 ///
 /// A ``ModelStorage`` backend that keeps all objects in memory,
@@ -113,3 +118,5 @@ public extension InMemoryModelStorage {
 //   same API with typed throws.
 extension InMemoryModelStorage: ModelStorage {}
 #endif
+
+#endif // canImport(_Concurrency)
