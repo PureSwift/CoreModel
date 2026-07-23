@@ -16,82 +16,75 @@
 /// main-actor access to managed objects while evaluating fetch requests with the
 /// pure Swift filtering engine.
 ///
+/// A view context can be created standalone, or obtained from an
+/// ``InMemoryModelStorage`` via ``InMemoryModelStorage/viewContext`` to read and
+/// write the same underlying data as the store.
+///
 /// Useful for SwiftUI previews, unit tests, and lightweight main-thread caches
 /// where the `async` ``InMemoryModelStorage`` would be inconvenient.
 @MainActor
 public final class InMemoryViewContext {
 
+    internal let backing: InMemoryStorage
+
     /// The schema this context validates entities against.
-    public let model: Model
+    public var model: Model {
+        backing.model
+    }
 
-    private var storage = [EntityName: [ObjectID: ModelData]]()
-
-    private var functions = [String: DatabaseFunction]()
+    /// Initialize a view context that shares the given backing store.
+    internal init(backing: InMemoryStorage) {
+        self.backing = backing
+    }
 
     /// Initialize an empty context that validates entities against the given schema.
     public init(model: Model) {
-        self.model = model
+        self.backing = InMemoryStorage(model: model)
     }
 
     /// Fetch managed object.
     public func fetch(_ entity: EntityName, for id: ObjectID) throws(CoreModelError) -> ModelData? {
-        try validate(entity)
-        return storage[entity]?[id]
+        try backing.fetch(entity, for: id)
     }
 
     /// Fetch managed objects.
     public func fetch(_ fetchRequest: FetchRequest) throws(CoreModelError) -> [ModelData] {
-        try validate(fetchRequest.entity)
-        let objects = storage[fetchRequest.entity].map { Array($0.values) } ?? []
-        return fetchRequest.evaluate(objects, functions: functions)
+        try backing.fetch(fetchRequest)
     }
 
     /// Fetch managed objects IDs.
     public func fetchID(_ fetchRequest: FetchRequest) throws(CoreModelError) -> [ObjectID] {
-        try fetch(fetchRequest).map { $0.id }
+        try backing.fetchID(fetchRequest)
     }
 
     /// Fetch and return result count.
     public func count(_ fetchRequest: FetchRequest) throws(CoreModelError) -> UInt {
-        try UInt(fetch(fetchRequest).count)
+        try backing.count(fetchRequest)
     }
 
     /// Create or edit a managed object.
     public func insert(_ value: ModelData) throws(CoreModelError) {
-        try validate(value.entity)
-        storage[value.entity, default: [:]][value.id] = value
+        try backing.insert(value)
     }
 
     /// Create or edit multiple managed objects.
     public func insert(_ values: [ModelData]) throws(CoreModelError) {
-        for value in values {
-            try insert(value)
-        }
+        try backing.insert(values)
     }
 
     /// Delete the specified managed object.
     public func delete(_ entity: EntityName, for id: ObjectID) throws(CoreModelError) {
-        try validate(entity)
-        storage[entity]?[id] = nil
+        try backing.delete(entity, for: id)
     }
 
     /// Delete the specified managed objects.
     public func delete(_ entity: EntityName, for ids: [ObjectID]) throws(CoreModelError) {
-        try validate(entity)
-        for id in ids {
-            storage[entity]?[id] = nil
-        }
+        try backing.delete(entity, for: ids)
     }
 
     /// Register a custom function so it can be invoked from a predicate or sort descriptor.
     public func register(function: DatabaseFunction) {
-        functions[function.name] = function
-    }
-
-    private func validate(_ entity: EntityName) throws(CoreModelError) {
-        guard model[entity] != nil else {
-            throw CoreModelError.invalidEntity(entity)
-        }
+        backing.register(function: function)
     }
 }
 
