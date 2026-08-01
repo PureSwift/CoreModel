@@ -6,49 +6,49 @@
 //
 
 import Foundation
-import XCTest
+import Testing
 @testable import CoreModel
 
 @MainActor
-final class InMemoryViewContextTests: XCTestCase {
+@Suite struct InMemoryViewContextTests {
 
     static let model = Model(entities: [
         EntityDescription(entity: Person.self),
         EntityDescription(entity: Event.self)
     ])
 
-    func testInsertAndFetch() throws {
+    @Test func insertAndFetch() throws {
         let context = InMemoryViewContext(model: Self.model)
         let person = Person(name: "Alice", age: 30)
         try context.insert(person.encode())
         let fetched = try context.fetch(Person.self, for: person.id)
-        XCTAssertEqual(fetched, person)
+        #expect(fetched == person)
         // fetching an unknown identifier returns nil
         let missing = try context.fetch(Person.self, for: UUID())
-        XCTAssertNil(missing)
+        #expect(missing == nil)
     }
 
-    func testUpdate() throws {
+    @Test func update() throws {
         let context = InMemoryViewContext(model: Self.model)
         var person = Person(name: "Alice", age: 30)
         try context.insert(person.encode())
         person.age = 31
         try context.insert(person.encode())
         let fetched = try context.fetch(Person.self, for: person.id)
-        XCTAssertEqual(fetched?.age, 31)
+        #expect(fetched?.age == 31)
         let count = try context.count(FetchRequest(entity: Person.entityName))
-        XCTAssertEqual(count, 1)
+        #expect(count == 1)
     }
 
-    func testBatchInsert() throws {
+    @Test func batchInsert() throws {
         let context = InMemoryViewContext(model: Self.model)
         let people = (1...10).map { Person(name: "Person \($0)", age: UInt(20 + $0)) }
         try context.insert(people.map { try $0.encode() })
         let count = try context.count(FetchRequest(entity: Person.entityName))
-        XCTAssertEqual(count, 10)
+        #expect(count == 10)
     }
 
-    func testFetchRequest() throws {
+    @Test func fetchRequest() throws {
         let context = InMemoryViewContext(model: Self.model)
         let people = (1...5).map { Person(name: "Person \($0)", age: UInt(20 + $0)) }
         try context.insert(people.map { try $0.encode() })
@@ -57,14 +57,14 @@ final class InMemoryViewContextTests: XCTestCase {
             Person.self,
             predicate: Person.CodingKeys.age > 22
         )
-        XCTAssertEqual(adults.count, 3)
-        XCTAssert(adults.allSatisfy { $0.age > 22 })
+        #expect(adults.count == 3)
+        #expect(adults.allSatisfy { $0.age > 22 })
         // sorting
         let sorted: [Person] = try context.fetch(
             Person.self,
             sortDescriptors: [.init(property: "age", ascending: false)]
         )
-        XCTAssertEqual(sorted.map { $0.age }, [25, 24, 23, 22, 21])
+        #expect(sorted.map { $0.age } == [25, 24, 23, 22, 21])
         // limit and offset
         let page: [Person] = try context.fetch(
             Person.self,
@@ -72,34 +72,34 @@ final class InMemoryViewContextTests: XCTestCase {
             fetchLimit: 2,
             fetchOffset: 1
         )
-        XCTAssertEqual(page.map { $0.age }, [22, 23])
+        #expect(page.map { $0.age } == [22, 23])
         // count with predicate
         let count = try context.count(Person.self, predicate: Person.CodingKeys.age <= 22)
-        XCTAssertEqual(count, 2)
+        #expect(count == 2)
     }
 
-    func testFetchID() throws {
+    @Test func fetchID() throws {
         let context = InMemoryViewContext(model: Self.model)
         let person = Person(name: "Alice", age: 30)
         try context.insert(person.encode())
         let ids = try context.fetchID(FetchRequest(entity: Person.entityName))
-        XCTAssertEqual(ids, [ObjectID(person.id)])
+        #expect(ids == [ObjectID(person.id)])
     }
 
-    func testDelete() throws {
+    @Test func delete() throws {
         let context = InMemoryViewContext(model: Self.model)
         let people = (1...3).map { Person(name: "Person \($0)", age: UInt(20 + $0)) }
         try context.insert(people.map { try $0.encode() })
         try context.delete(Person.entityName, for: ObjectID(people[0].id))
         var count = try context.count(FetchRequest(entity: Person.entityName))
-        XCTAssertEqual(count, 2)
+        #expect(count == 2)
         // batch delete
         try context.delete(Person.entityName, for: people.map { ObjectID($0.id) })
         count = try context.count(FetchRequest(entity: Person.entityName))
-        XCTAssertEqual(count, 0)
+        #expect(count == 0)
     }
 
-    func testRelationshipPredicate() throws {
+    @Test func relationshipPredicate() throws {
         let context = InMemoryViewContext(model: Self.model)
         let event = Event(name: "WWDC", date: Date())
         let attendee = Person(name: "Alice", age: 30, events: [event.id])
@@ -109,10 +109,10 @@ final class InMemoryViewContextTests: XCTestCase {
             Person.self,
             predicate: Person.CodingKeys.events.compare(.contains, .attribute(.string(event.id.uuidString)))
         )
-        XCTAssertEqual(attendees, [attendee])
+        #expect(attendees == [attendee])
     }
 
-    func testCustomFunction() throws {
+    @Test func customFunction() throws {
         let context = InMemoryViewContext(model: Self.model)
         let stringLength = DatabaseFunction(name: "LENGTH", argumentCount: 1) { arguments in
             guard case let .string(value)? = arguments.first ?? nil else { return nil }
@@ -134,42 +134,42 @@ final class InMemoryViewContextTests: XCTestCase {
                 )
             )
         )
-        XCTAssertEqual(longNames.map { $0.name }, ["Alexandra"])
+        #expect(longNames.map { $0.name } == ["Alexandra"])
     }
 
-    func testSharedDataWithStore() async throws {
+    @Test func sharedDataWithStore() async throws {
         let store = InMemoryModelStorage(model: Self.model)
         let context = store.viewContext
         // the same cached instance is returned on every access
-        XCTAssertTrue(context === store.viewContext)
+        #expect(context === store.viewContext)
         // objects inserted through the store are visible to the view context
         let alice = Person(name: "Alice", age: 30)
         try await store.insert(alice)
-        XCTAssertEqual(try context.fetch(Person.self, for: alice.id), alice)
-        XCTAssertEqual(try context.count(FetchRequest(entity: Person.entityName)), 1)
+        #expect(try context.fetch(Person.self, for: alice.id) == alice)
+        #expect(try context.count(FetchRequest(entity: Person.entityName)) == 1)
         // objects inserted through the view context are visible to the store
         let bob = Person(name: "Bob", age: 25)
         try context.insert(bob.encode())
         let fetchedByStore = try await store.fetch(Person.self, for: bob.id)
-        XCTAssertEqual(fetchedByStore, bob)
+        #expect(fetchedByStore == bob)
         // deletes propagate as well
         try await store.delete(Person.self, for: alice.id)
-        XCTAssertNil(try context.fetch(Person.self, for: alice.id))
-        XCTAssertEqual(try context.count(FetchRequest(entity: Person.entityName)), 1)
+        #expect(try context.fetch(Person.self, for: alice.id) == nil)
+        #expect(try context.count(FetchRequest(entity: Person.entityName)) == 1)
     }
 
-    func testModelValidation() throws {
+    @Test func modelValidation() throws {
         let context = InMemoryViewContext(model: Self.model)
         let person = Person(name: "Alice", age: 30)
         try context.insert(person.encode())
         let count = try context.count(FetchRequest(entity: Person.entityName))
-        XCTAssertEqual(count, 1)
+        #expect(count == 1)
         // unknown entities are rejected
         do {
             _ = try context.fetch(FetchRequest(entity: "Unknown"))
-            XCTFail("Expected an error")
+            Issue.record("Expected an error")
         } catch CoreModelError.invalidEntity(let entity) {
-            XCTAssertEqual(entity, "Unknown")
+            #expect(entity == "Unknown")
         }
     }
 }
