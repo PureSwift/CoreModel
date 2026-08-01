@@ -149,8 +149,15 @@ public final class InMemoryStorage {
             // `parkingReservations`, which is written by an entirely separate sync) would
             // silently wipe those links instead of leaving them alone.
             if var existing = objects[value.entity]?[value.id] {
-                existing.attributes.merge(value.attributes) { _, new in new }
-                existing.relationships.merge(value.relationships) { _, new in new }
+                // - Note: Explicit loops rather than `Dictionary.merge(_:uniquingKeysWith:)` —
+                //   the closure-based overload does dynamic casting internally, which is
+                //   disallowed under Embedded Swift.
+                for (key, attribute) in value.attributes {
+                    existing.attributes[key] = attribute
+                }
+                for (key, relationship) in value.relationships {
+                    existing.relationships[key] = relationship
+                }
                 objects[value.entity, default: [:]][value.id] = existing
             } else {
                 objects[value.entity, default: [:]][value.id] = value
