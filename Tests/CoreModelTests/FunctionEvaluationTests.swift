@@ -8,11 +8,11 @@
 #if canImport(CoreData)
 
 import Foundation
-import XCTest
+import Testing
 @testable import CoreModel
 @testable import CoreDataModel
 
-final class FunctionEvaluationTests: XCTestCase {
+@Suite struct FunctionEvaluationTests {
 
     typealias Predicate = FetchRequest.Predicate
 
@@ -35,77 +35,77 @@ final class FunctionEvaluationTests: XCTestCase {
         )
     }
 
-    func testRequiresInMemoryEvaluation() {
+    @Test func requiresInMemoryEvaluation() {
         let native = FetchRequest(entity: "Person", predicate: "name".compare(.equalTo, .attribute(.string("x"))))
-        XCTAssertFalse(native.requiresInMemoryEvaluation)
+        #expect(native.requiresInMemoryEvaluation == false)
         let functionPredicate = FetchRequest(
             entity: "Person",
             predicate: Self.functionExpression.compare(.equalTo, .attribute(.string("x")))
         )
-        XCTAssert(functionPredicate.requiresInMemoryEvaluation)
+        #expect(functionPredicate.requiresInMemoryEvaluation)
         let functionSort = FetchRequest(
             entity: "Person",
             sortDescriptors: [.init(term: .function(.init(name: "lowercase", arguments: [.keyPath("name")])), ascending: true)]
         )
-        XCTAssert(functionSort.requiresInMemoryEvaluation)
+        #expect(functionSort.requiresInMemoryEvaluation)
     }
 
-    func testContainsFunction() {
-        XCTAssertFalse(Predicate.value(true).containsFunction)
-        XCTAssertFalse("name".compare(.equalTo, .attribute(.string("x"))).containsFunction)
-        XCTAssert(Self.functionExpression.compare(.equalTo, .attribute(.string("x"))).containsFunction)
+    @Test func containsFunction() {
+        #expect(Predicate.value(true).containsFunction == false)
+        #expect("name".compare(.equalTo, .attribute(.string("x"))).containsFunction == false)
+        #expect(Self.functionExpression.compare(.equalTo, .attribute(.string("x"))).containsFunction)
         // function on the right side
-        XCTAssert(Predicate.Expression.keyPath("name").compare(.equalTo, Self.functionExpression).containsFunction)
-        XCTAssert(Predicate.compound(.and([.value(true), Self.functionExpression.compare(.equalTo, .attribute(.null))])).containsFunction)
-        XCTAssertFalse(Predicate.compound(.or([.value(false)])).containsFunction)
+        #expect(Predicate.Expression.keyPath("name").compare(.equalTo, Self.functionExpression).containsFunction)
+        #expect(Predicate.compound(.and([.value(true), Self.functionExpression.compare(.equalTo, .attribute(.null))])).containsFunction)
+        #expect(Predicate.compound(.or([.value(false)])).containsFunction == false)
     }
 
-    func testStrippingFunctionComparisons() {
+    @Test func strippingFunctionComparisons() {
         let function = Self.functionExpression.compare(.equalTo, .attribute(.string("x")))
         let native = "name".compare(.equalTo, .attribute(.string("x")))
-        XCTAssertEqual(Predicate.value(false).strippingFunctionComparisons(), .value(false))
-        XCTAssertEqual(native.strippingFunctionComparisons(), native)
-        XCTAssertEqual(function.strippingFunctionComparisons(), .value(true))
-        XCTAssertEqual(
-            Predicate.compound(.and([native, function])).strippingFunctionComparisons(),
-            .compound(.and([native, .value(true)]))
+        #expect(Predicate.value(false).strippingFunctionComparisons() == .value(false))
+        #expect(native.strippingFunctionComparisons() == native)
+        #expect(function.strippingFunctionComparisons() == .value(true))
+        #expect(
+            Predicate.compound(.and([native, function])).strippingFunctionComparisons()
+                == .compound(.and([native, .value(true)]))
         )
-        XCTAssertEqual(
-            Predicate.compound(.or([function])).strippingFunctionComparisons(),
-            .compound(.or([.value(true)]))
+        #expect(
+            Predicate.compound(.or([function])).strippingFunctionComparisons()
+                == .compound(.or([.value(true)]))
         )
-        XCTAssertEqual(
-            Predicate.compound(.not(function)).strippingFunctionComparisons(),
-            .compound(.not(.value(true)))
+        #expect(
+            Predicate.compound(.not(function)).strippingFunctionComparisons()
+                == .compound(.not(.value(true)))
         )
     }
 
-    func testPredicateEvaluation() {
+    @Test func predicateEvaluation() {
         let data = Self.makeData()
-        XCTAssert(Predicate.value(true).evaluate(with: data, functions: [:]))
-        XCTAssertFalse(Predicate.value(false).evaluate(with: data, functions: [:]))
+        #expect(Predicate.value(true).evaluate(with: data, functions: [:]))
+        #expect(Predicate.value(false).evaluate(with: data, functions: [:]) == false)
         let isAlice = Self.functionExpression.compare(.equalTo, .attribute(.string("alice")))
-        XCTAssert(isAlice.evaluate(with: data, functions: Self.functions))
+        #expect(isAlice.evaluate(with: data, functions: Self.functions))
         // compound evaluation
-        XCTAssert(Predicate.compound(.and([.value(true), isAlice])).evaluate(with: data, functions: Self.functions))
-        XCTAssertFalse(Predicate.compound(.and([.value(false), isAlice])).evaluate(with: data, functions: Self.functions))
-        XCTAssert(Predicate.compound(.or([.value(false), isAlice])).evaluate(with: data, functions: Self.functions))
-        XCTAssertFalse(Predicate.compound(.not(isAlice)).evaluate(with: data, functions: Self.functions))
+        #expect(Predicate.compound(.and([.value(true), isAlice])).evaluate(with: data, functions: Self.functions))
+        #expect(Predicate.compound(.and([.value(false), isAlice])).evaluate(with: data, functions: Self.functions) == false)
+        #expect(Predicate.compound(.or([.value(false), isAlice])).evaluate(with: data, functions: Self.functions))
+        #expect(Predicate.compound(.not(isAlice)).evaluate(with: data, functions: Self.functions) == false)
     }
 
-    func testExpressionEvaluation() {
+    @Test func expressionEvaluation() {
         let data = Self.makeData()
-        XCTAssertEqual(Predicate.Expression.attribute(.int64(1)).evaluate(with: data, functions: [:]), .attribute(.int64(1)))
-        XCTAssertEqual(Predicate.Expression.keyPath("name").evaluate(with: data, functions: [:]), .attribute(.string("Alice")))
-        XCTAssertNil(Predicate.Expression.keyPath("missing").evaluate(with: data, functions: [:]))
-        XCTAssertEqual(Self.functionExpression.evaluate(with: data, functions: Self.functions), .attribute(.string("alice")))
+        #expect(Predicate.Expression.attribute(.int64(1)).evaluate(with: data, functions: [:]) == .attribute(.int64(1)))
+        #expect(Predicate.Expression.keyPath("name").evaluate(with: data, functions: [:]) == .attribute(.string("Alice")))
+        #expect(Predicate.Expression.keyPath("missing").evaluate(with: data, functions: [:]) == nil)
+        #expect(Self.functionExpression.evaluate(with: data, functions: Self.functions) == .attribute(.string("alice")))
         // unregistered function
-        XCTAssertNil(Self.functionExpression.evaluate(with: data, functions: [:]))
+        #expect(Self.functionExpression.evaluate(with: data, functions: [:]) == nil)
         // relationship expressions resolve to relationship values
-        XCTAssertEqual(Predicate.Expression.relationship(.toOne("x")).evaluate(with: data, functions: [:]), .relationship(.toOne("x")))
+        #expect(Predicate.Expression.relationship(.toOne("x")).evaluate(with: data, functions: [:]) == .relationship(.toOne("x")))
     }
 
-    func testOperatorEvaluation() {
+    @Test func operatorEvaluation() {
         let data = Self.makeData()
         func evaluate(
             _ type: Predicate.Comparison.Operator,
@@ -119,79 +119,79 @@ final class FunctionEvaluationTests: XCTestCase {
         let name = Predicate.Expression.keyPath("name")
         let age = Predicate.Expression.keyPath("age")
         // equality
-        XCTAssert(evaluate(.equalTo, name, .attribute(.string("Alice"))))
-        XCTAssert(evaluate(.equalTo, name, .attribute(.string("ALICE")), options: [.caseInsensitive]))
-        XCTAssertFalse(evaluate(.equalTo, name, .attribute(.string("ALICE"))))
-        XCTAssert(evaluate(.notEqualTo, name, .attribute(.string("Bob"))))
+        #expect(evaluate(.equalTo, name, .attribute(.string("Alice"))))
+        #expect(evaluate(.equalTo, name, .attribute(.string("ALICE")), options: [.caseInsensitive]))
+        #expect(evaluate(.equalTo, name, .attribute(.string("ALICE"))) == false)
+        #expect(evaluate(.notEqualTo, name, .attribute(.string("Bob"))))
         // null equality
-        XCTAssert(evaluate(.equalTo, .attribute(.null), .attribute(.null)))
-        XCTAssert(evaluate(.equalTo, .keyPath("missing"), .attribute(.null)))
-        XCTAssertFalse(evaluate(.equalTo, name, .attribute(.null)))
-        XCTAssertFalse(evaluate(.equalTo, name, .keyPath("missing")))
+        #expect(evaluate(.equalTo, .attribute(.null), .attribute(.null)))
+        #expect(evaluate(.equalTo, .keyPath("missing"), .attribute(.null)))
+        #expect(evaluate(.equalTo, name, .attribute(.null)) == false)
+        #expect(evaluate(.equalTo, name, .keyPath("missing")) == false)
         // ordering (numeric)
-        XCTAssert(evaluate(.lessThan, age, .attribute(.int64(40))))
-        XCTAssertFalse(evaluate(.lessThan, age, .attribute(.int64(30))))
-        XCTAssert(evaluate(.lessThanOrEqualTo, age, .attribute(.int64(30))))
-        XCTAssert(evaluate(.greaterThan, age, .attribute(.int64(20))))
-        XCTAssert(evaluate(.greaterThanOrEqualTo, age, .attribute(.int64(30))))
+        #expect(evaluate(.lessThan, age, .attribute(.int64(40))))
+        #expect(evaluate(.lessThan, age, .attribute(.int64(30))) == false)
+        #expect(evaluate(.lessThanOrEqualTo, age, .attribute(.int64(30))))
+        #expect(evaluate(.greaterThan, age, .attribute(.int64(20))))
+        #expect(evaluate(.greaterThanOrEqualTo, age, .attribute(.int64(30))))
         // ordering with mixed numeric types
-        XCTAssert(evaluate(.lessThan, age, .attribute(.double(30.5))))
-        XCTAssert(evaluate(.greaterThan, age, .attribute(.float(29.5))))
-        XCTAssert(evaluate(.greaterThan, age, .attribute(.int16(29))))
-        XCTAssert(evaluate(.lessThan, age, .attribute(.int32(31))))
-        XCTAssert(evaluate(.greaterThan, age, .attribute(.bool(true))))
-        XCTAssert(evaluate(.lessThan, age, .attribute(.decimal(Decimal(50)))))
+        #expect(evaluate(.lessThan, age, .attribute(.double(30.5))))
+        #expect(evaluate(.greaterThan, age, .attribute(.float(29.5))))
+        #expect(evaluate(.greaterThan, age, .attribute(.int16(29))))
+        #expect(evaluate(.lessThan, age, .attribute(.int32(31))))
+        #expect(evaluate(.greaterThan, age, .attribute(.bool(true))))
+        #expect(evaluate(.lessThan, age, .attribute(.decimal(Decimal(50)))))
         // date ordering
-        XCTAssert(evaluate(.lessThan, .attribute(.date(Date(timeIntervalSinceReferenceDate: 0))), .attribute(.date(Date(timeIntervalSinceReferenceDate: 100)))))
+        #expect(evaluate(.lessThan, .attribute(.date(Date(timeIntervalSinceReferenceDate: 0))), .attribute(.date(Date(timeIntervalSinceReferenceDate: 100)))))
         // string ordering
-        XCTAssert(evaluate(.lessThan, name, .attribute(.string("Bob"))))
-        XCTAssertFalse(evaluate(.greaterThan, name, .attribute(.string("Bob"))))
+        #expect(evaluate(.lessThan, name, .attribute(.string("Bob"))))
+        #expect(evaluate(.greaterThan, name, .attribute(.string("Bob"))) == false)
         // non-comparable ordering
-        XCTAssertFalse(evaluate(.lessThan, name, .attribute(.int64(1))))
-        XCTAssertFalse(evaluate(.lessThan, .attribute(.null), age))
+        #expect(evaluate(.lessThan, name, .attribute(.int64(1))) == false)
+        #expect(evaluate(.lessThan, .attribute(.null), age) == false)
         // string operators
-        XCTAssert(evaluate(.beginsWith, name, .attribute(.string("Al"))))
-        XCTAssert(evaluate(.beginsWith, name, .attribute(.string("AL")), options: [.caseInsensitive]))
-        XCTAssert(evaluate(.endsWith, name, .attribute(.string("ice"))))
-        XCTAssert(evaluate(.contains, name, .attribute(.string("lic"))))
-        XCTAssertFalse(evaluate(.contains, name, .attribute(.string("bob"))))
-        XCTAssertFalse(evaluate(.contains, age, .attribute(.string("3"))))
+        #expect(evaluate(.beginsWith, name, .attribute(.string("Al"))))
+        #expect(evaluate(.beginsWith, name, .attribute(.string("AL")), options: [.caseInsensitive]))
+        #expect(evaluate(.endsWith, name, .attribute(.string("ice"))))
+        #expect(evaluate(.contains, name, .attribute(.string("lic"))))
+        #expect(evaluate(.contains, name, .attribute(.string("bob"))) == false)
+        #expect(evaluate(.contains, age, .attribute(.string("3"))) == false)
         // like / matches
-        XCTAssert(evaluate(.like, name, .attribute(.string("A*e"))))
-        XCTAssert(evaluate(.like, name, .attribute(.string("Alic?"))))
-        XCTAssertFalse(evaluate(.like, name, .attribute(.string("B*"))))
-        XCTAssert(evaluate(.matches, name, .attribute(.string("^A[a-z]+e$"))))
-        XCTAssertFalse(evaluate(.matches, name, .attribute(.string("^[0-9]+$"))))
+        #expect(evaluate(.like, name, .attribute(.string("A*e"))))
+        #expect(evaluate(.like, name, .attribute(.string("Alic?"))))
+        #expect(evaluate(.like, name, .attribute(.string("B*"))) == false)
+        #expect(evaluate(.matches, name, .attribute(.string("^A[a-z]+e$"))))
+        #expect(evaluate(.matches, name, .attribute(.string("^[0-9]+$"))) == false)
         // IN: left hand side is a substring of the right hand side
-        XCTAssert(evaluate(.in, name, .attribute(.string("Alice in Wonderland"))))
-        XCTAssertFalse(evaluate(.in, name, .attribute(.string("Bob"))))
+        #expect(evaluate(.in, name, .attribute(.string("Alice in Wonderland"))))
+        #expect(evaluate(.in, name, .attribute(.string("Bob"))) == false)
         // BETWEEN bounds aren't representable as a single expression value
-        XCTAssertFalse(evaluate(.between, age, .attribute(.int64(50))))
+        #expect(evaluate(.between, age, .attribute(.int64(50))) == false)
     }
 
-    func testSortedInMemory() {
+    @Test func sortedInMemory() {
         let people = [
             Self.makeData(name: "Charlie", age: 35, id: "3"),
             Self.makeData(name: "alice", age: 30, id: "1"),
             Self.makeData(name: "Bob", age: 30, id: "2")
         ]
         // no descriptors sorts by identifier
-        XCTAssertEqual(people.sorted(by: [], functions: [:]).map { $0.id.rawValue }, ["1", "2", "3"])
+        #expect(people.sorted(by: [], functions: [:]).map { $0.id.rawValue } == ["1", "2", "3"])
         // property ascending
         let byAge = people.sorted(by: [.init(property: "age", ascending: true)], functions: [:])
-        XCTAssertEqual(byAge.map { $0.id.rawValue }, ["1", "2", "3"])
+        #expect(byAge.map { $0.id.rawValue } == ["1", "2", "3"])
         // property descending
         let byAgeDesc = people.sorted(by: [.init(property: "age", ascending: false)], functions: [:])
-        XCTAssertEqual(byAgeDesc.first?.id.rawValue, "3")
+        #expect(byAgeDesc.first?.id.rawValue == "3")
         // function term (case-insensitive name order)
         let byName = people.sorted(
             by: [.init(term: .function(.init(name: "lowercase", arguments: [.keyPath("name")])), ascending: true)],
             functions: Self.functions
         )
-        XCTAssertEqual(byName.map { $0.id.rawValue }, ["1", "2", "3"])
+        #expect(byName.map { $0.id.rawValue } == ["1", "2", "3"])
         // ties fall back to id ordering
         let tied = people.sorted(by: [.init(property: "missing", ascending: true)], functions: [:])
-        XCTAssertEqual(tied.map { $0.id.rawValue }, ["1", "2", "3"])
+        #expect(tied.map { $0.id.rawValue } == ["1", "2", "3"])
     }
 }
 
