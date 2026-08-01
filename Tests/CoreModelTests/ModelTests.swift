@@ -6,47 +6,47 @@
 //
 
 import Foundation
-import XCTest
+import Testing
 @testable import CoreModel
 #if canImport(CoreData)
 @testable import CoreDataModel
 #endif
 
-final class ModelTests: XCTestCase {
+@Suite struct ModelTests {
 
-    func testModel() throws {
+    @Test func model() throws {
         let model = Model(entities: Person.self, Event.self)
-        XCTAssertEqual(model.entities.count, 2)
+        #expect(model.entities.count == 2)
         // subscript
-        XCTAssertNotNil(model[Person.entityName])
-        XCTAssertNotNil(model["Event"])
-        XCTAssertNil(model["Missing"])
+        #expect(model[Person.entityName] != nil)
+        #expect(model["Event"] != nil)
+        #expect(model["Missing"] == nil)
         // codable round trip
         let data = try JSONEncoder().encode(model)
         let decoded = try JSONDecoder().decode(Model.self, from: data)
-        XCTAssertEqual(decoded, model)
+        #expect(decoded == model)
     }
 
-    func testEntityName() throws {
+    @Test func entityName() throws {
         let name: EntityName = "Person"
-        XCTAssertEqual(name.rawValue, "Person")
-        XCTAssertEqual(name.description, "Person")
-        XCTAssertEqual(name.debugDescription, "Person")
+        #expect(name.rawValue == "Person")
+        #expect(name.description == "Person")
+        #expect(name.debugDescription == "Person")
         let data = try JSONEncoder().encode(name)
-        XCTAssertEqual(try JSONDecoder().decode(EntityName.self, from: data), name)
+        #expect(try JSONDecoder().decode(EntityName.self, from: data) == name)
     }
 
-    func testPropertyKey() throws {
+    @Test func propertyKey() throws {
         let key: PropertyKey = "name"
-        XCTAssertEqual(key.rawValue, "name")
-        XCTAssertEqual(key.description, "name")
-        XCTAssertEqual(key.debugDescription, "name")
-        XCTAssertEqual(PropertyKey(Person.CodingKeys.name), key)
+        #expect(key.rawValue == "name")
+        #expect(key.description == "name")
+        #expect(key.debugDescription == "name")
+        #expect(PropertyKey(Person.CodingKeys.name) == key)
         let data = try JSONEncoder().encode(key)
-        XCTAssertEqual(try JSONDecoder().decode(PropertyKey.self, from: data), key)
+        #expect(try JSONDecoder().decode(PropertyKey.self, from: data) == key)
     }
 
-    func testEntityDefaultImplementations() {
+    @Test func entityDefaultImplementations() {
         // entity with no attributes or relationships uses protocol defaults
         struct Empty: Entity {
             typealias ID = UUID
@@ -64,34 +64,34 @@ final class ModelTests: XCTestCase {
                 ModelData(entity: Self.entityName, id: ObjectID(id))
             }
         }
-        XCTAssertEqual(Empty.entityName.rawValue, "Empty")
-        XCTAssertEqual(Empty.attributes, [:])
-        XCTAssertEqual(Empty.relationships, [:])
+        #expect(Empty.entityName.rawValue == "Empty")
+        #expect(Empty.attributes == [:])
+        #expect(Empty.relationships == [:])
         let description = EntityDescription(entity: Empty.self)
-        XCTAssertEqual(description.id, Empty.entityName)
-        XCTAssertEqual(description.attributes, [])
-        XCTAssertEqual(description.relationships, [])
+        #expect(description.id == Empty.entityName)
+        #expect(description.attributes == [])
+        #expect(description.relationships == [])
     }
 
-    func testModelDataCodable() throws {
+    @Test func modelDataCodable() throws {
         var data = ModelData(entity: "Person", id: "1")
         data.encode("Alice", forKey: PredicateCodingTests.Key.name)
         data.encodeRelationship([UUID()], forKey: PredicateCodingTests.Key.age)
         let encoded = try JSONEncoder().encode(data)
         let decoded = try JSONDecoder().decode(ModelData.self, from: encoded)
-        XCTAssertEqual(decoded, data)
+        #expect(decoded == data)
     }
 
     #if canImport(CoreData)
-    func testNSNumberConversion() {
-        XCTAssertEqual(NSNumber(value: .bool(true)), NSNumber(value: true))
-        XCTAssertEqual(NSNumber(value: .int16(16)), NSNumber(value: Int16(16)))
-        XCTAssertEqual(NSNumber(value: .int32(32)), NSNumber(value: Int32(32)))
-        XCTAssertEqual(NSNumber(value: .int64(64)), NSNumber(value: Int64(64)))
-        XCTAssertEqual(NSNumber(value: .float(1.5)), NSNumber(value: Float(1.5)))
-        XCTAssertEqual(NSNumber(value: .double(2.5)), NSNumber(value: Double(2.5)))
-        XCTAssertNil(NSNumber(value: .string("x")))
-        XCTAssertNil(NSNumber(value: .null))
+    @Test func nsNumberConversion() {
+        #expect(NSNumber(value: .bool(true)) == NSNumber(value: true))
+        #expect(NSNumber(value: .int16(16)) == NSNumber(value: Int16(16)))
+        #expect(NSNumber(value: .int32(32)) == NSNumber(value: Int32(32)))
+        #expect(NSNumber(value: .int64(64)) == NSNumber(value: Int64(64)))
+        #expect(NSNumber(value: .float(1.5)) == NSNumber(value: Float(1.5)))
+        #expect(NSNumber(value: .double(2.5)) == NSNumber(value: Double(2.5)))
+        #expect(NSNumber(value: .string("x")) == nil)
+        #expect(NSNumber(value: .null) == nil)
     }
     #endif
 }
