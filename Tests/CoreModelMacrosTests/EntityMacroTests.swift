@@ -11,16 +11,16 @@
 #if os(macOS) || os(Linux)
 
 import Foundation
-import XCTest
+import Testing
 import SwiftSyntax
 import SwiftParser
 import SwiftSyntaxMacros
 import SwiftSyntaxMacroExpansion
 @testable import CoreModelMacros
 
-final class EntityMacroTests: XCTestCase {
+@Suite struct EntityMacroTests {
 
-    func testStructExpansion() throws {
+    @Test func structExpansion() throws {
         let (node, declaration) = try parse("""
         @Entity
         struct Person {
@@ -35,20 +35,20 @@ final class EntityMacroTests: XCTestCase {
         """)
         let context = BasicMacroExpansionContext()
         let members = try expandMembers(of: node, attachedTo: declaration, in: context)
-        XCTAssertEqual(members.count, 5)
+        #expect(members.count == 5)
         let source = members.map { $0.description }.joined(separator: "\n")
-        XCTAssert(source.contains(#"public static var entityName: EntityName { "Person" }"#))
-        XCTAssert(source.contains(".name: .string"))
-        XCTAssert(source.contains(".age: .int64"))
-        XCTAssert(source.contains(".created: .date"))
-        XCTAssert(source.contains("public static var relationships: [CodingKeys: Relationship] { [:] }"))
-        XCTAssert(source.contains("public init(from container: ModelData) throws"))
-        XCTAssert(source.contains("self.name = try container.decode(String.self, forKey: Person.CodingKeys.name)"))
-        XCTAssert(source.contains("public func encode() -> ModelData"))
-        XCTAssert(source.contains("container.encode(self.age, forKey: Person.CodingKeys.age)"))
+        #expect(source.contains(#"public static var entityName: EntityName { "Person" }"#))
+        #expect(source.contains(".name: .string"))
+        #expect(source.contains(".age: .int64"))
+        #expect(source.contains(".created: .date"))
+        #expect(source.contains("public static var relationships: [CodingKeys: Relationship] { [:] }"))
+        #expect(source.contains("public init(from container: ModelData) throws"))
+        #expect(source.contains("self.name = try container.decode(String.self, forKey: Person.CodingKeys.name)"))
+        #expect(source.contains("public func encode() -> ModelData"))
+        #expect(source.contains("container.encode(self.age, forKey: Person.CodingKeys.age)"))
     }
 
-    func testExtensionExpansion() throws {
+    @Test func extensionExpansion() throws {
         let (node, declaration) = try parse("""
         @Entity
         struct Person {
@@ -63,11 +63,11 @@ final class EntityMacroTests: XCTestCase {
             conformingTo: [],
             in: context
         )
-        XCTAssertEqual(extensions.count, 1)
-        XCTAssert(extensions[0].description.contains("CoreModel.Entity"))
+        #expect(extensions.count == 1)
+        #expect(extensions[0].description.contains("CoreModel.Entity"))
     }
 
-    func testExplicitEntityName() throws {
+    @Test func explicitEntityName() throws {
         let (node, declaration) = try parse("""
         @Entity("PersonEntity")
         struct Person {
@@ -76,10 +76,10 @@ final class EntityMacroTests: XCTestCase {
         """)
         let context = BasicMacroExpansionContext()
         let decl = try EntityMacro.entityNameDeclarationSyntax(of: node, providingMembersOf: declaration, in: context)
-        XCTAssert(decl.description.contains(#""PersonEntity""#))
+        #expect(decl.description.contains(#""PersonEntity""#))
     }
 
-    func testOptionalAttributes() throws {
+    @Test func optionalAttributes() throws {
         let (node, declaration) = try parse("""
         @Entity
         struct Person {
@@ -92,11 +92,11 @@ final class EntityMacroTests: XCTestCase {
         """)
         let context = BasicMacroExpansionContext()
         let decl = try EntityMacro.attributesDeclarationSyntax(of: node, providingMembersOf: declaration, in: context)
-        XCTAssert(decl.description.contains(".nickname: .string"))
-        XCTAssert(decl.description.contains(".count: .int64"))
+        #expect(decl.description.contains(".nickname: .string"))
+        #expect(decl.description.contains(".count: .int64"))
     }
 
-    func testExplicitAttributeType() throws {
+    @Test func explicitAttributeType() throws {
         let (node, declaration) = try parse("""
         @Entity
         struct Person {
@@ -107,10 +107,10 @@ final class EntityMacroTests: XCTestCase {
         """)
         let context = BasicMacroExpansionContext()
         let decl = try EntityMacro.attributesDeclarationSyntax(of: node, providingMembersOf: declaration, in: context)
-        XCTAssert(decl.description.contains(".avatar: .data"))
+        #expect(decl.description.contains(".avatar: .data"))
     }
 
-    func testUnknownAttributeType() throws {
+    @Test func unknownAttributeType() throws {
         let (node, declaration) = try parse("""
         @Entity
         struct Person {
@@ -120,15 +120,17 @@ final class EntityMacroTests: XCTestCase {
         }
         """)
         let context = BasicMacroExpansionContext()
-        XCTAssertThrowsError(try EntityMacro.attributesDeclarationSyntax(of: node, providingMembersOf: declaration, in: context)) { error in
-            guard case MacroError.unknownAttributeType(let name) = error else {
-                return XCTFail("Expected unknownAttributeType, got \(error)")
-            }
-            XCTAssertEqual(name, "point")
+        do {
+            _ = try EntityMacro.attributesDeclarationSyntax(of: node, providingMembersOf: declaration, in: context)
+            Issue.record("Expected an error")
+        } catch MacroError.unknownAttributeType(let name) {
+            #expect(name == "point")
+        } catch {
+            Issue.record("Expected unknownAttributeType, got \(error)")
         }
     }
 
-    func testRelationships() throws {
+    @Test func relationships() throws {
         let (node, declaration) = try parse("""
         @Entity
         struct Person {
@@ -142,15 +144,15 @@ final class EntityMacroTests: XCTestCase {
         let context = BasicMacroExpansionContext()
         let decl = try EntityMacro.relationshipsDeclarationSyntax(of: node, providingMembersOf: declaration, in: context)
         let source = decl.description
-        XCTAssert(source.contains("destination: Pet.self"))
-        XCTAssert(source.contains("type: .toMany"))
-        XCTAssert(source.contains("inverseRelationship: .owner"))
-        XCTAssert(source.contains("destination: Company.self"))
-        XCTAssert(source.contains("type: .toOne"))
-        XCTAssert(source.contains("inverseRelationship: .employees"))
+        #expect(source.contains("destination: Pet.self"))
+        #expect(source.contains("type: .toMany"))
+        #expect(source.contains("inverseRelationship: .owner"))
+        #expect(source.contains("destination: Company.self"))
+        #expect(source.contains("type: .toOne"))
+        #expect(source.contains("inverseRelationship: .employees"))
     }
 
-    func testMissingInverseRelationship() throws {
+    @Test func missingInverseRelationship() throws {
         let (node, declaration) = try parse("""
         @Entity
         struct Person {
@@ -160,15 +162,17 @@ final class EntityMacroTests: XCTestCase {
         }
         """)
         let context = BasicMacroExpansionContext()
-        XCTAssertThrowsError(try EntityMacro.relationshipsDeclarationSyntax(of: node, providingMembersOf: declaration, in: context)) { error in
-            guard case MacroError.unknownInverseRelationship(let name) = error else {
-                return XCTFail("Expected unknownInverseRelationship, got \(error)")
-            }
-            XCTAssertEqual(name, "pets")
+        do {
+            _ = try EntityMacro.relationshipsDeclarationSyntax(of: node, providingMembersOf: declaration, in: context)
+            Issue.record("Expected an error")
+        } catch MacroError.unknownInverseRelationship(let name) {
+            #expect(name == "pets")
+        } catch {
+            Issue.record("Expected unknownInverseRelationship, got \(error)")
         }
     }
 
-    func testInvalidInverseExpression() throws {
+    @Test func invalidInverseExpression() throws {
         let (node, declaration) = try parse("""
         @Entity
         struct Person {
@@ -178,14 +182,17 @@ final class EntityMacroTests: XCTestCase {
         }
         """)
         let context = BasicMacroExpansionContext()
-        XCTAssertThrowsError(try EntityMacro.relationshipsDeclarationSyntax(of: node, providingMembersOf: declaration, in: context)) { error in
-            guard case MacroError.unknownInverseRelationship = error else {
-                return XCTFail("Expected unknownInverseRelationship, got \(error)")
-            }
+        do {
+            _ = try EntityMacro.relationshipsDeclarationSyntax(of: node, providingMembersOf: declaration, in: context)
+            Issue.record("Expected an error")
+        } catch MacroError.unknownInverseRelationship {
+            // expected
+        } catch {
+            Issue.record("Expected unknownInverseRelationship, got \(error)")
         }
     }
 
-    func testRelationshipDecodeEncode() throws {
+    @Test func relationshipDecodeEncode() throws {
         let (node, declaration) = try parse("""
         @Entity
         struct Person {
@@ -198,12 +205,12 @@ final class EntityMacroTests: XCTestCase {
         """)
         let context = BasicMacroExpansionContext()
         let initDecl = try EntityMacro.initDeclarationSyntax(of: node, providingMembersOf: declaration, in: context)
-        XCTAssert(initDecl.description.contains("self.pets = try container.decodeRelationship([Pet.ID].self, forKey: Person.CodingKeys.pets)"))
+        #expect(initDecl.description.contains("self.pets = try container.decodeRelationship([Pet.ID].self, forKey: Person.CodingKeys.pets)"))
         let encodeDecl = try EntityMacro.encodeDeclarationSyntax(of: node, providingMembersOf: declaration, in: context)
-        XCTAssert(encodeDecl.description.contains("container.encodeRelationship(self.pets, forKey: Person.CodingKeys.pets)"))
+        #expect(encodeDecl.description.contains("container.encodeRelationship(self.pets, forKey: Person.CodingKeys.pets)"))
     }
 
-    func testUnrelatedPropertyAttributeIgnored() throws {
+    @Test func unrelatedPropertyAttributeIgnored() throws {
         let (node, declaration) = try parse("""
         @Entity
         struct Person {
@@ -216,12 +223,12 @@ final class EntityMacroTests: XCTestCase {
         """)
         let context = BasicMacroExpansionContext()
         let properties = EntityMacro.codableProperties(of: declaration)
-        XCTAssertEqual(properties.map { $0.name }, ["name"])
+        #expect(properties.map { $0.name } == ["name"])
         let initDecl = try EntityMacro.initDeclarationSyntax(of: node, providingMembersOf: declaration, in: context)
-        XCTAssertFalse(initDecl.description.contains("ignored"))
+        #expect(initDecl.description.contains("ignored") == false)
     }
 
-    func testClassTypeName() throws {
+    @Test func classTypeName() throws {
         let (node, declaration) = try parse("""
         @Entity
         class Animal {
@@ -229,10 +236,10 @@ final class EntityMacroTests: XCTestCase {
         }
         """)
         let context = BasicMacroExpansionContext()
-        XCTAssertEqual(try EntityMacro.typeName(of: node, providingMembersOf: declaration, in: context), "Animal")
+        #expect(try EntityMacro.typeName(of: node, providingMembersOf: declaration, in: context) == "Animal")
     }
 
-    func testEnumTypeName() throws {
+    @Test func enumTypeName() throws {
         let (node, declaration) = try parse("""
         @Entity
         enum Kind {
@@ -240,10 +247,10 @@ final class EntityMacroTests: XCTestCase {
         }
         """)
         let context = BasicMacroExpansionContext()
-        XCTAssertEqual(try EntityMacro.typeName(of: node, providingMembersOf: declaration, in: context), "Kind")
+        #expect(try EntityMacro.typeName(of: node, providingMembersOf: declaration, in: context) == "Kind")
     }
 
-    func testInvalidType() throws {
+    @Test func invalidType() throws {
         let (node, declaration) = try parse("""
         @Entity
         actor Worker {
@@ -251,31 +258,34 @@ final class EntityMacroTests: XCTestCase {
         }
         """)
         let context = BasicMacroExpansionContext()
-        XCTAssertThrowsError(try EntityMacro.typeName(of: node, providingMembersOf: declaration, in: context)) { error in
-            guard case MacroError.invalidType = error else {
-                return XCTFail("Expected invalidType, got \(error)")
-            }
+        do {
+            _ = try EntityMacro.typeName(of: node, providingMembersOf: declaration, in: context)
+            Issue.record("Expected an error")
+        } catch MacroError.invalidType {
+            // expected
+        } catch {
+            Issue.record("Expected invalidType, got \(error)")
         }
     }
 
-    func testInferAttributeType() {
-        XCTAssertEqual(inferAttributeType(from: "String"), ".string")
-        XCTAssertEqual(inferAttributeType(from: "Data"), ".data")
-        XCTAssertEqual(inferAttributeType(from: "Bool"), ".bool")
-        XCTAssertEqual(inferAttributeType(from: "Int16"), ".int16")
-        XCTAssertEqual(inferAttributeType(from: "Int32"), ".int32")
-        XCTAssertEqual(inferAttributeType(from: "Int64"), ".int64")
-        XCTAssertEqual(inferAttributeType(from: "Int"), ".int64")
-        XCTAssertEqual(inferAttributeType(from: "Float"), ".float")
-        XCTAssertEqual(inferAttributeType(from: "Double"), ".double")
-        XCTAssertEqual(inferAttributeType(from: "Date"), ".date")
-        XCTAssertEqual(inferAttributeType(from: "UUID"), ".uuid")
-        XCTAssertEqual(inferAttributeType(from: "URL"), ".url")
-        XCTAssertEqual(inferAttributeType(from: "Decimal"), ".decimal")
-        XCTAssertNil(inferAttributeType(from: "CGPoint"))
+    @Test func inferAttributeTypeMapping() {
+        #expect(inferAttributeType(from: "String") == ".string")
+        #expect(inferAttributeType(from: "Data") == ".data")
+        #expect(inferAttributeType(from: "Bool") == ".bool")
+        #expect(inferAttributeType(from: "Int16") == ".int16")
+        #expect(inferAttributeType(from: "Int32") == ".int32")
+        #expect(inferAttributeType(from: "Int64") == ".int64")
+        #expect(inferAttributeType(from: "Int") == ".int64")
+        #expect(inferAttributeType(from: "Float") == ".float")
+        #expect(inferAttributeType(from: "Double") == ".double")
+        #expect(inferAttributeType(from: "Date") == ".date")
+        #expect(inferAttributeType(from: "UUID") == ".uuid")
+        #expect(inferAttributeType(from: "URL") == ".url")
+        #expect(inferAttributeType(from: "Decimal") == ".decimal")
+        #expect(inferAttributeType(from: "CGPoint") == nil)
     }
 
-    func testPeerMacrosExpandToNothing() throws {
+    @Test func peerMacrosExpandToNothing() throws {
         let (node, declaration) = try parse("""
         @Entity
         struct Person {
@@ -283,26 +293,26 @@ final class EntityMacroTests: XCTestCase {
         }
         """)
         let context = BasicMacroExpansionContext()
-        XCTAssertEqual(try AttributeMacro.expansion(of: node, providingPeersOf: declaration, in: context).count, 0)
-        XCTAssertEqual(try RelationshipMacro.expansion(of: node, providingPeersOf: declaration, in: context).count, 0)
+        #expect(try AttributeMacro.expansion(of: node, providingPeersOf: declaration, in: context).count == 0)
+        #expect(try RelationshipMacro.expansion(of: node, providingPeersOf: declaration, in: context).count == 0)
     }
 
-    func testExpansionNames() {
-        XCTAssertEqual(EntityMacro.expansionNames.count, 5)
+    @Test func expansionNames() {
+        #expect(EntityMacro.expansionNames.count == 5)
     }
 
     #if canImport(Darwin)
-    func testMacroErrorDescriptions() {
-        XCTAssertNotNil(MacroError.invalidType.errorDescription)
-        XCTAssertNotNil(MacroError.unknownAttributeType(for: "point").errorDescription)
-        XCTAssertNotNil(MacroError.unknownInverseRelationship(for: "pets").errorDescription)
+    @Test func macroErrorDescriptions() {
+        #expect(MacroError.invalidType.errorDescription != nil)
+        #expect(MacroError.unknownAttributeType(for: "point").errorDescription != nil)
+        #expect(MacroError.unknownInverseRelationship(for: "pets").errorDescription != nil)
     }
     #endif
 }
 
 // MARK: - Helpers
 
-private extension EntityMacroTests {
+extension EntityMacroTests {
 
     /// Parse source containing a single attributed type declaration, returning the
     /// macro attribute node and the declaration group it is attached to.

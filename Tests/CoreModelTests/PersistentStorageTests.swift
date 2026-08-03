@@ -9,7 +9,7 @@
 
 import Foundation
 import CoreData
-import XCTest
+import Testing
 @testable import CoreModel
 @testable import CoreDataModel
 
@@ -108,8 +108,10 @@ struct AllTypes: Equatable, Hashable, Codable, Identifiable {
     }
 }
 
-@available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
-final class PersistentStorageTests: XCTestCase {
+// - Note: `@Test`/`@Suite` can't be combined with a declaration-level `@available` — see
+//   CoreDataModelTests.swift for the same note. Each test guards its body with a runtime
+//   `if #available` instead.
+@Suite struct PersistentStorageTests {
 
     static func makeStorage(model: Model = Model(entities: Person.self, Event.self, AllTypes.self)) -> PersistentContainerStorage {
         let description = NSPersistentStoreDescription()
@@ -140,22 +142,28 @@ final class PersistentStorageTests: XCTestCase {
         )
     }
 
-    func testAllAttributeTypesRoundTrip() async throws {
+    @Test func allAttributeTypesRoundTrip() async throws {
+        guard #available(macOS 12, iOS 15, watchOS 8, tvOS 15, *) else {
+            return
+        }
         let storage = Self.makeStorage()
         var value = Self.makeAllTypes()
         try await storage.insert(value)
         var fetched = try await storage.fetch(AllTypes.self, for: value.id)
-        XCTAssertEqual(fetched, value)
+        #expect(fetched == value)
         // update with non-nil optional
         value.optionalString = "present"
         value.stringValue = "updated"
         try await storage.insert(value)
         fetched = try await storage.fetch(AllTypes.self, for: value.id)
-        XCTAssertEqual(fetched, value)
-        XCTAssertEqual(fetched?.optionalString, "present")
+        #expect(fetched == value)
+        #expect(fetched?.optionalString == "present")
     }
 
-    func testStorageCRUD() async throws {
+    @Test func storageCRUD() async throws {
+        guard #available(macOS 12, iOS 15, watchOS 8, tvOS 15, *) else {
+            return
+        }
         let storage = Self.makeStorage()
         let people = [
             Person(name: "Alice", age: 30),
@@ -167,20 +175,20 @@ final class PersistentStorageTests: XCTestCase {
         // count
         let fetchRequest = FetchRequest(entity: Person.entityName)
         let total = try await storage.count(fetchRequest)
-        XCTAssertEqual(total, 3)
+        #expect(total == 3)
         // typed count
         let typedCount = try await storage.count(Person.self)
-        XCTAssertEqual(typedCount, 3)
+        #expect(typedCount == 3)
         // fetchID
         let ids = try await storage.fetchID(fetchRequest)
-        XCTAssertEqual(Set(ids), Set(people.map { ObjectID($0.id) }))
+        #expect(Set(ids) == Set(people.map { ObjectID($0.id) }))
         // typed fetch with sort and predicate
         let sorted: [Person] = try await storage.fetch(
             Person.self,
             sortDescriptors: [.init(property: PropertyKey(Person.CodingKeys.name), ascending: false)],
             predicate: Person.CodingKeys.age.compare(.greaterThan, .attribute(.int16(26)))
         )
-        XCTAssertEqual(sorted.map { $0.name }, ["Charlie", "Alice"])
+        #expect(sorted.map { $0.name } == ["Charlie", "Alice"])
         // fetch with limit and offset
         let limited = try await storage.fetch(
             FetchRequest(
@@ -190,20 +198,23 @@ final class PersistentStorageTests: XCTestCase {
                 fetchOffset: 1
             )
         )
-        XCTAssertEqual(limited.count, 1)
-        XCTAssertEqual(limited[0].attributes[PropertyKey(Person.CodingKeys.name)], .string("Bob"))
+        #expect(limited.count == 1)
+        #expect(limited[0].attributes[PropertyKey(Person.CodingKeys.name)] == .string("Bob"))
         // fetch missing object
         let missing = try await storage.fetch(Person.self, for: UUID())
-        XCTAssertNil(missing)
+        #expect(missing == nil)
         // typed delete
         try await storage.delete(Person.self, for: people[0].id)
         // batch delete by id
         try await storage.delete(Person.entityName, for: [ObjectID(people[1].id), ObjectID(people[2].id)])
         let remaining = try await storage.count(fetchRequest)
-        XCTAssertEqual(remaining, 0)
+        #expect(remaining == 0)
     }
 
-    func testStorageCustomFunction() async throws {
+    @Test func storageCustomFunction() async throws {
+        guard #available(macOS 12, iOS 15, watchOS 8, tvOS 15, *) else {
+            return
+        }
         let storage = Self.makeStorage()
         try await storage.register(function: DatabaseFunction(name: "upperName", argumentCount: 1) { arguments in
             guard case let .string(name) = arguments[0] else { return nil }
@@ -218,11 +229,14 @@ final class PersistentStorageTests: XCTestCase {
             predicate: .comparison(.init(left: upperName, right: .attribute(.string("ALICE")), type: .equalTo))
         )
         let matches = try await storage.fetch(request)
-        XCTAssertEqual(matches.count, 1)
+        #expect(matches.count == 1)
     }
 
     @MainActor
-    func testViewContext() async throws {
+    @Test func viewContext() async throws {
+        guard #available(macOS 12, iOS 15, watchOS 8, tvOS 15, *) else {
+            return
+        }
         let storage = Self.makeStorage()
         let person = Person(name: "Alice", age: 30)
         try await storage.insert(person)
@@ -231,23 +245,26 @@ final class PersistentStorageTests: XCTestCase {
         _ = try storage.viewContext
         // typed fetch by id
         let fetched = try viewContext.fetch(Person.self, for: person.id)
-        XCTAssertEqual(fetched, person)
+        #expect(fetched == person)
         // typed fetch with predicate
         let all: [Person] = try viewContext.fetch(
             Person.self,
             sortDescriptors: [.init(property: PropertyKey(Person.CodingKeys.name), ascending: true)],
             predicate: Person.CodingKeys.name.compare(.equalTo, .attribute(.string("Alice")))
         )
-        XCTAssertEqual(all, [person])
+        #expect(all == [person])
         // typed count
-        XCTAssertEqual(try viewContext.count(Person.self), 1)
+        #expect(try viewContext.count(Person.self) == 1)
         // count with fetch request
-        XCTAssertEqual(try viewContext.count(FetchRequest(entity: Person.entityName)), 1)
+        #expect(try viewContext.count(FetchRequest(entity: Person.entityName)) == 1)
         // fetch missing
-        XCTAssertNil(try viewContext.fetch(Person.self, for: UUID()))
+        #expect(try viewContext.fetch(Person.self, for: UUID()) == nil)
     }
 
-    func testNSPersistentContainerStorage() async throws {
+    @Test func nsPersistentContainerStorage() async throws {
+        guard #available(macOS 12, iOS 15, watchOS 8, tvOS 15, *) else {
+            return
+        }
         let model = Model(entities: Person.self, Event.self, AllTypes.self)
         let container = NSPersistentContainer(
             name: "Test\(UUID())",
@@ -262,13 +279,13 @@ final class PersistentStorageTests: XCTestCase {
         try await container.insert(people.map { try! $0.encode() })
         let fetchRequest = FetchRequest(entity: Person.entityName)
         let count = try await container.count(fetchRequest)
-        XCTAssertEqual(count, 2)
+        #expect(count == 2)
         let ids = try await container.fetchID(fetchRequest)
-        XCTAssertEqual(Set(ids), Set(people.map { ObjectID($0.id) }))
+        #expect(Set(ids) == Set(people.map { ObjectID($0.id) }))
         try await container.register(function: DatabaseFunction(name: "identity", argumentCount: 1) { arguments in arguments[0] })
         try await container.delete(Person.entityName, for: ids)
         let remaining = try await container.count(fetchRequest)
-        XCTAssertEqual(remaining, 0)
+        #expect(remaining == 0)
     }
 }
 

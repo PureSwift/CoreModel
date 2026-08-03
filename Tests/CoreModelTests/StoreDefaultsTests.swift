@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import XCTest
+import Testing
 @testable import CoreModel
 
 /// Minimal in-memory `ModelStorage` conformer that relies on the protocol's
@@ -46,9 +46,9 @@ private final class MinimalStore: ModelStorage, @unchecked Sendable {
     func register(function: DatabaseFunction) async throws { }
 }
 
-final class StoreDefaultsTests: XCTestCase {
+@Suite struct StoreDefaultsTests {
 
-    func testDefaultImplementations() async throws {
+    @Test func defaultImplementations() async throws {
         let store = MinimalStore()
         let people = [
             Person(name: "Alice", age: 30),
@@ -58,9 +58,9 @@ final class StoreDefaultsTests: XCTestCase {
         try await store.insert(people.map { try! $0.encode() })
         // default count(_:) falls back to fetching and counting
         let count = try await store.count(FetchRequest(entity: Person.entityName))
-        XCTAssertEqual(count, 2)
+        #expect(count == 2)
         // typed convenience still works through the defaults
         let fetched = try await store.fetch(Person.self, for: people[0].id)
-        XCTAssertEqual(fetched, people[0])
+        #expect(fetched == people[0])
     }
 }
