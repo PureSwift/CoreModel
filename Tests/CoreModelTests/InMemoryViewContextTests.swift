@@ -17,6 +17,7 @@ import Testing
         EntityDescription(entity: Event.self)
     ])
 
+    @available(macOS 15, iOS 18, tvOS 18, watchOS 11, visionOS 2, *)
     @Test func insertAndFetch() throws {
         let context = InMemoryViewContext(model: Self.model)
         let person = Person(name: "Alice", age: 30)
@@ -28,6 +29,7 @@ import Testing
         #expect(missing == nil)
     }
 
+    @available(macOS 15, iOS 18, tvOS 18, watchOS 11, visionOS 2, *)
     @Test func update() throws {
         let context = InMemoryViewContext(model: Self.model)
         var person = Person(name: "Alice", age: 30)
@@ -40,6 +42,7 @@ import Testing
         #expect(count == 1)
     }
 
+    @available(macOS 15, iOS 18, tvOS 18, watchOS 11, visionOS 2, *)
     @Test func batchInsert() throws {
         let context = InMemoryViewContext(model: Self.model)
         let people = (1...10).map { Person(name: "Person \($0)", age: UInt(20 + $0)) }
@@ -48,6 +51,7 @@ import Testing
         #expect(count == 10)
     }
 
+    @available(macOS 15, iOS 18, tvOS 18, watchOS 11, visionOS 2, *)
     @Test func fetchRequest() throws {
         let context = InMemoryViewContext(model: Self.model)
         let people = (1...5).map { Person(name: "Person \($0)", age: UInt(20 + $0)) }
@@ -78,6 +82,7 @@ import Testing
         #expect(count == 2)
     }
 
+    @available(macOS 15, iOS 18, tvOS 18, watchOS 11, visionOS 2, *)
     @Test func fetchID() throws {
         let context = InMemoryViewContext(model: Self.model)
         let person = Person(name: "Alice", age: 30)
@@ -86,6 +91,7 @@ import Testing
         #expect(ids == [ObjectID(person.id)])
     }
 
+    @available(macOS 15, iOS 18, tvOS 18, watchOS 11, visionOS 2, *)
     @Test func delete() throws {
         let context = InMemoryViewContext(model: Self.model)
         let people = (1...3).map { Person(name: "Person \($0)", age: UInt(20 + $0)) }
@@ -99,6 +105,7 @@ import Testing
         #expect(count == 0)
     }
 
+    @available(macOS 15, iOS 18, tvOS 18, watchOS 11, visionOS 2, *)
     @Test func relationshipPredicate() throws {
         let context = InMemoryViewContext(model: Self.model)
         let event = Event(name: "WWDC", date: Date())
@@ -112,6 +119,7 @@ import Testing
         #expect(attendees == [attendee])
     }
 
+    @available(macOS 15, iOS 18, tvOS 18, watchOS 11, visionOS 2, *)
     @Test func customFunction() throws {
         let context = InMemoryViewContext(model: Self.model)
         let stringLength = DatabaseFunction(name: "LENGTH", argumentCount: 1) { arguments in
@@ -137,6 +145,7 @@ import Testing
         #expect(longNames.map { $0.name } == ["Alexandra"])
     }
 
+    @available(macOS 15, iOS 18, tvOS 18, watchOS 11, visionOS 2, *)
     @Test func sharedDataWithStore() async throws {
         let store = InMemoryModelStorage(model: Self.model)
         let context = store.viewContext
@@ -158,6 +167,30 @@ import Testing
         #expect(try context.count(FetchRequest(entity: Person.entityName)) == 1)
     }
 
+    @available(macOS 15, iOS 18, tvOS 18, watchOS 11, visionOS 2, *)
+    @Test func concurrentAccessWithStore() async throws {
+        let store = InMemoryModelStorage(model: Self.model)
+        let context = store.viewContext
+        let people = (0 ..< 100).map { Person(name: "Person \($0)", age: UInt($0)) }
+        // writers run on the store's actor while this main-actor task reads the same
+        // backing, so the two isolation domains genuinely overlap
+        async let inserts: Void = withThrowingTaskGroup(of: Void.self) { group in
+            for person in people {
+                group.addTask {
+                    try await store.insert(person)
+                }
+            }
+            try await group.waitForAll()
+        }
+        for _ in 0 ..< 100 {
+            _ = try context.count(FetchRequest(entity: Person.entityName))
+        }
+        try await inserts
+        let count = try context.count(FetchRequest(entity: Person.entityName))
+        #expect(count == 100)
+    }
+
+    @available(macOS 15, iOS 18, tvOS 18, watchOS 11, visionOS 2, *)
     @Test func modelValidation() throws {
         let context = InMemoryViewContext(model: Self.model)
         let person = Person(name: "Alice", age: 30)
