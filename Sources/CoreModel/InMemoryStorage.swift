@@ -29,7 +29,7 @@ import Synchronization
 ///   `Synchronization.Mutex`, which is not back-deployed. The rest of `CoreModel`
 ///   keeps the package's lower deployment targets.
 @available(macOS 15, iOS 18, tvOS 18, watchOS 11, visionOS 2, *)
-public final class InMemoryStorage {
+internal final class InMemoryStorage {
 
     /// The schema entities are validated against.
     public let model: Model
