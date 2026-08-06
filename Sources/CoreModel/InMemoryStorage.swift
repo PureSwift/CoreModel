@@ -7,7 +7,7 @@
 //
 
 #if !hasFeature(Embedded)
-import Foundation
+import Synchronization
 #endif
 
 /// Shared in-memory backing store.
@@ -17,51 +17,64 @@ import Foundation
 /// reference type, a store and a view context that share the same instance observe
 /// the exact same data.
 ///
-/// The type is thread-safe: all access is serialized so the actor-isolated
-/// ``InMemoryModelStorage`` and the main-actor ``InMemoryViewContext`` can operate
-/// on the same instance concurrently. Under Embedded Swift the lock is elided:
-/// with a concurrency runtime the backing is only ever touched from within its
+/// The type is thread-safe: the mutable state lives inside a `Mutex`, so the
+/// actor-isolated ``InMemoryModelStorage`` and the main-actor ``InMemoryViewContext``
+/// can operate on the same instance concurrently. Under Embedded Swift the mutex is
+/// elided: with a concurrency runtime the backing is only ever touched from within its
 /// owning actor, and without one (e.g. bare-metal ARM, where ``ModelStorage``
 /// itself is unavailable) this synchronous store is the storage API, used
 /// directly from the single-threaded main loop.
-public final class InMemoryStorage {
+///
+/// - Note: On Apple platforms this type is gated on the availability of
+///   `Synchronization.Mutex`, which is not back-deployed. The rest of `CoreModel`
+///   keeps the package's lower deployment targets.
+@available(macOS 15, iOS 18, tvOS 18, watchOS 11, visionOS 2, *)
+internal final class InMemoryStorage {
 
     /// The schema entities are validated against.
     public let model: Model
 
-    private var objects = [EntityName: [ObjectID: ModelData]]()
+    /// The mutable state, only reachable through ``withState(_:)``.
+    private struct State {
 
-    private var functions = [String: DatabaseFunction]()
+        var objects = [EntityName: [ObjectID: ModelData]]()
 
-    #if !hasFeature(Embedded)
-    private let lock = NSLock()
+        var functions = [String: DatabaseFunction]()
+    }
+
+    #if hasFeature(Embedded)
+    private var state = State()
+    #else
+    private let state = Mutex(State())
     #endif
 
     public init(model: Model) {
         self.model = model
     }
 
-    private func withLock<T, E>(_ body: () throws(E) -> T) throws(E) -> T where E: Error {
-        #if !hasFeature(Embedded)
-        lock.lock()
-        defer { lock.unlock() }
+    private func withState<T, E>(_ body: (inout State) throws(E) -> T) throws(E) -> T where E: Error {
+        #if hasFeature(Embedded)
+        return try body(&state)
+        #else
+        return try state.withLock { (state) throws(E) in
+            try body(&state)
+        }
         #endif
-        return try body()
     }
 
     public func fetch(_ entity: EntityName, for id: ObjectID) throws(CoreModelError) -> ModelData? {
-        try withLock { () throws(CoreModelError) in
+        try withState { (state) throws(CoreModelError) in
             try validate(entity)
-            return objects[entity]?[id].map { normalized(entity: entity, $0) }
+            return state.objects[entity]?[id].map { normalized(entity: entity, $0, objects: state.objects) }
         }
     }
 
     public func fetch(_ fetchRequest: FetchRequest) throws(CoreModelError) -> [ModelData] {
-        try withLock { () throws(CoreModelError) in
+        try withState { (state) throws(CoreModelError) in
             try validate(fetchRequest.entity)
-            let values = (objects[fetchRequest.entity].map { Array($0.values) } ?? [])
-                .map { normalized(entity: fetchRequest.entity, $0) }
-            return fetchRequest.evaluate(values, functions: functions)
+            let values = (state.objects[fetchRequest.entity].map { Array($0.values) } ?? [])
+                .map { normalized(entity: fetchRequest.entity, $0, objects: state.objects) }
+            return fetchRequest.evaluate(values, functions: state.functions)
         }
     }
 
@@ -85,7 +98,11 @@ public final class InMemoryStorage {
     /// assigned — previously decoded as `keyNotFound` instead of the collection it actually
     /// has. To-one relationships are left alone: an absent required reference is a real data
     /// problem, not a default.
-    private func normalized(entity: EntityName, _ value: ModelData) -> ModelData {
+    private func normalized(
+        entity: EntityName,
+        _ value: ModelData,
+        objects: [EntityName: [ObjectID: ModelData]]
+    ) -> ModelData {
         guard let description = model[entity] else { return value }
         var value = value
         for attribute in description.attributes where value.attributes[attribute.id] == nil {
@@ -139,7 +156,7 @@ public final class InMemoryStorage {
     }
 
     public func insert(_ value: ModelData) throws(CoreModelError) {
-        try withLock { () throws(CoreModelError) in
+        try withState { (state) throws(CoreModelError) in
             try validate(value.entity)
             // A key present in `value` overrides; a key the existing row already had that
             // `value` doesn't mention is preserved — the same "only touch the columns you
@@ -148,7 +165,7 @@ public final class InMemoryStorage {
             // touch every relationship (e.g. a site catalog refresh that never re-states
             // `parkingReservations`, which is written by an entirely separate sync) would
             // silently wipe those links instead of leaving them alone.
-            if var existing = objects[value.entity]?[value.id] {
+            if var existing = state.objects[value.entity]?[value.id] {
                 // - Note: Explicit loops rather than `Dictionary.merge(_:uniquingKeysWith:)` —
                 //   the closure-based overload does dynamic casting internally, which is
                 //   disallowed under Embedded Swift.
@@ -158,9 +175,9 @@ public final class InMemoryStorage {
                 for (key, relationship) in value.relationships {
                     existing.relationships[key] = relationship
                 }
-                objects[value.entity, default: [:]][value.id] = existing
+                state.objects[value.entity, default: [:]][value.id] = existing
             } else {
-                objects[value.entity, default: [:]][value.id] = value
+                state.objects[value.entity, default: [:]][value.id] = value
             }
         }
     }
@@ -172,24 +189,24 @@ public final class InMemoryStorage {
     }
 
     public func delete(_ entity: EntityName, for id: ObjectID) throws(CoreModelError) {
-        try withLock { () throws(CoreModelError) in
+        try withState { (state) throws(CoreModelError) in
             try validate(entity)
-            objects[entity]?[id] = nil
+            state.objects[entity]?[id] = nil
         }
     }
 
     public func delete(_ entity: EntityName, for ids: [ObjectID]) throws(CoreModelError) {
-        try withLock { () throws(CoreModelError) in
+        try withState { (state) throws(CoreModelError) in
             try validate(entity)
             for id in ids {
-                objects[entity]?[id] = nil
+                state.objects[entity]?[id] = nil
             }
         }
     }
 
     public func register(function: DatabaseFunction) {
-        withLock {
-            functions[function.name] = function
+        withState { state in
+            state.functions[function.name] = function
         }
     }
 
@@ -200,6 +217,14 @@ public final class InMemoryStorage {
     }
 }
 
-// - Note: Safe because every access is serialized through `withLock` (non-Embedded)
-//   or confined to the owning actor (Embedded).
+#if hasFeature(Embedded)
+// - Note: Safe because the backing is confined to the owning actor, or to the
+//   single-threaded main loop on targets without a concurrency runtime.
+@available(macOS 15, iOS 18, tvOS 18, watchOS 11, visionOS 2, *)
 extension InMemoryStorage: @unchecked Sendable {}
+#else
+// - Note: Checked: `model` is an immutable `Sendable` value and every piece of
+//   mutable state lives inside the `Mutex`.
+@available(macOS 15, iOS 18, tvOS 18, watchOS 11, visionOS 2, *)
+extension InMemoryStorage: Sendable {}
+#endif

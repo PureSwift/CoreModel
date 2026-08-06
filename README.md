@@ -8,6 +8,12 @@
 
 Swift Object Graph
 
+## Requirements
+
+Swift 6.0 or later, macOS 10.15, iOS 13, tvOS 13, and watchOS 6.
+
+`InMemoryStorage`, `InMemoryModelStorage`, and `InMemoryViewContext` are the exception: they serialize access to their shared backing with `Synchronization.Mutex`, which is not back-deployed, so on Apple platforms they require macOS 15, iOS 18, tvOS 18, watchOS 11, or visionOS 2. Everything else in `CoreModel` — the schema types, predicates, and the `ModelStorage`/`ViewContext` protocols — is available at the package's own deployment targets, as are third-party backends such as SQLite and MongoDB. Linux, Windows, Android, and WebAssembly have no such restriction.
+
 ## Backends
 
 - CoreData
