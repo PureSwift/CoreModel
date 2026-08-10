@@ -22,10 +22,6 @@
 ///
 /// Useful for SwiftUI previews, unit tests, and lightweight main-thread caches
 /// where the `async` ``InMemoryModelStorage`` would be inconvenient.
-///
-/// - Note: Inherits ``InMemoryStorage``'s Apple-platform availability, which is
-///   gated on `Synchronization.Mutex`.
-@available(macOS 15, iOS 18, tvOS 18, watchOS 11, visionOS 2, *)
 @MainActor
 public final class InMemoryViewContext {
 
@@ -94,7 +90,6 @@ public final class InMemoryViewContext {
 
 // MARK: - ViewContext
 
-@available(macOS 15, iOS 18, tvOS 18, watchOS 11, visionOS 2, *)
 extension InMemoryViewContext: ViewContext {}
 
 #endif

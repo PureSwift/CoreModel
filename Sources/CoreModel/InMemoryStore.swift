@@ -22,10 +22,6 @@
 ///
 /// On platforms that support it, ``viewContext`` returns a synchronous,
 /// main-actor ``InMemoryViewContext`` backed by the same data.
-///
-/// - Note: Inherits ``InMemoryStorage``'s Apple-platform availability, which is
-///   gated on `Synchronization.Mutex`.
-@available(macOS 15, iOS 18, tvOS 18, watchOS 11, visionOS 2, *)
 public actor InMemoryModelStorage {
 
     internal let backing: InMemoryStorage
@@ -94,7 +90,6 @@ public actor InMemoryModelStorage {
 // MARK: - ViewContext
 
 #if !hasFeature(Embedded)
-@available(macOS 15, iOS 18, tvOS 18, watchOS 11, visionOS 2, *)
 public extension InMemoryModelStorage {
 
     /// A synchronous, main-actor view context backed by the same data as this store.
@@ -121,7 +116,6 @@ public extension InMemoryModelStorage {
 //   `CoreModelError` to `any Error` is disallowed (`#EmbeddedRestrictions`).
 //   Embedded consumers call the store's methods directly; they provide the
 //   same API with typed throws.
-@available(macOS 15, iOS 18, tvOS 18, watchOS 11, visionOS 2, *)
 extension InMemoryModelStorage: ModelStorage {}
 #endif
 
