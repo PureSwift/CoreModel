@@ -6,10 +6,6 @@
 //  Copyright © 2026 PureSwift. All rights reserved.
 //
 
-#if !hasFeature(Embedded)
-import Synchronization
-#endif
-
 /// Shared in-memory backing store.
 ///
 /// Holds the objects and registered functions for an ``InMemoryModelStorage`` and,
@@ -17,18 +13,14 @@ import Synchronization
 /// reference type, a store and a view context that share the same instance observe
 /// the exact same data.
 ///
-/// The type is thread-safe: the mutable state lives inside a `Mutex`, so the
-/// actor-isolated ``InMemoryModelStorage`` and the main-actor ``InMemoryViewContext``
-/// can operate on the same instance concurrently. Under Embedded Swift the mutex is
-/// elided: with a concurrency runtime the backing is only ever touched from within its
+/// The type is thread-safe: the mutable state lives behind a ``Locked`` (a `Mutex`
+/// where the runtime has one, `NSLock` on older Darwin), so the sendable
+/// ``InMemoryModelStorage`` and the main-actor ``InMemoryViewContext`` can operate
+/// on the same instance concurrently. Under Embedded Swift the lock is elided:
+/// with a concurrency runtime the backing is only ever touched from within its
 /// owning actor, and without one (e.g. bare-metal ARM, where ``ModelStorage``
 /// itself is unavailable) this synchronous store is the storage API, used
 /// directly from the single-threaded main loop.
-///
-/// - Note: On Apple platforms this type is gated on the availability of
-///   `Synchronization.Mutex`, which is not back-deployed. The rest of `CoreModel`
-///   keeps the package's lower deployment targets.
-@available(macOS 15, iOS 18, tvOS 18, watchOS 11, visionOS 2, *)
 internal final class InMemoryStorage {
 
     /// The schema entities are validated against.
@@ -45,7 +37,7 @@ internal final class InMemoryStorage {
     #if hasFeature(Embedded)
     private var state = State()
     #else
-    private let state = Mutex(State())
+    private let state = Locked(State())
     #endif
 
     public init(model: Model) {
@@ -56,7 +48,7 @@ internal final class InMemoryStorage {
         #if hasFeature(Embedded)
         return try body(&state)
         #else
-        return try state.withLock { (state) throws(E) in
+        return try state.withValue { (state) throws(E) in
             try body(&state)
         }
         #endif
@@ -220,11 +212,9 @@ internal final class InMemoryStorage {
 #if hasFeature(Embedded)
 // - Note: Safe because the backing is confined to the owning actor, or to the
 //   single-threaded main loop on targets without a concurrency runtime.
-@available(macOS 15, iOS 18, tvOS 18, watchOS 11, visionOS 2, *)
 extension InMemoryStorage: @unchecked Sendable {}
 #else
 // - Note: Checked: `model` is an immutable `Sendable` value and every piece of
-//   mutable state lives inside the `Mutex`.
-@available(macOS 15, iOS 18, tvOS 18, watchOS 11, visionOS 2, *)
+//   mutable state lives inside the ``Locked``.
 extension InMemoryStorage: Sendable {}
 #endif

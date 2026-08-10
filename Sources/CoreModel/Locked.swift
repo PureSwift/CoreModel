@@ -1,10 +1,15 @@
 //
-//  InMemoryStore.swift
+//  Locked.swift
 //  CoreModel
 //
 //  Created by Alsey Coleman Miller on 7/21/26.
 //  Copyright © 2026 PureSwift. All rights reserved.
 //
+
+// - Note: Unavailable under Embedded Swift — the types that would use it there
+//   (``InMemoryStorage``) elide the lock entirely, since state is confined to the
+//   owning actor or the single-threaded main loop.
+#if !hasFeature(Embedded)
 
 #if canImport(Darwin)
 import Foundation
@@ -13,9 +18,9 @@ import Synchronization
 
 /// Mutable state behind a lock.
 ///
-/// The capability protocols are `Sendable`, so the mocks that implement them have to
-/// be too — but a recording mock is mutable by definition. This is the smallest thing
-/// that reconciles the two without pulling in a dependency.
+/// Lets a class expose `Sendable` thread-safe access to mutable state without
+/// raising the package's deployment targets to where `Synchronization.Mutex`
+/// became available.
 ///
 /// Backed by `Mutex` wherever the runtime has it (non-Darwin, and Darwin at or above
 /// iOS 18 / macOS 15), falling back to `NSLock` on the older Darwin releases this
@@ -114,4 +119,6 @@ private final class NSLockStorage<Value>: @unchecked Sendable {
         return try body(&value)
     }
 }
+#endif
+
 #endif
