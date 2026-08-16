@@ -81,6 +81,48 @@ internal extension PredicateValue {
         return value
     }
 
+    /// Resolve a key path against an object, descending through composite attribute values.
+    ///
+    /// The first component names a property of the object itself, and each further
+    /// component names an element of the composite value the previous one resolved to.
+    /// Traversal stays inside attributes: a relationship can only be the *last*
+    /// component, since resolving one would need the objects it points at.
+    ///
+    /// A property whose name literally contains a dot is matched before the path is
+    /// traversed, so every model that predates composite attributes resolves as before.
+    ///
+    /// - Returns: `nil` for an empty key path, for `.index`/`.operator` components,
+    /// and for any name that doesn't resolve.
+    init?(data: ModelData, keyPath: PredicateKeyPath) {
+        guard case let .property(name)? = keyPath.keys.first else {
+            return nil
+        }
+        let literal = PropertyKey(rawValue: keyPath.rawValue)
+        if let attribute = data.attributes[literal] {
+            self = .attribute(attribute)
+            return
+        }
+        if let relationship = data.relationships[literal] {
+            self = .relationship(relationship)
+            return
+        }
+        guard keyPath.keys.count > 1 else {
+            return nil
+        }
+        guard var current = data.attributes[PropertyKey(rawValue: name)] else {
+            return nil
+        }
+        for key in keyPath.keys.dropFirst() {
+            guard case let .property(name) = key,
+                case let .composite(elements) = current,
+                let next = elements[PropertyKey(rawValue: name)] else {
+                return nil
+            }
+            current = next
+        }
+        self = .attribute(current)
+    }
+
     /// An object identifier this value can represent, for relationship comparisons.
     var objectIDValue: ObjectID? {
         switch self {
@@ -93,6 +135,24 @@ internal extension PredicateValue {
         default:
             return nil
         }
+    }
+}
+
+// MARK: - Property Resolution
+
+internal extension ModelData {
+
+    /// The attribute value a property name addresses, which may be a dotted path into a
+    /// composite attribute (e.g. `location.latitude`).
+    ///
+    /// A direct lookup wins, so an attribute whose name literally contains a dot still
+    /// resolves as it did before composite attributes existed.
+    func attributeValue(for property: PropertyKey) -> AttributeValue? {
+        // fast path for the overwhelmingly common single-component name
+        if let value = attributes[property] {
+            return value
+        }
+        return PredicateValue(data: self, keyPath: PredicateKeyPath(rawValue: property.rawValue))?.attributeValue
     }
 }
 
@@ -111,14 +171,7 @@ internal extension FetchRequest.Predicate.Expression {
         case let .relationship(value):
             return .relationship(value)
         case let .keyPath(keyPath):
-            let key = PropertyKey(rawValue: keyPath.rawValue)
-            if let attribute = data.attributes[key] {
-                return .attribute(attribute)
-            }
-            if let relationship = data.relationships[key] {
-                return .relationship(relationship)
-            }
-            return nil
+            return PredicateValue(data: data, keyPath: keyPath)
         case let .function(function):
             guard let registered = functions[function.name] else {
                 return nil
