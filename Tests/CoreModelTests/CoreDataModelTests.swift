@@ -174,6 +174,33 @@ import Testing
     }
 
     @available(macOS 14.0, iOS 17.0, tvOS 17.0, watchOS 10.0, *)
+    @Test func integerDivisionMatchesCoreData() throws {
+
+        // `divide:by:` truncates for integer operands, so CoreModel's in-memory
+        // evaluator has to agree with CoreData rather than divide as floating-point
+        let context = try Self.makeContext()
+        try context.insert(Person(name: "Seven", age: 7).encode())
+
+        // age / 2 == 3 holds under integer division, not under floating-point
+        let predicate = FetchRequest.Predicate.Expression
+            .arithmetic(.init(function: .divide, left: .keyPath("age"), right: .attribute(.int64(2))))
+            .compare(.equalTo, .attribute(.int64(3)))
+        let request = FetchRequest(entity: Person.entityName, predicate: predicate)
+        let coreData = try context.fetch(request)
+        #expect(coreData.map { $0.attributes["name"] } == [.string("Seven")])
+
+        let objects = try context.fetch(FetchRequest(entity: Person.entityName))
+        #expect(objects.filtered(by: predicate).map { $0.attributes["name"] } == [.string("Seven")])
+
+        // and the floating-point quotient matches neither engine
+        let floating = FetchRequest.Predicate.Expression
+            .arithmetic(.init(function: .divide, left: .keyPath("age"), right: .attribute(.int64(2))))
+            .compare(.equalTo, .attribute(.double(3.5)))
+        #expect(try context.fetch(FetchRequest(entity: Person.entityName, predicate: floating)).isEmpty)
+        #expect(objects.filtered(by: floating).isEmpty)
+    }
+
+    @available(macOS 14.0, iOS 17.0, tvOS 17.0, watchOS 10.0, *)
     @Test func modifierPredicateFetch() throws {
 
         let context = try Self.makeContext()
