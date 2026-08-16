@@ -182,7 +182,8 @@ import Testing
         try context.insert([wwdc.encode(), other.encode()])
         try context.insert([
             Person(name: "Alice", age: 30, events: [wwdc.id, other.id]).encode(),
-            Person(name: "Bob", age: 17, events: [other.id]).encode()
+            Person(name: "Bob", age: 17, events: [other.id]).encode(),
+            Person(name: "Carol", age: 25, events: []).encode()
         ])
 
         // CoreModel API: ANY events.name == "WWDC"
@@ -194,16 +195,27 @@ import Testing
         let anyConverted = try FetchRequest.Predicate(#Predicate<PersonRecord> { $0.events.contains { $0.name == "WWDC" } })
         #expect(anyConverted == anyDirect)
 
-        // CoreModel API: ALL events.name == "Other"
+        // CoreModel API: ALL events.name == "Other".
+        // Carol has no events, so the comparison holds vacuously — the same semantics
+        // CoreModel's in-memory evaluator implements, verified here against CoreData itself.
         let allDirect = "events.name".compare(.all, .equalTo, [], .attribute(.string("Other")))
-        let allResults = try context.fetch(FetchRequest(entity: Person.entityName, predicate: allDirect))
-        #expect(allResults.map { $0.attributes["name"] } == [.string("Bob")])
+        let allRequest = FetchRequest(entity: Person.entityName, sortDescriptors: [.init(property: "name")], predicate: allDirect)
+        let allResults = try context.fetch(allRequest)
+        #expect(allResults.map { $0.attributes["name"] } == [.string("Bob"), .string("Carol")])
 
         // Foundation.Predicate: allSatisfy converts to the same ALL comparison
         let allConverted = try FetchRequest.Predicate(#Predicate<PersonRecord> { $0.events.allSatisfy { $0.name == "Other" } })
         #expect(allConverted == allDirect)
-        let allConvertedResults = try context.fetch(FetchRequest(entity: Person.entityName, predicate: allConverted))
-        #expect(allConvertedResults.map { $0.attributes["name"] } == [.string("Bob")])
+        let allConvertedResults = try context.fetch(
+            FetchRequest(entity: Person.entityName, sortDescriptors: [.init(property: "name")], predicate: allConverted)
+        )
+        #expect(allConvertedResults.map { $0.attributes["name"] } == [.string("Bob"), .string("Carol")])
+
+        // the in-memory evaluator agrees with CoreData on the same objects
+        let objects = try context.fetch(FetchRequest(entity: Person.entityName))
+            + context.fetch(FetchRequest(entity: Event.entityName))
+        let inMemory = allRequest.evaluate(objects)
+        #expect(inMemory.map { $0.attributes["name"] } == [.string("Bob"), .string("Carol")])
     }
 
     @Test func nullRelationshipInsert() throws {
