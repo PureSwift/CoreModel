@@ -123,6 +123,18 @@ import Testing
         #expect(Attribute(id: "name", type: .string).type.isComposite == false)
     }
 
+    @Test func entityDescriptionPropertyLookup() {
+        let entity = EntityDescription(entity: Campground.self)
+        #expect(entity[attribute: "name"]?.type == .string)
+        #expect(entity[attribute: "location"]?.type == Campground.LocationCoordinates.attributeType)
+        // an attribute subscript never returns a relationship, and vice versa
+        #expect(entity[attribute: "units"] == nil)
+        #expect(entity[relationship: "units"]?.destinationEntity == "RentalUnit")
+        #expect(entity[relationship: "name"] == nil)
+        #expect(entity[attribute: "missing"] == nil)
+        #expect(entity[relationship: "missing"] == nil)
+    }
+
     @Test func entityDescriptionKeyPathResolution() {
         let entity = EntityDescription(entity: Campground.self)
         #expect(entity.attribute(for: "location")?.type == Campground.LocationCoordinates.attributeType)
