@@ -22,7 +22,7 @@ import Testing
 
     static func makeContext() throws -> NSManagedObjectContext {
         let model = Model(entities: Person.self, Event.self)
-        let coordinator = NSPersistentStoreCoordinator(managedObjectModel: NSManagedObjectModel(model: model))
+        let coordinator = NSPersistentStoreCoordinator(managedObjectModel: try NSManagedObjectModel(model: model))
         try coordinator.addPersistentStore(ofType: NSInMemoryStoreType, configurationName: nil, at: nil, options: nil)
         let context = NSManagedObjectContext(concurrencyType: .mainQueueConcurrencyType)
         context.persistentStoreCoordinator = coordinator
@@ -183,7 +183,7 @@ import Testing
         let model = Model(entities: Person.self, Event.self)
         let container = NSPersistentContainer(
             name: "Test\(UUID())",
-            managedObjectModel: NSManagedObjectModel(model: model)
+            managedObjectModel: try NSManagedObjectModel(model: model)
         )
         try container.syncLoadPersistentStores()
         let person = Person(name: "Alice", age: 30)
@@ -206,8 +206,8 @@ import Testing
             url: URL(fileURLWithPath: "/nonexistent-\(UUID())/store.sqlite")
         )
         description.type = NSSQLiteStoreType
-        let storage = PersistentStorageTests.makeStorage(model: Model(entities: Person.self, Event.self))
-        let failing = PersistentContainerStorage(
+        let storage = try PersistentStorageTests.makeStorage(model: Model(entities: Person.self, Event.self))
+        let failing = try PersistentContainerStorage(
             name: "Failing\(UUID())",
             model: Model(entities: Person.self, Event.self),
             storeDescriptions: [description]
@@ -231,7 +231,7 @@ import Testing
             url: URL(fileURLWithPath: "/nonexistent-\(UUID())/store.sqlite")
         )
         description.type = NSSQLiteStoreType
-        let failing = PersistentContainerStorage(
+        let failing = try PersistentContainerStorage(
             name: "Failing\(UUID())",
             model: Model(entities: Person.self, Event.self),
             storeDescriptions: [description]
