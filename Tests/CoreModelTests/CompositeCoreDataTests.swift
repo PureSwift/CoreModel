@@ -86,6 +86,58 @@ import Testing
         #expect(AttributeType(attribute: location) == Campground.LocationCoordinates.attributeType)
     }
 
+    // MARK: - Errors
+
+    @Test func modelErrorDescriptions() {
+        let errors: [CoreDataModelError] = [
+            .compositeAttributesUnavailable("Campground", "location"),
+            .emptyCompositeAttribute("empty"),
+            .invalidCompositeValue("location")
+        ]
+        #expect(CoreDataModelError.errorDomain == "org.pureswift.CoreDataModel.CoreDataModelError")
+        // each case has a distinct code
+        #expect(Set(errors.map(\.errorCode)) == [1, 2, 3])
+        for error in errors {
+            #expect(error.description.isEmpty == false)
+            #expect(error.errorUserInfo[NSLocalizedDescriptionKey] as? String == error.description)
+            // and bridges to NSError with that domain and code
+            let nsError = error as NSError
+            #expect(nsError.domain == CoreDataModelError.errorDomain)
+            #expect(nsError.code == error.errorCode)
+            #expect(nsError.localizedDescription == error.description)
+        }
+    }
+
+    /// A CoreData type with no CoreModel equivalent has no attribute type.
+    @Test func attributeTypeFromUnsupportedDescription() {
+        let transformable = NSAttributeDescription()
+        transformable.name = "value"
+        transformable.attributeType = .transformableAttributeType
+        #expect(AttributeType(attribute: transformable) == nil)
+    }
+
+    /// A description marked composite that isn't the composite subclass carries no
+    /// elements, so it cannot produce an attribute type.
+    @Test func attributeTypeFromMalformedComposite() {
+        let malformed = NSAttributeDescription()
+        malformed.name = "value"
+        malformed.attributeType = .composite
+        #expect(AttributeType(attribute: malformed) == nil)
+    }
+
+    /// A composite is only as convertible as its least convertible element.
+    @available(macOS 14, iOS 17, watchOS 10, tvOS 17, *)
+    @Test func attributeTypeFromCompositeWithUnsupportedElement() throws {
+        let element = NSAttributeDescription()
+        element.name = "value"
+        element.attributeType = .transformableAttributeType
+        let composite = NSCompositeAttributeDescription()
+        composite.name = "broken"
+        composite.attributeType = .composite
+        composite.elements = [element]
+        #expect(AttributeType(attribute: composite) == nil)
+    }
+
     // MARK: - Value marshalling
 
     @Test func compositeToFoundation() throws {
