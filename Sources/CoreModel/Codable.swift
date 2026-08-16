@@ -6,3 +6,5 @@
 //
 
 public typealias AttributeCodable = AttributeEncodable & AttributeDecodable
+
+public typealias CompositeAttributeCodable = CompositeAttributeEncodable & CompositeAttributeDecodable
