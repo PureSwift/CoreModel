@@ -17,6 +17,9 @@ enum MacroError: Error {
     
     /// Unknown inverse relationship
     case unknownInverseRelationship(for: String)
+
+    /// `@CompositeAttribute` was supplied arguments, or applied to a collection type.
+    case invalidCompositeAttribute(for: String)
 }
 
 #if canImport(Darwin)
@@ -30,6 +33,8 @@ extension MacroError: LocalizedError {
             return String(format: NSLocalizedString("Unknown attribute type: %@", comment: "Unknown attribute type error"), type)
         case .unknownInverseRelationship(let relationship):
             return String(format: NSLocalizedString("Unknown inverse relationship for: %@", comment: "Unknown inverse relationship error"), relationship)
+        case .invalidCompositeAttribute(let property):
+            return String(format: NSLocalizedString("Invalid composite attribute: %@. @CompositeAttribute takes no arguments and requires a type conforming to CompositeAttribute.", comment: "Invalid composite attribute error"), property)
         }
     }
 }
