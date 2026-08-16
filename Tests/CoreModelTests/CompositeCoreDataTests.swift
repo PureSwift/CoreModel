@@ -17,7 +17,7 @@ import Testing
 ///
 /// - Note: CoreData supports composite attributes only in SQLite-backed stores, so
 /// every store here is built with an explicit `NSSQLiteStoreType` description.
-@Suite struct CompositeCoreDataTests {
+@Suite(.serialized) struct CompositeCoreDataTests {
 
     // MARK: - Schema
 
