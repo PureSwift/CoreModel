@@ -15,45 +15,6 @@ import Testing
         case value
     }
 
-    /// A composite whose elements include another composite.
-    struct Address: CompositeAttributeCodable, Equatable, Hashable {
-
-        var street: String
-        var location: Campground.LocationCoordinates
-
-        enum CodingKeys: String, CodingKey {
-            case street
-            case location
-        }
-
-        static var attributeElements: [Attribute] {
-            [
-                Attribute(id: PropertyKey(CodingKeys.street), type: .string),
-                Attribute(id: PropertyKey(CodingKeys.location), composite: Campground.LocationCoordinates.self)
-            ]
-        }
-
-        var compositeValue: [PropertyKey: AttributeValue] {
-            var value = [PropertyKey: AttributeValue]()
-            value.encode(street, forKey: CodingKeys.street)
-            value.encode(location, forKey: CodingKeys.location)
-            return value
-        }
-
-        init(street: String, location: Campground.LocationCoordinates) {
-            self.street = street
-            self.location = location
-        }
-
-        init?(compositeValue: [PropertyKey: AttributeValue]) {
-            guard let street = compositeValue.decode(String.self, forKey: CodingKeys.street),
-                let location = compositeValue.decode(Campground.LocationCoordinates.self, forKey: CodingKeys.location) else {
-                return nil
-            }
-            self.init(street: street, location: location)
-        }
-    }
-
     static let coordinates = Campground.LocationCoordinates(latitude: 34.51446212994721, longitude: -89.15318142250365)
 
     static var coordinatesValue: AttributeValue {
@@ -106,9 +67,10 @@ import Testing
     }
 
     @Test func nestedComposite() {
-        let address = Address(street: "1 Main", location: Self.coordinates)
+        let address = Address(street: "1 Main", city: "Springfield", location: Self.coordinates)
         let expected = AttributeValue.composite([
             "street": .string("1 Main"),
+            "city": .string("Springfield"),
             "location": Self.coordinatesValue
         ])
         #expect(address.attributeValue == expected)
@@ -116,6 +78,7 @@ import Testing
         // the element list nests too
         #expect(Address.attributeType == .composite([
             Attribute(id: "street", type: .string),
+            Attribute(id: "city", type: .string),
             Attribute(id: "location", type: Campground.LocationCoordinates.attributeType)
         ]))
     }
@@ -208,6 +171,7 @@ import Testing
         let partial = AttributeValue.composite(["street": .string("1 Main")])
         #expect(partial.normalized(for: Address.attributeElements) == .composite([
             "street": .string("1 Main"),
+            "city": .null,
             "location": .null
         ]))
         // a present-but-partial nested composite is filled in one level down
@@ -217,6 +181,7 @@ import Testing
         ])
         #expect(nested.normalized(for: Address.attributeElements) == .composite([
             "street": .string("1 Main"),
+            "city": .null,
             "location": .composite(["latitude": .double(1), "longitude": .null])
         ]))
     }
