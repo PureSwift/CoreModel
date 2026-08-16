@@ -17,7 +17,7 @@ jobs:
     - name: Build
       run: ${{ matrix.options }} swift build -c ${{ matrix.config }}
     - name: Test
-      run: ${{ matrix.options }} swift test -c ${{ matrix.config }}
+      run: ${{ matrix.options }} swift test -c ${{ matrix.config }} --no-parallel
 
   coverage:
     name: Code Coverage
@@ -74,7 +74,7 @@ jobs:
     - name: Build
       run: ${{ matrix.options }} swift build -c ${{ matrix.config }}
     - name: Test
-      run: ${{ matrix.options }} swift test -c ${{ matrix.config }}
+      run: ${{ matrix.options }} swift test -c ${{ matrix.config }} --no-parallel
 
   skip-fuse:
       name: Skip Fuse (Android)
