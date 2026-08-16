@@ -71,6 +71,8 @@ internal extension FetchRequest.Predicate.Expression {
             return true
         case .attribute, .relationship, .keyPath:
             return false
+        case let .arithmetic(arithmetic):
+            return arithmetic.left.containsFunction || arithmetic.right.containsFunction
         }
     }
 }
