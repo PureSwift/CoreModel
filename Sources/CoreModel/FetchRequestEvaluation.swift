@@ -56,8 +56,15 @@ public extension Array where Element == ModelData {
     }
 
     /// Index these objects by identifier, for resolving key paths that traverse a relationship.
+    ///
+    /// - Note: Built by hand rather than with `Dictionary.init(_:uniquingKeysWith:)`,
+    ///   which relies on dynamic casting and is unavailable under Embedded Swift.
     internal func index() -> [ObjectID: ModelData] {
-        Dictionary(map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+        var index = [ObjectID: ModelData](minimumCapacity: count)
+        for object in self where index[object.id] == nil {
+            index[object.id] = object
+        }
+        return index
     }
 
     /// Sort in memory by the given descriptors, resolving function terms with the
