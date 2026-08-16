@@ -15,6 +15,7 @@ struct Plugins: CompilerPlugin {
     let providingMacros: [Macro.Type] = [
         EntityMacro.self,
         RelationshipMacro.self,
-        AttributeMacro.self
+        AttributeMacro.self,
+        CompositeAttributeMacro.self
     ]
 }
