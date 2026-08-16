@@ -26,6 +26,9 @@ public extension FetchRequest.Predicate {
     /// - Parameters:
     ///   - data: The object instance to evaluate the predicate against.
     ///   - functions: Custom functions (keyed by name) that `.function` expressions can invoke.
+    ///   - objects: Related objects (keyed by identifier) that key paths traversing a
+    ///   relationship are resolved against, e.g. `events.name` with an `ALL`/`ANY` modifier.
+    ///   Key paths that traverse a relationship absent from this index evaluate to `false`.
     /// - Returns: Whether the object satisfies the predicate.
     ///
     /// - Note: The `.matches` operator requires regular expression support and always
@@ -34,7 +37,8 @@ public extension FetchRequest.Predicate {
     ///   and always evaluates to `false`.
     func evaluate(
         with data: ModelData,
-        functions: [String: DatabaseFunction] = [:]
+        functions: [String: DatabaseFunction] = [:],
+        objects: [ObjectID: ModelData] = [:]
     ) -> Bool {
         switch self {
         case let .value(value):
@@ -42,25 +46,28 @@ public extension FetchRequest.Predicate {
         case let .compound(compound):
             switch compound {
             case let .and(subpredicates):
-                return subpredicates.allSatisfy { $0.evaluate(with: data, functions: functions) }
+                return subpredicates.allSatisfy { $0.evaluate(with: data, functions: functions, objects: objects) }
             case let .or(subpredicates):
-                return subpredicates.contains { $0.evaluate(with: data, functions: functions) }
+                return subpredicates.contains { $0.evaluate(with: data, functions: functions, objects: objects) }
             case let .not(subpredicate):
-                return subpredicate.evaluate(with: data, functions: functions) == false
+                return subpredicate.evaluate(with: data, functions: functions, objects: objects) == false
             }
         case let .comparison(comparison):
-            return comparison.evaluate(with: data, functions: functions)
+            return comparison.evaluate(with: data, functions: functions, objects: objects)
         }
     }
 }
 
 // MARK: - Supporting Types
 
-/// A resolved predicate expression value — either an attribute or a relationship.
-internal enum PredicateValue: Equatable, Hashable, Sendable {
+/// A resolved predicate expression value — an attribute, a relationship, or the
+/// values gathered by traversing a to-many relationship (e.g. `events.name`),
+/// which only an `ALL`/`ANY` comparison can be applied to.
+internal indirect enum PredicateValue: Equatable, Hashable, Sendable {
 
     case attribute(AttributeValue)
     case relationship(RelationshipValue)
+    case aggregate([PredicateValue])
 }
 
 internal extension PredicateValue {
@@ -79,6 +86,12 @@ internal extension PredicateValue {
     var attributeValue: AttributeValue? {
         guard case let .attribute(value) = self else { return nil }
         return value
+    }
+
+    /// The values traversed through a to-many relationship, if any.
+    var aggregateValues: [PredicateValue]? {
+        guard case let .aggregate(values) = self else { return nil }
+        return values
     }
 
     /// An object identifier this value can represent, for relationship comparisons.
@@ -103,7 +116,8 @@ internal extension FetchRequest.Predicate.Expression {
     /// Resolve this expression to a value for the given object.
     func evaluate(
         with data: ModelData,
-        functions: [String: DatabaseFunction]
+        functions: [String: DatabaseFunction],
+        objects: [ObjectID: ModelData] = [:]
     ) -> PredicateValue? {
         switch self {
         case let .attribute(value):
@@ -118,15 +132,61 @@ internal extension FetchRequest.Predicate.Expression {
             if let relationship = data.relationships[key] {
                 return .relationship(relationship)
             }
-            return nil
+            // a key path like `events.name` traverses a relationship to related objects
+            return keyPath.traverse(data, functions: functions, objects: objects)
         case let .function(function):
             guard let registered = functions[function.name] else {
                 return nil
             }
             let arguments = function.arguments.map {
-                $0.evaluate(with: data, functions: functions)?.attributeValue
+                $0.evaluate(with: data, functions: functions, objects: objects)?.attributeValue
             }
             return registered.evaluate(arguments).map { .attribute($0) }
+        case let .arithmetic(arithmetic):
+            let lhs = arithmetic.left.evaluate(with: data, functions: functions, objects: objects)?.attributeValue
+            let rhs = arithmetic.right.evaluate(with: data, functions: functions, objects: objects)?.attributeValue
+            return AttributeValue.arithmetic(arithmetic.function, lhs, rhs).map { .attribute($0) }
+        }
+    }
+}
+
+// MARK: - Key Path Traversal
+
+internal extension PredicateKeyPath {
+
+    /// Resolve a multi-component key path by following its leading relationship
+    /// into the related objects (e.g. `events.name`).
+    ///
+    /// A to-one relationship resolves to the single related value, a to-many to an
+    /// aggregate of every related value. Returns `nil` when the leading key isn't a
+    /// relationship on this object, and skips related objects missing from the index.
+    func traverse(
+        _ data: ModelData,
+        functions: [String: DatabaseFunction],
+        objects: [ObjectID: ModelData]
+    ) -> PredicateValue? {
+        guard keys.count > 1, case let .property(name) = keys[0] else {
+            return nil
+        }
+        guard let relationship = data.relationships[PropertyKey(rawValue: name)] else {
+            return nil
+        }
+        let remaining = FetchRequest.Predicate.Expression.keyPath(
+            PredicateKeyPath(keys: Array(keys.dropFirst()))
+        )
+        switch relationship {
+        case .null:
+            return nil
+        case let .toOne(objectID):
+            guard let related = objects[objectID] else { return nil }
+            return remaining.evaluate(with: related, functions: functions, objects: objects)
+        case let .toMany(objectIDs):
+            let values = objectIDs.compactMap { objectID in
+                objects[objectID].flatMap {
+                    remaining.evaluate(with: $0, functions: functions, objects: objects)
+                }
+            }
+            return .aggregate(values)
         }
     }
 }
@@ -137,20 +197,29 @@ internal extension FetchRequest.Predicate.Comparison {
 
     func evaluate(
         with data: ModelData,
-        functions: [String: DatabaseFunction]
+        functions: [String: DatabaseFunction],
+        objects: [ObjectID: ModelData] = [:]
     ) -> Bool {
-        let lhs = left.evaluate(with: data, functions: functions)
-        let rhs = right.evaluate(with: data, functions: functions)
+        let lhs = left.evaluate(with: data, functions: functions, objects: objects)
+        let rhs = right.evaluate(with: data, functions: functions, objects: objects)
         // aggregate modifiers apply the comparison to each element of a to-many relationship
-        if let modifier, case let .relationship(.toMany(objectIDs)) = lhs {
-            switch modifier {
-            case .any:
-                return objectIDs.contains {
-                    type.evaluate(.relationship(.toOne($0)), rhs, options: options)
-                }
-            case .all:
-                return objectIDs.allSatisfy {
-                    type.evaluate(.relationship(.toOne($0)), rhs, options: options)
+        if let modifier {
+            let elements: [PredicateValue]?
+            switch lhs {
+            case let .relationship(.toMany(objectIDs)):
+                elements = objectIDs.map { .relationship(.toOne($0)) }
+            case let .aggregate(values):
+                // values traversed through a to-many relationship, e.g. `events.name`
+                elements = values
+            default:
+                elements = nil
+            }
+            if let elements {
+                switch modifier {
+                case .any:
+                    return elements.contains { type.evaluate($0, rhs, options: options) }
+                case .all:
+                    return elements.allSatisfy { type.evaluate($0, rhs, options: options) }
                 }
             }
         }
@@ -275,6 +344,56 @@ internal extension AttributeValue {
     var stringValue: String? {
         if case let .string(value) = self { return value }
         return nil
+    }
+
+    /// An integer representation for integer value types, for integer arithmetic.
+    var integerValue: Int64? {
+        switch self {
+        case let .int16(value):     return Int64(value)
+        case let .int32(value):     return Int64(value)
+        case let .int64(value):     return value
+        default:                    return nil
+        }
+    }
+
+    /// Apply an arithmetic function to two values.
+    ///
+    /// Integer operands stay in integer arithmetic, so division truncates the way
+    /// Swift's `/` and `NSExpression`'s `divide:by:` both do (`7 / 2` is `3`, not `3.5`);
+    /// mixed or floating-point operands are computed as `Double`.
+    /// Returns `nil` for non-numeric operands, division or remainder by zero,
+    /// an overflowing division, or a floating-point remainder.
+    static func arithmetic(
+        _ function: FetchRequest.Predicate.ArithmeticExpression.Function,
+        _ lhs: AttributeValue?,
+        _ rhs: AttributeValue?
+    ) -> AttributeValue? {
+        guard let lhs, let rhs else { return nil }
+        if let leftInteger = lhs.integerValue, let rightInteger = rhs.integerValue {
+            switch function {
+            case .add:      return .int64(leftInteger &+ rightInteger)
+            case .subtract: return .int64(leftInteger &- rightInteger)
+            case .multiply: return .int64(leftInteger &* rightInteger)
+            case .divide:
+                guard rightInteger != 0 else { return nil }
+                let (quotient, overflow) = leftInteger.dividedReportingOverflow(by: rightInteger)
+                return overflow ? nil : .int64(quotient)
+            case .modulus:
+                guard rightInteger != 0 else { return nil }
+                let (remainder, overflow) = leftInteger.remainderReportingOverflow(dividingBy: rightInteger)
+                return overflow ? nil : .int64(remainder)
+            }
+        }
+        guard let leftNumber = lhs.comparableDouble, let rightNumber = rhs.comparableDouble else {
+            return nil
+        }
+        switch function {
+        case .add:      return .double(leftNumber + rightNumber)
+        case .subtract: return .double(leftNumber - rightNumber)
+        case .multiply: return .double(leftNumber * rightNumber)
+        case .divide:   return rightNumber == 0 ? nil : .double(leftNumber / rightNumber)
+        case .modulus:  return nil // integers only
+        }
     }
 
     static func areEqual(_ lhs: AttributeValue?, _ rhs: AttributeValue?, caseInsensitive: Bool) -> Bool {

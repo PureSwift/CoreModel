@@ -29,6 +29,20 @@ import Testing
         return context
     }
 
+    /// Mirrors the `Person` entity for `#Predicate` conversion.
+    struct PersonRecord {
+
+        var name: String
+        var age: Int
+        var events: [EventRecord]
+    }
+
+    /// Mirrors the `Event` entity for `#Predicate` conversion.
+    struct EventRecord {
+
+        var name: String
+    }
+
     @Test func attributeTypeConversion() throws {
         guard #available(macOS 12, iOS 15, watchOS 8, tvOS 15, *) else {
             return
@@ -135,6 +149,121 @@ import Testing
         let results = try context.fetch(paged)
         #expect(results.count == 1)
         #expect(results[0].attributes["name"] == .string("alina"))
+    }
+
+    @available(macOS 14.0, iOS 17.0, tvOS 17.0, watchOS 10.0, *)
+    @Test func arithmeticPredicateFetch() throws {
+
+        let context = try Self.makeContext()
+        try context.insert([
+            Person(name: "Alice", age: 30).encode(),
+            Person(name: "Bob", age: 17).encode()
+        ])
+
+        // CoreModel API: age * 2 >= 40, bridged to NSExpression's multiply:by:
+        let direct = FetchRequest.Predicate.Expression
+            .arithmetic(.init(function: .multiply, left: .keyPath("age"), right: .attribute(.int64(2))))
+            .compare(.greaterThanOrEqualTo, .attribute(.int64(40)))
+        let directResults = try context.fetch(FetchRequest(entity: Person.entityName, predicate: direct))
+        #expect(directResults.map { $0.attributes["name"] } == [.string("Alice")])
+
+        // Foundation.Predicate: age + 1 >= 21
+        let converted = try FetchRequest.Predicate(#Predicate<PersonRecord> { $0.age + 1 >= 21 })
+        let convertedResults = try context.fetch(FetchRequest(entity: Person.entityName, predicate: converted))
+        #expect(convertedResults.map { $0.attributes["name"] } == [.string("Alice")])
+    }
+
+    @available(macOS 14.0, iOS 17.0, tvOS 17.0, watchOS 10.0, *)
+    @Test func integerDivisionMatchesCoreData() throws {
+
+        // `divide:by:` truncates for integer operands, so CoreModel's in-memory
+        // evaluator has to agree with CoreData rather than divide as floating-point
+        let context = try Self.makeContext()
+        try context.insert(Person(name: "Seven", age: 7).encode())
+
+        // age / 2 == 3 holds under integer division, not under floating-point
+        let predicate = FetchRequest.Predicate.Expression
+            .arithmetic(.init(function: .divide, left: .keyPath("age"), right: .attribute(.int64(2))))
+            .compare(.equalTo, .attribute(.int64(3)))
+        let request = FetchRequest(entity: Person.entityName, predicate: predicate)
+        let coreData = try context.fetch(request)
+        #expect(coreData.map { $0.attributes["name"] } == [.string("Seven")])
+
+        let objects = try context.fetch(FetchRequest(entity: Person.entityName))
+        #expect(objects.filtered(by: predicate).map { $0.attributes["name"] } == [.string("Seven")])
+
+        // and the floating-point quotient matches neither engine
+        let floating = FetchRequest.Predicate.Expression
+            .arithmetic(.init(function: .divide, left: .keyPath("age"), right: .attribute(.int64(2))))
+            .compare(.equalTo, .attribute(.double(3.5)))
+        #expect(try context.fetch(FetchRequest(entity: Person.entityName, predicate: floating)).isEmpty)
+        #expect(objects.filtered(by: floating).isEmpty)
+    }
+
+    @available(macOS 14.0, iOS 17.0, tvOS 17.0, watchOS 10.0, *)
+    @Test func modifierPredicateFetch() throws {
+
+        let context = try Self.makeContext()
+        let wwdc = Event(name: "WWDC", date: Date())
+        let other = Event(name: "Other", date: Date())
+        try context.insert([wwdc.encode(), other.encode()])
+        try context.insert([
+            Person(name: "Alice", age: 30, events: [wwdc.id, other.id]).encode(),
+            Person(name: "Bob", age: 17, events: [other.id]).encode(),
+            Person(name: "Carol", age: 25, events: []).encode()
+        ])
+
+        // CoreModel API: ANY events.name == "WWDC"
+        let anyDirect = "events.name".compare(.any, .equalTo, [], .attribute(.string("WWDC")))
+        let anyResults = try context.fetch(FetchRequest(entity: Person.entityName, predicate: anyDirect))
+        #expect(anyResults.map { $0.attributes["name"] } == [.string("Alice")])
+
+        // Foundation.Predicate: contains(where:) converts to the same ANY comparison
+        let anyConverted = try FetchRequest.Predicate(#Predicate<PersonRecord> { $0.events.contains { $0.name == "WWDC" } })
+        #expect(anyConverted == anyDirect)
+
+        // CoreModel API: ALL events.name == "Other".
+        // Carol has no events, so the comparison holds vacuously — the same semantics
+        // CoreModel's in-memory evaluator implements, verified here against CoreData itself.
+        let allDirect = "events.name".compare(.all, .equalTo, [], .attribute(.string("Other")))
+        let allRequest = FetchRequest(entity: Person.entityName, sortDescriptors: [.init(property: "name")], predicate: allDirect)
+        let allResults = try context.fetch(allRequest)
+        #expect(allResults.map { $0.attributes["name"] } == [.string("Bob"), .string("Carol")])
+
+        // Foundation.Predicate: allSatisfy converts to the same ALL comparison
+        let allConverted = try FetchRequest.Predicate(#Predicate<PersonRecord> { $0.events.allSatisfy { $0.name == "Other" } })
+        #expect(allConverted == allDirect)
+        let allConvertedResults = try context.fetch(
+            FetchRequest(entity: Person.entityName, sortDescriptors: [.init(property: "name")], predicate: allConverted)
+        )
+        #expect(allConvertedResults.map { $0.attributes["name"] } == [.string("Bob"), .string("Carol")])
+
+        // the in-memory evaluator agrees with CoreData on the same objects
+        let objects = try context.fetch(FetchRequest(entity: Person.entityName))
+            + context.fetch(FetchRequest(entity: Event.entityName))
+        let inMemory = allRequest.evaluate(objects)
+        #expect(inMemory.map { $0.attributes["name"] } == [.string("Bob"), .string("Carol")])
+    }
+
+    @available(macOS 15.0, iOS 18.0, tvOS 18.0, watchOS 11.0, *)
+    @Test func regexPredicateFetch() throws {
+
+        let context = try Self.makeContext()
+        try context.insert([
+            Person(name: "Alice", age: 30).encode(),
+            Person(name: "Bob", age: 17).encode()
+        ])
+
+        // Foundation.Predicate: the captured pattern becomes a MATCHES comparison
+        let regex = try Regex("Al[a-z]+")
+        let converted = try FetchRequest.Predicate(#Predicate<PersonRecord> { $0.name.contains(regex) })
+        #expect(converted == "name".compare(.matches, .attribute(.string(".*Al[a-z]+.*"))))
+        let results = try context.fetch(FetchRequest(entity: Person.entityName, predicate: converted))
+        #expect(results.map { $0.attributes["name"] } == [.string("Alice")])
+
+        // the in-memory evaluator agrees with CoreData on the same objects
+        let objects = try context.fetch(FetchRequest(entity: Person.entityName))
+        #expect(objects.filtered(by: converted).map { $0.attributes["name"] } == [.string("Alice")])
     }
 
     @Test func nullRelationshipInsert() throws {
