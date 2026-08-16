@@ -62,5 +62,38 @@ public extension FetchRequest.SortDescriptor {
         self.term = .property(PropertyKey(rawValue: sortDescriptor.key ?? ""))
         self.ascending = sortDescriptor.ascending
     }
+
+    /// Converts to a ``Foundation.SortDescriptor`` comparing the specified root type.
+    ///
+    /// Returns `nil` for function-based sort terms, which have no Foundation equivalent.
+    func toFoundation<Root: NSObject>(comparing root: Root.Type) -> Foundation.SortDescriptor<Root>? {
+        guard let sortDescriptor = toFoundation() else {
+            return nil
+        }
+        return Foundation.SortDescriptor(sortDescriptor, comparing: root)
+    }
+}
+
+public extension FetchRequest.SortDescriptor {
+
+    /// Creates a ``FetchRequest.SortDescriptor`` from an `NSSortDescriptor`.
+    ///
+    /// Returns `nil` if the sort descriptor has no key path.
+    init?(_ sortDescriptor: NSSortDescriptor) {
+        guard let key = sortDescriptor.key else {
+            return nil
+        }
+        self.init(property: PropertyKey(rawValue: key), ascending: sortDescriptor.ascending)
+    }
+
+    /// Converts to an `NSSortDescriptor`.
+    ///
+    /// Returns `nil` for function-based sort terms, which have no Foundation equivalent.
+    func toFoundation() -> NSSortDescriptor? {
+        guard let property else {
+            return nil
+        }
+        return NSSortDescriptor(key: property.rawValue, ascending: ascending)
+    }
 }
 #endif
