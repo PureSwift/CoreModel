@@ -358,11 +358,11 @@ internal extension AttributeValue {
 
     /// Apply an arithmetic function to two values.
     ///
-    /// Integer operands stay in integer arithmetic (except division, which always
-    /// produces a floating-point value, matching `NSExpression`'s `divide:by:`);
+    /// Integer operands stay in integer arithmetic, so division truncates the way
+    /// Swift's `/` and `NSExpression`'s `divide:by:` both do (`7 / 2` is `3`, not `3.5`);
     /// mixed or floating-point operands are computed as `Double`.
-    /// Returns `nil` for non-numeric operands, division by zero, or
-    /// floating-point remainder.
+    /// Returns `nil` for non-numeric operands, division or remainder by zero,
+    /// an overflowing division, or a floating-point remainder.
     static func arithmetic(
         _ function: FetchRequest.Predicate.ArithmeticExpression.Function,
         _ lhs: AttributeValue?,
@@ -374,8 +374,14 @@ internal extension AttributeValue {
             case .add:      return .int64(leftInteger &+ rightInteger)
             case .subtract: return .int64(leftInteger &- rightInteger)
             case .multiply: return .int64(leftInteger &* rightInteger)
-            case .divide:   break // always floating-point
-            case .modulus:  return rightInteger == 0 ? nil : .int64(leftInteger % rightInteger)
+            case .divide:
+                guard rightInteger != 0 else { return nil }
+                let (quotient, overflow) = leftInteger.dividedReportingOverflow(by: rightInteger)
+                return overflow ? nil : .int64(quotient)
+            case .modulus:
+                guard rightInteger != 0 else { return nil }
+                let (remainder, overflow) = leftInteger.remainderReportingOverflow(dividingBy: rightInteger)
+                return overflow ? nil : .int64(remainder)
             }
         }
         guard let leftNumber = lhs.comparableDouble, let rightNumber = rhs.comparableDouble else {
