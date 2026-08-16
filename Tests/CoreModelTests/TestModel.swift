@@ -374,3 +374,96 @@ public extension Campground {
         }
     }
 }
+
+// MARK: - Nested Composite Attributes
+
+/// A street address, whose `location` element is itself a composite.
+public struct Address: Equatable, Hashable, Codable, Sendable {
+
+    public var street: String
+
+    /// An optional scalar element, to exercise a null inside a nested composite.
+    public var city: String?
+
+    public var location: Campground.LocationCoordinates
+
+    public init(street: String, city: String? = nil, location: Campground.LocationCoordinates) {
+        self.street = street
+        self.city = city
+        self.location = location
+    }
+}
+
+extension Address: CompositeAttributeCodable {
+
+    public enum CodingKeys: String, CodingKey {
+        case street
+        case city
+        case location
+    }
+
+    public static var attributeElements: [Attribute] {
+        [
+            Attribute(id: PropertyKey(CodingKeys.street), type: .string),
+            Attribute(id: PropertyKey(CodingKeys.city), type: .string),
+            Attribute(id: PropertyKey(CodingKeys.location), composite: Campground.LocationCoordinates.self)
+        ]
+    }
+
+    public var compositeValue: [PropertyKey: AttributeValue] {
+        var value = [PropertyKey: AttributeValue]()
+        value.encode(street, forKey: CodingKeys.street)
+        value.encode(city, forKey: CodingKeys.city)
+        value.encode(location, forKey: CodingKeys.location)
+        return value
+    }
+
+    public init?(compositeValue: [PropertyKey: AttributeValue]) {
+        guard let street = compositeValue.decode(String.self, forKey: CodingKeys.street),
+            let location = compositeValue.decode(Campground.LocationCoordinates.self, forKey: CodingKeys.location) else {
+            return nil
+        }
+        self.init(
+            street: street,
+            city: compositeValue.decode(String.self, forKey: CodingKeys.city),
+            location: location
+        )
+    }
+}
+
+/// An entity with a required and an optional nested composite attribute.
+@Entity("Facility")
+public struct Facility: Equatable, Hashable, Codable, Identifiable {
+
+    public let id: UUID
+
+    @Attribute
+    public var name: String
+
+    @CompositeAttribute
+    public var address: Address
+
+    /// An optional composite, which is absent as a whole rather than element-wise.
+    @CompositeAttribute
+    public var billingAddress: Address?
+
+    public init(
+        id: UUID = UUID(),
+        name: String,
+        address: Address,
+        billingAddress: Address? = nil
+    ) {
+        self.id = id
+        self.name = name
+        self.address = address
+        self.billingAddress = billingAddress
+    }
+
+    public enum CodingKeys: CodingKey {
+
+        case id
+        case name
+        case address
+        case billingAddress
+    }
+}
