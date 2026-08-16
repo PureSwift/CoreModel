@@ -61,11 +61,18 @@ import Testing
         )
         #expect(modulus.compare(.equalTo, .attribute(.int64(2))).evaluate(with: person))
 
-        // division is always floating-point
+        // integer division truncates, the way Swift's `/` and NSExpression's `divide:by:` do
         let divide = FetchRequest.Predicate.Expression.arithmetic(
             .init(function: .divide, left: .keyPath("age"), right: .attribute(.int64(4)))
         )
-        #expect(divide.compare(.equalTo, .attribute(.double(7.5))).evaluate(with: person))
+        #expect(divide.compare(.equalTo, .attribute(.int64(7))).evaluate(with: person)) // 30 / 4 == 7
+        #expect(divide.compare(.equalTo, .attribute(.double(7.5))).evaluate(with: person) == false)
+
+        // a floating-point operand divides normally
+        let floatDivide = FetchRequest.Predicate.Expression.arithmetic(
+            .init(function: .divide, left: .keyPath("height"), right: .attribute(.int64(2)))
+        )
+        #expect(floatDivide.compare(.equalTo, .attribute(.double(0.85))).evaluate(with: person))
 
         // mixed integer and floating-point operands promote to double
         let mixed = FetchRequest.Predicate.Expression.arithmetic(
@@ -106,6 +113,47 @@ import Testing
             .init(function: .modulus, left: .keyPath("height"), right: .attribute(.int64(2)))
         )
         #expect(floatModulus.compare(.lessThan, .attribute(.int64(2))).evaluate(with: person) == false)
+
+        // remainder by zero resolves to nil rather than trapping
+        let modulusByZero = FetchRequest.Predicate.Expression.arithmetic(
+            .init(function: .modulus, left: .keyPath("age"), right: .attribute(.int64(0)))
+        )
+        #expect(modulusByZero.compare(.equalTo, .attribute(.int64(0))).evaluate(with: person) == false)
+
+        // an overflowing division resolves to nil rather than trapping
+        let overflow = ModelData(
+            entity: "Person",
+            id: ObjectID(rawValue: "overflow"),
+            attributes: ["age": .int64(.min)]
+        )
+        let overflowingDivide = FetchRequest.Predicate.Expression.arithmetic(
+            .init(function: .divide, left: .keyPath("age"), right: .attribute(.int64(-1)))
+        )
+        #expect(overflowingDivide.compare(.equalTo, .attribute(.int64(.min))).evaluate(with: overflow) == false)
+        let overflowingModulus = FetchRequest.Predicate.Expression.arithmetic(
+            .init(function: .modulus, left: .keyPath("age"), right: .attribute(.int64(-1)))
+        )
+        #expect(overflowingModulus.compare(.equalTo, .attribute(.int64(0))).evaluate(with: overflow) == false)
+    }
+
+    @Test func integerDivisionTruncates() {
+
+        // every quotient truncates toward zero, matching Swift's `/`
+        for (dividend, divisor) in [(7, 2), (-7, 2), (7, -2), (-7, -2), (30, 4), (1, 2)] {
+            let data = ModelData(
+                entity: "Person",
+                id: ObjectID(rawValue: "\(dividend)"),
+                attributes: ["value": .int64(numericCast(dividend))]
+            )
+            let expression = FetchRequest.Predicate.Expression.arithmetic(
+                .init(function: .divide, left: .keyPath("value"), right: .attribute(.int64(numericCast(divisor))))
+            )
+            let expected = Int64(dividend / divisor)
+            #expect(
+                expression.compare(.equalTo, .attribute(.int64(expected))).evaluate(with: data),
+                "\(dividend) / \(divisor) should be \(expected)"
+            )
+        }
     }
 
     @Test func fetchRequestEvaluation() {
