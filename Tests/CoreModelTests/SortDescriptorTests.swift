@@ -123,3 +123,62 @@ import Testing
     }
 }
 #endif
+
+#if !canImport(Darwin)
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#elseif canImport(Foundation)
+import Foundation
+#endif
+import Testing
+@testable import CoreModel
+#endif
+
+#if canImport(FoundationEssentials) || canImport(Foundation)
+@Suite struct SortComparatorTests {
+
+    static var events: [ModelData] {
+        [1, 3, 2].map { id in
+            ModelData(
+                entity: "Event",
+                id: ObjectID(rawValue: id.description),
+                attributes: [
+                    "id": .int64(numericCast(id)),
+                    "name": .string("Event \(id)")
+                ]
+            )
+        }
+    }
+
+    @Test func sortOrder() {
+
+        var sortDescriptor = FetchRequest.SortDescriptor(property: "id", order: .forward)
+        #expect(sortDescriptor.ascending)
+        #expect(sortDescriptor.order == .forward)
+        sortDescriptor.order = .reverse
+        #expect(sortDescriptor.ascending == false)
+        #expect(sortDescriptor == FetchRequest.SortDescriptor(term: .property("id"), order: .reverse))
+    }
+
+    @Test func sortComparator() {
+
+        let events = Self.events
+        let forward = FetchRequest.SortDescriptor(property: "id", order: .forward)
+        #expect(events.sorted(using: forward).map(\.id.rawValue) == ["1", "2", "3"])
+        let reverse = FetchRequest.SortDescriptor(property: "id", order: .reverse)
+        #expect(events.sorted(using: reverse).map(\.id.rawValue) == ["3", "2", "1"])
+
+        let lhs = events[0]
+        #expect(forward.compare(lhs, lhs) == .orderedSame)
+        #expect(forward.compare(events[1], events[2]) == .orderedDescending)
+        #expect(reverse.compare(events[1], events[2]) == .orderedAscending)
+
+        // function-based sort terms compare as equal without registered functions
+        let function = FetchRequest.SortDescriptor(
+            term: .function(.init(name: "custom", arguments: [.keyPath("name")])),
+            order: .forward
+        )
+        #expect(function.compare(events[0], events[1]) == .orderedSame)
+    }
+}
+#endif
