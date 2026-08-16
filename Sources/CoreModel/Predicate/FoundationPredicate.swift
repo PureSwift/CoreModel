@@ -244,6 +244,11 @@ extension PredicateExpressions.KeyPath: CoreModelPredicateConvertible {
 extension PredicateExpressions.Value: CoreModelPredicateConvertible {
 
     func toCoreModel(in context: PredicateConversionContext) throws -> ConvertedPredicateExpression {
+        // the macro wraps regexes in a type that retains the source pattern
+        if #available(macOS 15.0, iOS 18.0, tvOS 18.0, watchOS 11.0, *),
+            let regex = value as? PredicateExpressions.PredicateRegex {
+            return .expression(.attribute(.string(regex.stringRepresentation)))
+        }
         guard let encodable = value as? AttributeEncodable else {
             throw FetchRequest.Predicate.ConversionError.unsupportedValue(String(describing: Swift.type(of: value)))
         }
@@ -552,6 +557,24 @@ extension PredicateExpressions.Range: CoreModelRangeConvertible {
 }
 
 // MARK: - String Conformances
+
+@available(macOS 15.0, iOS 18.0, tvOS 18.0, watchOS 11.0, *)
+extension PredicateExpressions.StringContainsRegex: CoreModelPredicateConvertible {
+
+    func toCoreModel(in context: PredicateConversionContext) throws -> ConvertedPredicateExpression {
+        let subject = try FetchRequest.Predicate.expression(converting: self.subject, in: context)
+        let pattern = try FetchRequest.Predicate.expression(converting: self.regex, in: context)
+        guard case let .attribute(.string(pattern)) = pattern else {
+            throw FetchRequest.Predicate.ConversionError.unsupportedValue(pattern.description)
+        }
+        // `MATCHES` matches the whole value, so pad the pattern to express `contains`
+        return .predicate(.comparison(.init(
+            left: subject,
+            right: .attribute(.string(".*" + pattern + ".*")),
+            type: .matches
+        )))
+    }
+}
 
 #if canImport(Darwin)
 @available(macOS 14.0, iOS 17.0, tvOS 17.0, watchOS 10.0, *)
