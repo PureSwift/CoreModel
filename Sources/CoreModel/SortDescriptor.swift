@@ -48,6 +48,67 @@ extension FetchRequest.SortDescriptor: Codable {}
 extension FetchRequest.SortTerm: Codable {}
 #endif
 
+// MARK: - SortComparator
+
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#elseif canImport(Foundation)
+import Foundation
+#endif
+
+#if canImport(FoundationEssentials) || canImport(Foundation)
+@available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
+public extension FetchRequest.SortDescriptor {
+
+    /// The sort order (`.forward` when ascending).
+    var order: SortOrder {
+        get { ascending ? .forward : .reverse }
+        set { ascending = newValue == .forward }
+    }
+
+    init(term: FetchRequest.SortTerm, order: SortOrder) {
+        self.init(term: term, ascending: order == .forward)
+    }
+
+    init(property: PropertyKey, order: SortOrder) {
+        self.init(property: property, ascending: order == .forward)
+    }
+}
+
+@available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
+extension FetchRequest.SortDescriptor: SortComparator {
+
+    /// Compares two model objects using this descriptor's sort term and order.
+    ///
+    /// Function-based sort terms have no registered functions available through
+    /// `SortComparator`, so they evaluate to `nil` and compare as equal;
+    /// use `Array.sorted(by:functions:)` to sort with custom functions.
+    public func compare(_ lhs: ModelData, _ rhs: ModelData) -> ComparisonResult {
+        let lhsValue: AttributeValue?
+        let rhsValue: AttributeValue?
+        switch term {
+        case let .property(property):
+            lhsValue = lhs.attributes[property]
+            rhsValue = rhs.attributes[property]
+        case let .function(function):
+            let expression = FetchRequest.Predicate.Expression.function(function)
+            lhsValue = expression.evaluate(with: lhs, functions: [:])?.attributeValue
+            rhsValue = expression.evaluate(with: rhs, functions: [:])?.attributeValue
+        }
+        guard let comparison = AttributeValue.order(lhsValue, rhsValue), comparison != 0 else {
+            return .orderedSame
+        }
+        let ascendingResult: ComparisonResult = comparison < 0 ? .orderedAscending : .orderedDescending
+        switch order {
+        case .forward:
+            return ascendingResult
+        case .reverse:
+            return ascendingResult == .orderedAscending ? .orderedDescending : .orderedAscending
+        }
+    }
+}
+#endif
+
 // MARK: - Foundation
 
 #if canImport(Darwin)
