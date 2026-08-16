@@ -67,7 +67,56 @@ import Testing
         let greaterThanOrEqual = try FetchRequest.Predicate(#Predicate<PersonModel> { $0.age >= 20 })
         #expect(greaterThanOrEqual == .comparison(.init(left: .keyPath("age"), right: .attribute(.int64(20)), type: .greaterThanOrEqualTo)))
         #expect(Self.people.filtered(by: greaterThanOrEqual).map(\.id.rawValue) == ["Alice", "Alina"])
+
+        let lessThanOrEqual = try FetchRequest.Predicate(#Predicate<PersonModel> { $0.age <= 20 })
+        #expect(lessThanOrEqual == .comparison(.init(left: .keyPath("age"), right: .attribute(.int64(20)), type: .lessThanOrEqualTo)))
+        #expect(Self.people.filtered(by: lessThanOrEqual).map(\.id.rawValue) == ["Bob", "Alina"])
+
+        let greaterThan = try FetchRequest.Predicate(#Predicate<PersonModel> { $0.age > 20 })
+        #expect(greaterThan == .comparison(.init(left: .keyPath("age"), right: .attribute(.int64(20)), type: .greaterThan)))
+        #expect(Self.people.filtered(by: greaterThan).map(\.id.rawValue) == ["Alice"])
     }
+
+    @available(macOS 14.0, iOS 17.0, tvOS 17.0, watchOS 10.0, *)
+    @Test func sequenceContains() throws {
+
+        // an element tested against a collection property
+        let predicate = try FetchRequest.Predicate(#Predicate<PersonModel> { $0.scores.contains(10) })
+        #expect(predicate == .comparison(.init(
+            left: .keyPath("scores"),
+            right: .attribute(.int64(10)),
+            type: .contains
+        )))
+    }
+
+    #if canImport(Darwin)
+    @available(macOS 14.0, iOS 17.0, tvOS 17.0, watchOS 10.0, *)
+    @Test func localizedStandardContains() throws {
+
+        // maps to a case- and diacritic-insensitive CONTAINS
+        let predicate = try FetchRequest.Predicate(#Predicate<PersonModel> { $0.name.localizedStandardContains("ali") })
+        #expect(predicate == .comparison(.init(
+            left: .keyPath("name"),
+            right: .attribute(.string("ali")),
+            type: .contains,
+            options: [.caseInsensitive, .diacriticInsensitive]
+        )))
+        // the case-insensitive option applies when evaluating in memory
+        #expect(Self.people.filtered(by: predicate).map(\.id.rawValue) == ["Alice", "Alina"])
+    }
+
+    @available(macOS 14.0, iOS 17.0, tvOS 17.0, watchOS 10.0, *)
+    @Test func objectKeyPath() throws {
+
+        // an @objc root resolves its key paths through Key-Value Coding
+        let predicate = try FetchRequest.Predicate(#Predicate<EventObject> { $0.name == "Event 1" })
+        #expect(predicate == .comparison(.init(
+            left: .keyPath("name"),
+            right: .attribute(.string("Event 1")),
+            type: .equalTo
+        )))
+    }
+    #endif
 
     @available(macOS 14.0, iOS 17.0, tvOS 17.0, watchOS 10.0, *)
     @Test func compound() throws {
