@@ -13,6 +13,9 @@ public extension FetchRequest {
     /// Filters by entity and predicate, sorts by the sort descriptors
     /// (with a stable identifier tiebreaker), then applies the fetch offset and limit.
     ///
+    /// Objects of other entities may be included; they're filtered out of the results but
+    /// remain available for key paths that traverse a relationship (e.g. `events.name`).
+    ///
     /// - Parameters:
     ///   - objects: The objects to evaluate the fetch request against.
     ///   - functions: Custom functions (keyed by name) that `.function` expressions can invoke.
@@ -23,7 +26,8 @@ public extension FetchRequest {
     ) -> [ModelData] {
         var results = objects.filter { $0.entity == entity }
         if let predicate {
-            results = results.filter { predicate.evaluate(with: $0, functions: functions) }
+            let index = objects.index()
+            results = results.filter { predicate.evaluate(with: $0, functions: functions, objects: index) }
         }
         results = results.sorted(by: sortDescriptors, functions: functions)
         if fetchOffset > 0 {
@@ -47,7 +51,13 @@ public extension Array where Element == ModelData {
         by predicate: FetchRequest.Predicate,
         functions: [String: DatabaseFunction] = [:]
     ) -> [ModelData] {
-        filter { predicate.evaluate(with: $0, functions: functions) }
+        let index = self.index()
+        return filter { predicate.evaluate(with: $0, functions: functions, objects: index) }
+    }
+
+    /// Index these objects by identifier, for resolving key paths that traverse a relationship.
+    internal func index() -> [ObjectID: ModelData] {
+        Dictionary(map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
     }
 
     /// Sort in memory by the given descriptors, resolving function terms with the
