@@ -18,8 +18,87 @@ internal extension NSManagedObject {
     }
 }
 
+internal extension AttributeValue {
+
+    /// Decode a CoreData object value using the attribute type declared by the schema.
+    ///
+    /// The declared type is required, not merely convenient: an `NSNumber` alone can't
+    /// distinguish a bool from an `int16` from a `double`.
+    init(coreDataValue: Any, type: AttributeType, key: PropertyKey) throws {
+        switch type {
+        case .bool:
+            guard let value = coreDataValue as? Bool else { throw Self.invalid(coreDataValue, key) }
+            self = .bool(value)
+        case .int16:
+            guard let value = coreDataValue as? Int16 else { throw Self.invalid(coreDataValue, key) }
+            self = .int16(value)
+        case .int32:
+            guard let value = coreDataValue as? Int32 else { throw Self.invalid(coreDataValue, key) }
+            self = .int32(value)
+        case .int64:
+            guard let value = coreDataValue as? Int64 else { throw Self.invalid(coreDataValue, key) }
+            self = .int64(value)
+        case .float:
+            guard let value = coreDataValue as? Float else { throw Self.invalid(coreDataValue, key) }
+            self = .float(value)
+        case .double:
+            guard let value = coreDataValue as? Double else { throw Self.invalid(coreDataValue, key) }
+            self = .double(value)
+        case .string:
+            guard let value = coreDataValue as? String else { throw Self.invalid(coreDataValue, key) }
+            self = .string(value)
+        case .data:
+            guard let value = coreDataValue as? Data else { throw Self.invalid(coreDataValue, key) }
+            self = .data(value)
+        case .date:
+            guard let value = coreDataValue as? Date else { throw Self.invalid(coreDataValue, key) }
+            self = .date(value)
+        case .uuid:
+            guard let value = coreDataValue as? UUID else { throw Self.invalid(coreDataValue, key) }
+            self = .uuid(value)
+        case .url:
+            guard let value = coreDataValue as? URL else { throw Self.invalid(coreDataValue, key) }
+            self = .url(value)
+        case .decimal:
+            guard let value = coreDataValue as? NSDecimalNumber else { throw Self.invalid(coreDataValue, key) }
+            self = .decimal(value as Decimal)
+        case let .composite(elements):
+            guard let dictionary = coreDataValue as? [String: Any] else {
+                throw CoreDataModelError.invalidCompositeValue(key)
+            }
+            self = .composite(try AttributeValue.composite(from: dictionary, elements: elements))
+        }
+    }
+
+    /// Convert the dictionary CoreData stores for a composite attribute.
+    ///
+    /// Iterates the declared elements rather than the stored dictionary, so that a stale
+    /// or unknown key is ignored rather than mis-typed, and materializes an absent
+    /// element as `.null` so that the shape always matches the schema.
+    static func composite(
+        from dictionary: [String: Any],
+        elements: [Attribute]
+    ) throws -> [PropertyKey: AttributeValue] {
+        var values = [PropertyKey: AttributeValue](minimumCapacity: elements.count)
+        for element in elements {
+            // elements are always optional, so a missing key and NSNull both mean null
+            guard let raw = dictionary[element.id.rawValue], raw is NSNull == false else {
+                values[element.id] = .null
+                continue
+            }
+            values[element.id] = try AttributeValue(coreDataValue: raw, type: element.type, key: element.id)
+        }
+        return values
+    }
+
+    private static func invalid(_ value: Any, _ key: PropertyKey) -> any Error {
+        assertionFailure("Invalid CoreData attribute value \(value) for \(key)")
+        return CocoaError(.coreData)
+    }
+}
+
 internal extension NSManagedObject {
-    
+
     func attribute(for key: PropertyKey) throws -> AttributeValue {
         
         guard let objectValue = self.value(forKey: key.rawValue)
@@ -30,121 +109,17 @@ internal extension NSManagedObject {
             throw CocoaError(.coreData)
         }
         
-        guard let attributeType = AttributeType(attributeType: coreDataAttribute.attributeType) else {
+        guard let attributeType = AttributeType(attribute: coreDataAttribute) else {
             assertionFailure("Invalid CoreData attribute \(coreDataAttribute)")
             throw CocoaError(.coreData)
         }
-        
-        switch attributeType {
-        case .bool:
-            guard let value = objectValue as? Bool else {
-                assertionFailure("Invalid CoreData attribute value \(objectValue)")
-                throw CocoaError(.coreData)
-            }
-            return .bool(value)
-        case .int16:
-            guard let value = objectValue as? Int16 else {
-                assertionFailure("Invalid CoreData attribute value \(objectValue)")
-                throw CocoaError(.coreData)
-            }
-            return .int16(value)
-        case .int32:
-            guard let value = objectValue as? Int32 else {
-                assertionFailure("Invalid CoreData attribute value \(objectValue)")
-                throw CocoaError(.coreData)
-            }
-            return .int32(value)
-        case .int64:
-            guard let value = objectValue as? Int64 else {
-                assertionFailure("Invalid CoreData attribute value \(objectValue)")
-                throw CocoaError(.coreData)
-            }
-            return .int64(value)
-        case .float:
-            guard let value = objectValue as? Float else {
-                assertionFailure("Invalid CoreData attribute value \(objectValue)")
-                throw CocoaError(.coreData)
-            }
-            return .float(value)
-        case .double:
-            guard let value = objectValue as? Double else {
-                assertionFailure("Invalid CoreData attribute value \(objectValue)")
-                throw CocoaError(.coreData)
-            }
-            return .double(value)
-        case .string:
-            guard let value = objectValue as? String else {
-                assertionFailure("Invalid CoreData attribute value \(objectValue)")
-                throw CocoaError(.coreData)
-            }
-            return .string(value)
-        case .data:
-            guard let value = objectValue as? Data else {
-                assertionFailure("Invalid CoreData attribute value \(objectValue)")
-                throw CocoaError(.coreData)
-            }
-            return .data(value)
-        case .date:
-            guard let value = objectValue as? Date else {
-                assertionFailure("Invalid CoreData attribute value \(objectValue)")
-                throw CocoaError(.coreData)
-            }
-            return .date(value)
-        case .uuid:
-            guard let value = objectValue as? UUID else {
-                assertionFailure("Invalid CoreData attribute value \(objectValue)")
-                throw CocoaError(.coreData)
-            }
-            return .uuid(value)
-        case .url:
-            guard let value = objectValue as? URL else {
-                assertionFailure("Invalid CoreData attribute value \(objectValue)")
-                throw CocoaError(.coreData)
-            }
-            return .url(value)
-        case .decimal:
-            guard let value = objectValue as? NSDecimalNumber else {
-                assertionFailure("Invalid CoreData attribute value \(objectValue)")
-                throw CocoaError(.coreData)
-            }
-            return .decimal(value as Decimal)
-        }
+
+        return try AttributeValue(coreDataValue: objectValue, type: attributeType, key: key)
     }
-    
+
     func setAttribute(_ newValue: AttributeValue, for key: PropertyKey) {
-        
-        let objectValue: AnyObject?
-        
-        switch newValue {
-        case .null:
-            objectValue = nil
-        case let .string(value):
-            objectValue = value as NSString
-        case let .uuid(value):
-            objectValue = value as NSUUID
-        case let .url(value):
-            objectValue = value as NSURL
-        case let .data(value):
-            objectValue = value as NSData
-        case let .date(value):
-            objectValue = value as NSDate
-        case let .bool(value):
-            objectValue = value as NSNumber
-        case let .int16(value):
-            objectValue = value as NSNumber
-        case let .int32(value):
-            objectValue = value as NSNumber
-        case let .int64(value):
-            objectValue = value as NSNumber
-        case let .float(value):
-            objectValue = value as NSNumber
-        case let .double(value):
-            objectValue = value as NSNumber
-        case let .decimal(value):
-            objectValue = value as NSDecimalNumber
-        }
-        
-        self.setValue(objectValue, forKey: key.rawValue)
+
+        self.setValue(newValue.toFoundation(), forKey: key.rawValue)
     }
     
     func relationship(for key: PropertyKey) throws -> RelationshipValue {
@@ -257,7 +232,7 @@ internal extension NSManagedObject {
             attributes.reserveCapacity(attributesByName.count)
             for (key, attribute) in attributesByName {
                 guard NSManagedObject.BuiltInProperty(rawValue: key) == nil,
-                    let _ = AttributeType(attributeType: attribute.attributeType) else {
+                    let _ = AttributeType(attribute: attribute) else {
                     continue
                 }
                 let property = PropertyKey(rawValue: key)
