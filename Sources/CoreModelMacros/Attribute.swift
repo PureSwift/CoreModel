@@ -22,6 +22,18 @@ public struct AttributeMacro: PeerMacro {
     }
 }
 
+public struct CompositeAttributeMacro: PeerMacro {
+    public static func expansion(
+        of node: AttributeSyntax,
+        providingPeersOf declaration: some DeclSyntaxProtocol,
+        in context: some MacroExpansionContext
+    ) throws -> [DeclSyntax] {
+
+        // Tag only, logic handled in EntityMacro
+        return []
+    }
+}
+
 internal func inferAttributeType(from type: String) -> String? {
     switch type {
         case "String": return ".string"

@@ -47,11 +47,59 @@ public extension ModelData {
     }
 }
 
+// MARK: - Composite Attribute Value Encoding
+
+public extension Dictionary where Key == PropertyKey, Value == AttributeValue {
+
+    /// Encode an element of a composite attribute value.
+    mutating func encode<T, K>(_ value: T, forKey key: K) where T: AttributeEncodable, K: CodingKey {
+
+        let property = PropertyKey(key)
+        self[property] = value.attributeValue
+    }
+}
+
 // MARK: - AttributeEncodable
 
 public protocol AttributeEncodable {
-    
+
     var attributeValue: AttributeValue { get }
+}
+
+// MARK: - CompositeAttribute
+
+/// A type that describes the elements of the composite attribute it represents.
+///
+/// Modeled on CoreData's `NSCompositeAttributeDescription`. Conform to
+/// ``CompositeAttributeEncodable``, ``CompositeAttributeDecodable``, or
+/// ``CompositeAttributeCodable`` rather than to this protocol directly.
+public protocol CompositeAttribute {
+
+    /// The named sub-attributes this composite is made of.
+    ///
+    /// - Note: Elements are ``Attribute`` values and so can never be relationships.
+    /// An element may itself be ``AttributeType/composite(_:)``.
+    static var attributeElements: [Attribute] { get }
+}
+
+public extension CompositeAttribute {
+
+    /// The attribute type describing this composite.
+    static var attributeType: AttributeType { .composite(attributeElements) }
+}
+
+// MARK: - CompositeAttributeEncodable
+
+/// A type that can be stored as the value of a composite attribute.
+public protocol CompositeAttributeEncodable: CompositeAttribute, AttributeEncodable {
+
+    /// The value of each element, keyed by its ``Attribute/id``.
+    var compositeValue: [PropertyKey: AttributeValue] { get }
+}
+
+public extension CompositeAttributeEncodable {
+
+    var attributeValue: AttributeValue { .composite(compositeValue) }
 }
 
 extension Optional: AttributeEncodable where Wrapped: AttributeEncodable {

@@ -158,7 +158,8 @@ extension EntityMacro {
             let inferredType = inferAttributeType(from: typeName)
             
             for attr in attributes.compactMap({ $0.as(AttributeSyntax.self) }) {
-                if attr.attributeName.description == "Attribute" {
+                switch attr.attributeName.trimmedDescription {
+                case "Attribute":
                     let type: String
                     if let argument = attr.arguments?.description.trimmingCharacters(in: .whitespacesAndNewlines) {
                         // Use explicit parameter
@@ -170,6 +171,18 @@ extension EntityMacro {
                         throw MacroError.unknownAttributeType(for: identifier)
                     }
                     attributeEntries.append(".\(identifier): \(type)")
+                case "CompositeAttribute":
+                    // The element list comes from the declared type, so no arguments are accepted.
+                    guard attr.arguments == nil else {
+                        throw MacroError.invalidCompositeAttribute(for: identifier)
+                    }
+                    // `typeName` already has any Optional wrapper stripped.
+                    guard typeName.hasPrefix("[") == false, typeName.hasSuffix("]") == false else {
+                        throw MacroError.invalidCompositeAttribute(for: identifier)
+                    }
+                    attributeEntries.append(".\(identifier): \(typeName).attributeType")
+                default:
+                    continue
                 }
             }
         }
@@ -283,8 +296,8 @@ extension EntityMacro {
                   else { continue }
             let rawTypeName = typeSyntax.description.trimmingCharacters(in: .whitespacesAndNewlines)
             for attr in varDecl.attributes.compactMap({ $0.as(AttributeSyntax.self) }) {
-                switch attr.attributeName.description {
-                case "Attribute":
+                switch attr.attributeName.trimmedDescription {
+                case "Attribute", "CompositeAttribute":
                     properties.append((identifier, rawTypeName, false))
                 case "Relationship":
                     properties.append((identifier, rawTypeName, true))

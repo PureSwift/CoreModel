@@ -12,10 +12,25 @@ import CoreModel
 
 public extension NSManagedObjectModel {
     
-    convenience init(model: Model) {
+    /// - Precondition: A model containing composite attributes may only back an
+    /// `NSSQLiteStoreType` store. Adding an atomic store (in-memory, XML, or binary)
+    /// for such a model raises an `NSInvalidArgumentException` — "Core Data provided
+    /// atomic stores do not support composite attributes" — which is an Objective-C
+    /// exception and therefore cannot be caught from Swift.
+    ///
+    /// - Throws: ``CoreDataModelError/compositeAttributesUnavailable(_:_:)`` when the
+    /// model declares a composite attribute but the platform is older than
+    /// macOS 14 / iOS 17 / tvOS 17 / watchOS 10, and
+    /// ``CoreDataModelError/emptyCompositeAttribute(_:)`` for a composite with no elements.
+    convenience init(model: Model) throws {
         self.init()
         // create entities
-        self.entities = model.entities.map { NSEntityDescription(entity: $0) }
+        var entities = [NSEntityDescription]()
+        entities.reserveCapacity(model.entities.count)
+        for entity in model.entities {
+            entities.append(try NSEntityDescription(entity: entity))
+        }
+        self.entities = entities
         // set inverse relationships
         for entity in model.entities {
             guard let entityDescription = self.entitiesByName[entity.id.rawValue] else {

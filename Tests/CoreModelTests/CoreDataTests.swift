@@ -16,7 +16,7 @@ import Testing
 @Suite(.serialized)
 struct CoreDataTests {
     
-    @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
+    @available(macOS 14, iOS 17, watchOS 10, tvOS 17, *)
     @Test
     func coreData() async throws {
         
@@ -28,7 +28,7 @@ struct CoreDataTests {
                 Campground.Unit.self
         )
         
-        let managedObjectModel = NSManagedObjectModel(model: model)
+        let managedObjectModel = try NSManagedObjectModel(model: model)
         
         let store = NSPersistentContainer(
             name: "Test\(UUID())",
@@ -108,7 +108,7 @@ struct CoreDataTests {
     func customFunctionInMemory() throws {
 
         let model = Model(entities: Person.self, Event.self)
-        let coordinator = NSPersistentStoreCoordinator(managedObjectModel: NSManagedObjectModel(model: model))
+        let coordinator = NSPersistentStoreCoordinator(managedObjectModel: try NSManagedObjectModel(model: model))
         try coordinator.addPersistentStore(ofType: NSInMemoryStoreType, configurationName: nil, at: nil, options: nil)
         let context = NSManagedObjectContext(concurrencyType: .mainQueueConcurrencyType)
         context.persistentStoreCoordinator = coordinator

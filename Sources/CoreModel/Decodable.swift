@@ -99,11 +99,54 @@ public extension ModelData {
     }
 }
 
+// MARK: - Composite Attribute Value Decoding
+
+public extension Dictionary where Key == PropertyKey, Value == AttributeValue {
+
+    /// Decode an element of a composite attribute value.
+    ///
+    /// - Returns: `nil` when the element is absent, `.null`, or holds a value of a
+    /// different type — the shape ``CompositeAttributeDecodable/init(compositeValue:)``
+    /// needs, since it is failable rather than throwing.
+    func decode<T, K>(_ type: T.Type, forKey key: K) -> T? where T: AttributeDecodable, K: CodingKey {
+
+        let property = PropertyKey(key)
+        guard let value = self[property] else {
+            return nil
+        }
+        return T.init(attributeValue: value)
+    }
+}
+
 // MARK: - AttributeDecodable
 
 public protocol AttributeDecodable {
-    
+
     init?(attributeValue: AttributeValue)
+}
+
+// MARK: - CompositeAttributeDecodable
+
+/// A type that can be loaded from the value of a composite attribute.
+///
+/// - Note: A type that is both `CompositeAttributeDecodable` and `RawRepresentable`
+/// where `RawValue: AttributeDecodable` inherits two candidate default implementations
+/// of `init(attributeValue:)` and will not compile. Implement `init(attributeValue:)`
+/// explicitly in that case.
+public protocol CompositeAttributeDecodable: CompositeAttribute, AttributeDecodable {
+
+    /// Initialize from the value of each element, keyed by its ``Attribute/id``.
+    init?(compositeValue: [PropertyKey: AttributeValue])
+}
+
+public extension CompositeAttributeDecodable {
+
+    init?(attributeValue: AttributeValue) {
+        guard case let .composite(elements) = attributeValue else {
+            return nil
+        }
+        self.init(compositeValue: elements)
+    }
 }
 
 extension Optional: AttributeDecodable where Wrapped: AttributeDecodable {
@@ -234,7 +277,8 @@ extension Int: AttributeDecodable {
             .bool,
             .decimal,
             .float,
-            .double:
+            .double,
+            .composite:
             return nil
         case let .int16(value):
             self = numericCast(value)
@@ -259,7 +303,8 @@ extension Int8: AttributeDecodable {
             .bool,
             .decimal,
             .float,
-            .double:
+            .double,
+            .composite:
             return nil
         case let .int16(value):
             self = numericCast(value)
@@ -284,7 +329,8 @@ extension Int16: AttributeDecodable {
             .bool,
             .decimal,
             .float,
-            .double:
+            .double,
+            .composite:
             return nil
         case let .int16(value):
             self = value
@@ -309,7 +355,8 @@ extension Int32: AttributeDecodable {
             .bool,
             .decimal,
             .float,
-            .double:
+            .double,
+            .composite:
             return nil
         case let .int16(value):
             self = numericCast(value)
@@ -334,7 +381,8 @@ extension Int64: AttributeDecodable {
             .bool,
             .decimal,
             .float,
-            .double:
+            .double,
+            .composite:
             return nil
         case let .int16(value):
             self = numericCast(value)
@@ -359,7 +407,8 @@ extension UInt: AttributeDecodable {
             .bool,
             .decimal,
             .float,
-            .double:
+            .double,
+            .composite:
             return nil
         case let .int16(value):
             self = numericCast(value)
@@ -385,7 +434,8 @@ extension UInt8: AttributeDecodable {
             .bool,
             .decimal,
             .float,
-            .double:
+            .double,
+            .composite:
             return nil
         case let .int16(value):
             self = numericCast(value)
@@ -411,7 +461,8 @@ extension UInt16: AttributeDecodable {
             .bool,
             .decimal,
             .float,
-            .double:
+            .double,
+            .composite:
             return nil
         case let .int16(value):
             self = numericCast(value)
@@ -437,7 +488,8 @@ extension UInt32: AttributeDecodable {
             .bool,
             .decimal,
             .float,
-            .double:
+            .double,
+            .composite:
             return nil
         case let .int16(value):
             self = numericCast(value)
@@ -462,7 +514,8 @@ extension UInt64: AttributeDecodable {
             .bool,
             .decimal,
             .float,
-            .double:
+            .double,
+            .composite:
             return nil
         case let .int16(value):
             self = numericCast(value)

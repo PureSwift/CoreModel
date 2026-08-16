@@ -10,10 +10,22 @@ import Foundation
 import CoreData
 import CoreModel
 
+internal extension NSAttributeType {
+
+    /// `NSCompositeAttributeType` (2100).
+    ///
+    /// - Note: Spelled by raw value so that referencing it doesn't depend on the
+    /// availability annotations of the imported enum case. The
+    /// `NSCompositeAttributeDescription` *class* still requires macOS 14 / iOS 17.
+    static var composite: NSAttributeType { NSAttributeType(rawValue: 2100)! }
+}
+
 public extension NSAttributeType {
-    
+
     init(attributeType: AttributeType) {
         switch attributeType {
+        case .composite:
+            self = .composite
         case .bool:
             self = .booleanAttributeType
         case .int16:
@@ -43,7 +55,40 @@ public extension NSAttributeType {
 }
 
 public extension AttributeType {
-    
+
+    /// Reconstruct the CoreModel attribute type from a CoreData attribute description,
+    /// including composite attributes and their (possibly nested) elements.
+    ///
+    /// Prefer this over ``init(attributeType:)``, which cannot represent composites:
+    /// the elements live on the description, not on the `NSAttributeType`.
+    init?(attribute: NSAttributeDescription) {
+        guard attribute.attributeType == .composite else {
+            guard let type = AttributeType(attributeType: attribute.attributeType) else {
+                return nil
+            }
+            self = type
+            return
+        }
+        guard #available(macOS 14, iOS 17, tvOS 17, watchOS 10, *) else {
+            return nil
+        }
+        guard let composite = attribute as? NSCompositeAttributeDescription else {
+            return nil
+        }
+        var elements = [Attribute]()
+        elements.reserveCapacity(composite.elements.count)
+        for element in composite.elements {
+            // recursion handles nested composites
+            guard let type = AttributeType(attribute: element) else {
+                return nil
+            }
+            elements.append(Attribute(id: PropertyKey(rawValue: element.name), type: type))
+        }
+        self = .composite(elements)
+    }
+
+    /// - Note: Returns `nil` for `.compositeAttributeType`, whose elements cannot be
+    /// recovered from the type alone. Use ``init(attribute:)`` to round-trip composites.
     init?(attributeType: NSAttributeType) {
         switch attributeType {
         case .undefinedAttributeType:

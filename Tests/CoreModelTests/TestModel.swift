@@ -89,9 +89,9 @@ public struct Campground: Equatable, Hashable, Codable, Identifiable {
     @Attribute
     public var address: String
     
-    @Attribute(.string)
+    @CompositeAttribute
     public var location: LocationCoordinates
-    
+
     @Attribute(.string)
     public var amenities: [Amenity]
     
@@ -111,7 +111,7 @@ public struct Campground: Equatable, Hashable, Codable, Identifiable {
     @Attribute
     public var directions: String?
     
-    @Attribute(.string)
+    @CompositeAttribute
     public var officeHours: Schedule
     
     @Relationship(destination: Unit.self, inverse: .campground)
@@ -242,23 +242,30 @@ public extension Campground {
     }
 }
 
-extension Campground.LocationCoordinates: AttributeEncodable {
-    
-    public var attributeValue: AttributeValue {
-        return .string("\(latitude),\(longitude)")
-    }
-}
+extension Campground.LocationCoordinates: CompositeAttributeCodable {
 
-extension Campground.LocationCoordinates: AttributeDecodable {
-    
-    public init?(attributeValue: AttributeValue) {
-        guard let string = String(attributeValue: attributeValue) else {
-            return nil
-        }
-        let components = string.components(separatedBy: ",")
-        guard components.count == 2,
-            let latitude = Double(components[0]),
-            let longitude = Double(components[1]) else {
+    public enum CodingKeys: String, CodingKey {
+        case latitude
+        case longitude
+    }
+
+    public static var attributeElements: [Attribute] {
+        [
+            Attribute(id: PropertyKey(CodingKeys.latitude), type: .double),
+            Attribute(id: PropertyKey(CodingKeys.longitude), type: .double)
+        ]
+    }
+
+    public var compositeValue: [PropertyKey: AttributeValue] {
+        var value = [PropertyKey: AttributeValue]()
+        value.encode(latitude, forKey: CodingKeys.latitude)
+        value.encode(longitude, forKey: CodingKeys.longitude)
+        return value
+    }
+
+    public init?(compositeValue: [PropertyKey: AttributeValue]) {
+        guard let latitude = compositeValue.decode(Double.self, forKey: CodingKeys.latitude),
+            let longitude = compositeValue.decode(Double.self, forKey: CodingKeys.longitude) else {
             return nil
         }
         self.init(latitude: latitude, longitude: longitude)
@@ -282,26 +289,38 @@ public extension Campground {
     }
 }
 
-extension Campground.Schedule: AttributeEncodable {
-    
-    public var attributeValue: AttributeValue {
-        return .string("\(start),\(end)")
-    }
-}
+extension Campground.Schedule: CompositeAttributeCodable {
 
-extension Campground.Schedule: AttributeDecodable {
-    
-    public init?(attributeValue: AttributeValue) {
-        guard let string = String(attributeValue: attributeValue) else {
+    public enum CodingKeys: String, CodingKey {
+        case start
+        case end
+    }
+
+    public static var attributeElements: [Attribute] {
+        [
+            // - Note: `.int64`, since `UInt.attributeValue` is `.int64`.
+            Attribute(id: PropertyKey(CodingKeys.start), type: .int64),
+            Attribute(id: PropertyKey(CodingKeys.end), type: .int64)
+        ]
+    }
+
+    public var compositeValue: [PropertyKey: AttributeValue] {
+        var value = [PropertyKey: AttributeValue]()
+        value.encode(start, forKey: CodingKeys.start)
+        value.encode(end, forKey: CodingKeys.end)
+        return value
+    }
+
+    public init?(compositeValue: [PropertyKey: AttributeValue]) {
+        guard let start = compositeValue.decode(UInt.self, forKey: CodingKeys.start),
+            let end = compositeValue.decode(UInt.self, forKey: CodingKeys.end) else {
             return nil
         }
-        let components = string.components(separatedBy: ",")
-        guard components.count == 2,
-            let start = UInt(components[0]),
-            let end = UInt(components[1]) else {
-            return nil
-        }
-        self.init(start: start, end: end)
+        // - Note: Assigns the stored properties directly rather than calling
+        //   `init(start:end:)`, whose `assert(start < end)` would trap in debug builds
+        //   when decoding arbitrary stored data.
+        self.start = start
+        self.end = end
     }
 }
 
@@ -325,7 +344,7 @@ public extension Campground {
         @Attribute(.string)
         public var amenities: [Amenity]
         
-        @Attribute(.string)
+        @CompositeAttribute
         public var checkout: Schedule
         
         public init(
@@ -353,5 +372,98 @@ public extension Campground {
             case amenities
             case checkout
         }
+    }
+}
+
+// MARK: - Nested Composite Attributes
+
+/// A street address, whose `location` element is itself a composite.
+public struct Address: Equatable, Hashable, Codable, Sendable {
+
+    public var street: String
+
+    /// An optional scalar element, to exercise a null inside a nested composite.
+    public var city: String?
+
+    public var location: Campground.LocationCoordinates
+
+    public init(street: String, city: String? = nil, location: Campground.LocationCoordinates) {
+        self.street = street
+        self.city = city
+        self.location = location
+    }
+}
+
+extension Address: CompositeAttributeCodable {
+
+    public enum CodingKeys: String, CodingKey {
+        case street
+        case city
+        case location
+    }
+
+    public static var attributeElements: [Attribute] {
+        [
+            Attribute(id: PropertyKey(CodingKeys.street), type: .string),
+            Attribute(id: PropertyKey(CodingKeys.city), type: .string),
+            Attribute(id: PropertyKey(CodingKeys.location), composite: Campground.LocationCoordinates.self)
+        ]
+    }
+
+    public var compositeValue: [PropertyKey: AttributeValue] {
+        var value = [PropertyKey: AttributeValue]()
+        value.encode(street, forKey: CodingKeys.street)
+        value.encode(city, forKey: CodingKeys.city)
+        value.encode(location, forKey: CodingKeys.location)
+        return value
+    }
+
+    public init?(compositeValue: [PropertyKey: AttributeValue]) {
+        guard let street = compositeValue.decode(String.self, forKey: CodingKeys.street),
+            let location = compositeValue.decode(Campground.LocationCoordinates.self, forKey: CodingKeys.location) else {
+            return nil
+        }
+        self.init(
+            street: street,
+            city: compositeValue.decode(String.self, forKey: CodingKeys.city),
+            location: location
+        )
+    }
+}
+
+/// An entity with a required and an optional nested composite attribute.
+@Entity("Facility")
+public struct Facility: Equatable, Hashable, Codable, Identifiable {
+
+    public let id: UUID
+
+    @Attribute
+    public var name: String
+
+    @CompositeAttribute
+    public var address: Address
+
+    /// An optional composite, which is absent as a whole rather than element-wise.
+    @CompositeAttribute
+    public var billingAddress: Address?
+
+    public init(
+        id: UUID = UUID(),
+        name: String,
+        address: Address,
+        billingAddress: Address? = nil
+    ) {
+        self.id = id
+        self.name = name
+        self.address = address
+        self.billingAddress = billingAddress
+    }
+
+    public enum CodingKeys: CodingKey {
+
+        case id
+        case name
+        case address
+        case billingAddress
     }
 }

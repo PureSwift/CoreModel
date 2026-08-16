@@ -12,7 +12,7 @@ import CoreModel
 
 internal extension NSEntityDescription {
     
-    convenience init(entity: EntityDescription) {
+    convenience init(entity: EntityDescription) throws {
         self.init()
         self.name = entity.id.rawValue
         // add id attribute
@@ -27,7 +27,15 @@ internal extension NSEntityDescription {
         var properties = [NSPropertyDescription]()
         properties.reserveCapacity(entity.attributes.count + entity.relationships.count + 1)
         properties.append(id)
-        properties += entity.attributes.map { NSAttributeDescription(attribute: $0) }
+        for attribute in entity.attributes {
+            do {
+                properties.append(try NSAttributeDescription.make(attribute: attribute))
+            }
+            catch CoreDataModelError.compositeAttributesUnavailable(_, let key) {
+                // re-throw with the entity name attached
+                throw CoreDataModelError.compositeAttributesUnavailable(entity.id, key)
+            }
+        }
         properties += entity.relationships.map { NSRelationshipDescription(relationship: $0) }
         self.properties = properties
         self.uniquenessConstraints = [[NSManagedObject.BuiltInProperty.id.rawValue as NSString]]

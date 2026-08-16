@@ -80,12 +80,14 @@ public actor PersistentContainerStorage: ModelStorage, ObservableObject {
     
     // MARK: Initialization
     
+    /// - Throws: ``CoreDataModelError`` when the model cannot be represented in CoreData,
+    /// e.g. a composite attribute on a platform older than macOS 14 / iOS 17.
     public init(
         name: String,
         model: Model,
         storeDescriptions: [NSPersistentStoreDescription] = []
-    ) {
-        let managedObjectModel = NSManagedObjectModel(model: model)
+    ) throws {
+        let managedObjectModel = try NSManagedObjectModel(model: model)
         let persistentContainer = NSPersistentContainer(
             name: name,
             managedObjectModel: managedObjectModel
