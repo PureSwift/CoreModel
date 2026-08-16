@@ -149,7 +149,24 @@ internal extension AttributeValue {
         case let .double(value):    return value as NSNumber
         case let .url(value):       return value as NSURL
         case let .decimal(value):   return value as NSDecimalNumber
+        case let .composite(value): return value.toFoundationDictionary()
         }
+    }
+}
+
+internal extension Dictionary where Key == PropertyKey, Value == AttributeValue {
+
+    /// The `NSDictionary` CoreData stores for a composite attribute.
+    ///
+    /// - Note: `.null` elements are omitted rather than stored as `NSNull`, matching
+    /// CoreData's requirement that every element of a composite be optional.
+    func toFoundationDictionary() -> NSDictionary {
+        let result = NSMutableDictionary(capacity: count)
+        for (key, value) in self {
+            guard let object = value.toFoundation() else { continue }
+            result[key.rawValue as NSString] = object
+        }
+        return result
     }
 }
 
