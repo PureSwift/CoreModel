@@ -29,6 +29,20 @@ import Testing
         return context
     }
 
+    /// Mirrors the `Person` entity for `#Predicate` conversion.
+    struct PersonRecord {
+
+        var name: String
+        var age: Int
+        var events: [EventRecord]
+    }
+
+    /// Mirrors the `Event` entity for `#Predicate` conversion.
+    struct EventRecord {
+
+        var name: String
+    }
+
     @Test func attributeTypeConversion() throws {
         guard #available(macOS 12, iOS 15, watchOS 8, tvOS 15, *) else {
             return
@@ -135,6 +149,61 @@ import Testing
         let results = try context.fetch(paged)
         #expect(results.count == 1)
         #expect(results[0].attributes["name"] == .string("alina"))
+    }
+
+    @available(macOS 14.0, iOS 17.0, tvOS 17.0, watchOS 10.0, *)
+    @Test func arithmeticPredicateFetch() throws {
+
+        let context = try Self.makeContext()
+        try context.insert([
+            Person(name: "Alice", age: 30).encode(),
+            Person(name: "Bob", age: 17).encode()
+        ])
+
+        // CoreModel API: age * 2 >= 40, bridged to NSExpression's multiply:by:
+        let direct = FetchRequest.Predicate.Expression
+            .arithmetic(.init(function: .multiply, left: .keyPath("age"), right: .attribute(.int64(2))))
+            .compare(.greaterThanOrEqualTo, .attribute(.int64(40)))
+        let directResults = try context.fetch(FetchRequest(entity: Person.entityName, predicate: direct))
+        #expect(directResults.map { $0.attributes["name"] } == [.string("Alice")])
+
+        // Foundation.Predicate: age + 1 >= 21
+        let converted = try FetchRequest.Predicate(#Predicate<PersonRecord> { $0.age + 1 >= 21 })
+        let convertedResults = try context.fetch(FetchRequest(entity: Person.entityName, predicate: converted))
+        #expect(convertedResults.map { $0.attributes["name"] } == [.string("Alice")])
+    }
+
+    @available(macOS 14.0, iOS 17.0, tvOS 17.0, watchOS 10.0, *)
+    @Test func modifierPredicateFetch() throws {
+
+        let context = try Self.makeContext()
+        let wwdc = Event(name: "WWDC", date: Date())
+        let other = Event(name: "Other", date: Date())
+        try context.insert([wwdc.encode(), other.encode()])
+        try context.insert([
+            Person(name: "Alice", age: 30, events: [wwdc.id, other.id]).encode(),
+            Person(name: "Bob", age: 17, events: [other.id]).encode()
+        ])
+
+        // CoreModel API: ANY events.name == "WWDC"
+        let anyDirect = "events.name".compare(.any, .equalTo, [], .attribute(.string("WWDC")))
+        let anyResults = try context.fetch(FetchRequest(entity: Person.entityName, predicate: anyDirect))
+        #expect(anyResults.map { $0.attributes["name"] } == [.string("Alice")])
+
+        // Foundation.Predicate: contains(where:) converts to the same ANY comparison
+        let anyConverted = try FetchRequest.Predicate(#Predicate<PersonRecord> { $0.events.contains { $0.name == "WWDC" } })
+        #expect(anyConverted == anyDirect)
+
+        // CoreModel API: ALL events.name == "Other"
+        let allDirect = "events.name".compare(.all, .equalTo, [], .attribute(.string("Other")))
+        let allResults = try context.fetch(FetchRequest(entity: Person.entityName, predicate: allDirect))
+        #expect(allResults.map { $0.attributes["name"] } == [.string("Bob")])
+
+        // Foundation.Predicate: allSatisfy converts to the same ALL comparison
+        let allConverted = try FetchRequest.Predicate(#Predicate<PersonRecord> { $0.events.allSatisfy { $0.name == "Other" } })
+        #expect(allConverted == allDirect)
+        let allConvertedResults = try context.fetch(FetchRequest(entity: Person.entityName, predicate: allConverted))
+        #expect(allConvertedResults.map { $0.attributes["name"] } == [.string("Bob")])
     }
 
     @Test func nullRelationshipInsert() throws {
