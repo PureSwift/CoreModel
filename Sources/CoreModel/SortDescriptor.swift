@@ -29,6 +29,11 @@ public extension FetchRequest {
     /// with the underlying store via ``DatabaseFunction``).
     enum SortTerm: Equatable, Hashable, Sendable {
 
+        /// Sort by a property of the object.
+        ///
+        /// A dotted name is a key path into the elements of a composite attribute
+        /// (e.g. `officeHours.start`), matching `NSSortDescriptor(key:ascending:)`.
+        /// A property whose name literally contains a dot still takes precedence.
         case property(PropertyKey)
         case function(Predicate.FunctionExpression)
     }
@@ -88,8 +93,8 @@ extension FetchRequest.SortDescriptor: SortComparator {
         let rhsValue: AttributeValue?
         switch term {
         case let .property(property):
-            lhsValue = lhs.attributes[property]
-            rhsValue = rhs.attributes[property]
+            lhsValue = lhs.attributeValue(for: property)
+            rhsValue = rhs.attributeValue(for: property)
         case let .function(function):
             let expression = FetchRequest.Predicate.Expression.function(function)
             lhsValue = expression.evaluate(with: lhs, functions: [:])?.attributeValue
