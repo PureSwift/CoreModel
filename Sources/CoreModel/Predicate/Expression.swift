@@ -31,6 +31,9 @@ public extension FetchRequest.Predicate {
         /// Expression that invokes a named function (e.g. a custom function registered
         /// with the underlying store) with a list of argument expressions.
         case function(FunctionExpression)
+
+        /// Expression that applies an arithmetic operation to two subexpressions.
+        indirect case arithmetic(ArithmeticExpression)
     }
 
     /// Type of predicate expression.
@@ -40,6 +43,7 @@ public extension FetchRequest.Predicate {
         case relationship
         case keyPath
         case function
+        case arithmetic
     }
 }
 
@@ -55,6 +59,7 @@ public extension FetchRequest.Predicate.Expression {
         case .relationship: return .relationship
         case .keyPath: return .keyPath
         case .function: return .function
+        case .arithmetic: return .arithmetic
         }
     }
 }
@@ -70,6 +75,7 @@ extension FetchRequest.Predicate.Expression: CustomStringConvertible {
         case let .relationship(value):  return value.predicateDescription
         case let .keyPath(value):       return value.description
         case let .function(value):      return value.description
+        case let .arithmetic(value):    return value.description
         }
     }
 }
@@ -149,6 +155,9 @@ extension FetchRequest.Predicate.Expression: Codable {
         case .function:
             let expression = try container.decode(FetchRequest.Predicate.FunctionExpression.self, forKey: .expression)
             self = .function(expression)
+        case .arithmetic:
+            let expression = try container.decode(FetchRequest.Predicate.ArithmeticExpression.self, forKey: .expression)
+            self = .arithmetic(expression)
         }
     }
 
@@ -165,6 +174,8 @@ extension FetchRequest.Predicate.Expression: Codable {
         case let .keyPath(keyPath):
             try container.encode(keyPath.rawValue, forKey: .expression)
         case let .function(value):
+            try container.encode(value, forKey: .expression)
+        case let .arithmetic(value):
             try container.encode(value, forKey: .expression)
         }
     }
