@@ -88,12 +88,6 @@ internal extension PredicateValue {
         return value
     }
 
-    /// The values traversed through a to-many relationship, if any.
-    var aggregateValues: [PredicateValue]? {
-        guard case let .aggregate(values) = self else { return nil }
-        return values
-    }
-
     /// An object identifier this value can represent, for relationship comparisons.
     var objectIDValue: ObjectID? {
         switch self {
