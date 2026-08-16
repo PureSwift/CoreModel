@@ -295,10 +295,275 @@ import SwiftSyntaxMacroExpansion
         let context = BasicMacroExpansionContext()
         #expect(try AttributeMacro.expansion(of: node, providingPeersOf: declaration, in: context).count == 0)
         #expect(try RelationshipMacro.expansion(of: node, providingPeersOf: declaration, in: context).count == 0)
+        #expect(try CompositeAttributeMacro.expansion(of: node, providingPeersOf: declaration, in: context).count == 0)
     }
 
     @Test func expansionNames() {
         #expect(EntityMacro.expansionNames.count == 5)
+    }
+
+    // MARK: - Composite Attributes
+
+    @Test func compositeAttribute() throws {
+        let (node, declaration) = try parse("""
+        @Entity
+        struct Campground {
+            var id: UUID
+            @CompositeAttribute
+            var location: LocationCoordinates
+        }
+        """)
+        let context = BasicMacroExpansionContext()
+        let source = try expandMembers(of: node, attachedTo: declaration, in: context)
+            .map { $0.description }.joined(separator: "\n")
+        #expect(source.contains(".location: LocationCoordinates.attributeType"))
+        // encode/decode codegen is unchanged
+        #expect(source.contains("container.decode(LocationCoordinates.self, forKey: Campground.CodingKeys.location)"))
+        #expect(source.contains("container.encode(self.location, forKey: Campground.CodingKeys.location)"))
+    }
+
+    @Test func optionalCompositeAttribute() throws {
+        for declared in ["LocationCoordinates?", "Optional<LocationCoordinates>"] {
+            let (node, declaration) = try parse("""
+            @Entity
+            struct Campground {
+                var id: UUID
+                @CompositeAttribute
+                var location: \(declared)
+            }
+            """)
+            let context = BasicMacroExpansionContext()
+            let source = try expandMembers(of: node, attachedTo: declaration, in: context)
+                .map { $0.description }.joined(separator: "\n")
+            // the Optional wrapper is stripped for the element list ...
+            #expect(source.contains(".location: LocationCoordinates.attributeType"))
+            // ... but kept for decoding, which routes through the Optional conformance
+            #expect(source.contains("container.decode(\(declared).self, forKey: Campground.CodingKeys.location)"))
+        }
+    }
+
+    @Test func nestedCompositeTypeName() throws {
+        let (node, declaration) = try parse("""
+        @Entity
+        struct Campground {
+            var id: UUID
+            @CompositeAttribute
+            var location: Campground.LocationCoordinates
+        }
+        """)
+        let context = BasicMacroExpansionContext()
+        let source = try expandMembers(of: node, attachedTo: declaration, in: context)
+            .map { $0.description }.joined(separator: "\n")
+        #expect(source.contains(".location: Campground.LocationCoordinates.attributeType"))
+    }
+
+    /// `@Attribute` with an explicit composite type works with no macro support,
+    /// since the argument is passed through verbatim.
+    @Test func explicitCompositeAttributeType() throws {
+        let (node, declaration) = try parse("""
+        @Entity
+        struct Campground {
+            var id: UUID
+            @Attribute(LocationCoordinates.attributeType)
+            var location: LocationCoordinates
+        }
+        """)
+        let context = BasicMacroExpansionContext()
+        let source = try expandMembers(of: node, attachedTo: declaration, in: context)
+            .map { $0.description }.joined(separator: "\n")
+        #expect(source.contains(".location: LocationCoordinates.attributeType"))
+    }
+
+    @Test func invalidCompositeAttribute() throws {
+        // a collection type cannot be a composite
+        let (node, declaration) = try parse("""
+        @Entity
+        struct Campground {
+            var id: UUID
+            @CompositeAttribute
+            var tags: [Tag]
+        }
+        """)
+        let context = BasicMacroExpansionContext()
+        #expect(throws: MacroError.self) {
+            try expandMembers(of: node, attachedTo: declaration, in: context)
+        }
+        // arguments are not accepted
+        let (node2, declaration2) = try parse("""
+        @Entity
+        struct Campground {
+            var id: UUID
+            @CompositeAttribute(.string)
+            var location: LocationCoordinates
+        }
+        """)
+        #expect(throws: MacroError.self) {
+            try expandMembers(of: node2, attachedTo: declaration2, in: BasicMacroExpansionContext())
+        }
+    }
+
+    @Test func compositeCodableProperties() throws {
+        let (_, declaration) = try parse("""
+        @Entity
+        struct Campground {
+            var id: UUID
+            @CompositeAttribute
+            var location: LocationCoordinates
+        }
+        """)
+        let properties = EntityMacro.codableProperties(of: declaration)
+        #expect(properties.count == 1)
+        #expect(properties[0].name == "location")
+        #expect(properties[0].isRelationship == false)
+    }
+
+    /// An entity mixing scalar attributes, required and optional composites, and a
+    /// relationship generates all five members consistently.
+    @Test func mixedEntityExpansion() throws {
+        let (node, declaration) = try parse("""
+        @Entity("Campground")
+        struct Campground {
+            var id: UUID
+            @Attribute
+            var name: String
+            @CompositeAttribute
+            var location: LocationCoordinates
+            @CompositeAttribute
+            var officeHours: Schedule?
+            @Relationship(destination: Unit.self, inverse: .campground)
+            var units: [Unit.ID]
+        }
+        """)
+        let context = BasicMacroExpansionContext()
+        let members = try expandMembers(of: node, attachedTo: declaration, in: context)
+        #expect(members.count == 5)
+        let source = members.map { $0.description }.joined(separator: "\n")
+        #expect(source.contains(#"public static var entityName: EntityName { "Campground" }"#))
+        // scalar and composite attributes live side by side
+        #expect(source.contains(".name: .string"))
+        #expect(source.contains(".location: LocationCoordinates.attributeType"))
+        #expect(source.contains(".officeHours: Schedule.attributeType"))
+        // the relationship is not folded into `attributes`
+        #expect(source.contains(".units: .string") == false)
+        #expect(source.contains(".units: Unit.attributeType") == false)
+        #expect(source.contains(".units: Relationship("))
+        #expect(source.contains("destination: Unit.self"))
+        // decode keeps the optional wrapper, encode passes the property through
+        #expect(source.contains("container.decode(LocationCoordinates.self, forKey: Campground.CodingKeys.location)"))
+        #expect(source.contains("container.decode(Schedule?.self, forKey: Campground.CodingKeys.officeHours)"))
+        #expect(source.contains("container.encode(self.location, forKey: Campground.CodingKeys.location)"))
+        #expect(source.contains("container.encodeRelationship(self.units, forKey: Campground.CodingKeys.units)"))
+    }
+
+    @Test func multipleCompositeAttributes() throws {
+        let (node, declaration) = try parse("""
+        @Entity
+        struct Campground {
+            var id: UUID
+            @CompositeAttribute
+            var location: LocationCoordinates
+            @CompositeAttribute
+            var officeHours: Schedule
+        }
+        """)
+        let context = BasicMacroExpansionContext()
+        let source = try expandMembers(of: node, attachedTo: declaration, in: context)
+            .map { $0.description }.joined(separator: "\n")
+        #expect(source.contains(".location: LocationCoordinates.attributeType"))
+        #expect(source.contains(".officeHours: Schedule.attributeType"))
+        // declaration order is preserved
+        let properties = EntityMacro.codableProperties(of: declaration)
+        #expect(properties.map { $0.name } == ["location", "officeHours"])
+    }
+
+    @Test func compositeAttributeInClass() throws {
+        let (node, declaration) = try parse("""
+        @Entity
+        class Campground {
+            var id: UUID
+            @CompositeAttribute
+            var location: LocationCoordinates
+        }
+        """)
+        let context = BasicMacroExpansionContext()
+        let source = try expandMembers(of: node, attachedTo: declaration, in: context)
+            .map { $0.description }.joined(separator: "\n")
+        #expect(source.contains(".location: LocationCoordinates.attributeType"))
+    }
+
+    @Test func compositeExtensionExpansion() throws {
+        let (node, declaration) = try parse("""
+        @Entity
+        struct Campground {
+            var id: UUID
+            @CompositeAttribute
+            var location: LocationCoordinates
+        }
+        """)
+        let context = BasicMacroExpansionContext()
+        let extensions = try EntityMacro.expansion(
+            of: node,
+            attachedTo: declaration,
+            providingExtensionsOf: TypeSyntax(stringLiteral: "Campground"),
+            conformingTo: [],
+            in: context
+        )
+        #expect(extensions.count == 1)
+        #expect(extensions[0].description.contains("CoreModel.Entity"))
+    }
+
+    /// A property with no type annotation carries no type name to build elements from,
+    /// so it is skipped rather than crashing.
+    @Test func compositeAttributeWithoutTypeAnnotation() throws {
+        let (node, declaration) = try parse("""
+        @Entity
+        struct Campground {
+            var id: UUID
+            @CompositeAttribute
+            var location = LocationCoordinates(latitude: 0, longitude: 0)
+        }
+        """)
+        let context = BasicMacroExpansionContext()
+        let source = try expandMembers(of: node, attachedTo: declaration, in: context)
+            .map { $0.description }.joined(separator: "\n")
+        #expect(source.contains("location") == false)
+        #expect(EntityMacro.codableProperties(of: declaration).isEmpty)
+    }
+
+    @Test func compositeAttributeRejectsCollections() throws {
+        for declared in ["[LocationCoordinates]", "[String: LocationCoordinates]"] {
+            let (node, declaration) = try parse("""
+            @Entity
+            struct Campground {
+                var id: UUID
+                @CompositeAttribute
+                var values: \(declared)
+            }
+            """)
+            #expect(throws: MacroError.self) {
+                try expandMembers(of: node, attachedTo: declaration, in: BasicMacroExpansionContext())
+            }
+        }
+    }
+
+    /// `@Attribute` and `@CompositeAttribute` are the only attribute spellings that
+    /// contribute; an unrelated property wrapper is still ignored.
+    @Test func unrelatedAttributeIgnoredAlongsideComposite() throws {
+        let (node, declaration) = try parse("""
+        @Entity
+        struct Campground {
+            var id: UUID
+            @CompositeAttribute
+            var location: LocationCoordinates
+            @Published
+            var ignored: Int
+        }
+        """)
+        let context = BasicMacroExpansionContext()
+        let properties = EntityMacro.codableProperties(of: declaration)
+        #expect(properties.map { $0.name } == ["location"])
+        let initDecl = try EntityMacro.initDeclarationSyntax(of: node, providingMembersOf: declaration, in: context)
+        #expect(initDecl.description.contains("ignored") == false)
     }
 
     #if canImport(Darwin)
@@ -306,6 +571,7 @@ import SwiftSyntaxMacroExpansion
         #expect(MacroError.invalidType.errorDescription != nil)
         #expect(MacroError.unknownAttributeType(for: "point").errorDescription != nil)
         #expect(MacroError.unknownInverseRelationship(for: "pets").errorDescription != nil)
+        #expect(MacroError.invalidCompositeAttribute(for: "location").errorDescription != nil)
     }
     #endif
 }
