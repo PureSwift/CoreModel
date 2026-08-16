@@ -65,8 +65,8 @@ public extension Array where Element == ModelData {
                 let rhs: AttributeValue?
                 switch descriptor.term {
                 case let .property(property):
-                    lhs = first.attributes[property]
-                    rhs = second.attributes[property]
+                    lhs = first.attributeValue(for: property)
+                    rhs = second.attributeValue(for: property)
                 case let .function(function):
                     let expression = FetchRequest.Predicate.Expression.function(function)
                     lhs = expression.evaluate(with: first, functions: functions)?.attributeValue
