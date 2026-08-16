@@ -218,6 +218,27 @@ import Testing
         #expect(inMemory.map { $0.attributes["name"] } == [.string("Bob"), .string("Carol")])
     }
 
+    @available(macOS 15.0, iOS 18.0, tvOS 18.0, watchOS 11.0, *)
+    @Test func regexPredicateFetch() throws {
+
+        let context = try Self.makeContext()
+        try context.insert([
+            Person(name: "Alice", age: 30).encode(),
+            Person(name: "Bob", age: 17).encode()
+        ])
+
+        // Foundation.Predicate: the captured pattern becomes a MATCHES comparison
+        let regex = try Regex("Al[a-z]+")
+        let converted = try FetchRequest.Predicate(#Predicate<PersonRecord> { $0.name.contains(regex) })
+        #expect(converted == "name".compare(.matches, .attribute(.string(".*Al[a-z]+.*"))))
+        let results = try context.fetch(FetchRequest(entity: Person.entityName, predicate: converted))
+        #expect(results.map { $0.attributes["name"] } == [.string("Alice")])
+
+        // the in-memory evaluator agrees with CoreData on the same objects
+        let objects = try context.fetch(FetchRequest(entity: Person.entityName))
+        #expect(objects.filtered(by: converted).map { $0.attributes["name"] } == [.string("Alice")])
+    }
+
     @Test func nullRelationshipInsert() throws {
         guard #available(macOS 12, iOS 15, watchOS 8, tvOS 15, *) else {
             return
