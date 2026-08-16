@@ -183,6 +183,28 @@ import Testing
         )))
         #expect(Self.people.filtered(by: modulus).map(\.id.rawValue) == ["Alice", "Alina"])
 
+        // integer division truncates, so the converted predicate agrees with
+        // the semantics Swift itself gives the same expression
+        let intDivide = #Predicate<PersonModel> { $0.age / 2 == 8 }
+        let converted = try FetchRequest.Predicate(intDivide)
+        #expect(converted == .comparison(.init(
+            left: .arithmetic(.init(function: .divide, left: .keyPath("age"), right: .attribute(.int64(2)))),
+            right: .attribute(.int64(8)),
+            type: .equalTo
+        )))
+        #expect(Self.people.filtered(by: converted).map(\.id.rawValue) == ["Bob"]) // 17 / 2 == 8
+        for person in [
+            PersonModel(name: "Alice", age: 30, isActive: true, nickname: nil, height: 1.7, friends: [], scores: []),
+            PersonModel(name: "Bob", age: 17, isActive: false, nickname: nil, height: 1.8, friends: [], scores: [])
+        ] {
+            let data = ModelData(
+                entity: "Person",
+                id: ObjectID(rawValue: person.name),
+                attributes: ["age": .int64(numericCast(person.age))]
+            )
+            #expect(try intDivide.evaluate(person) == converted.evaluate(with: data), "\(person.name)")
+        }
+
         // unary minus lowers to multiplication by -1
         let negated = try FetchRequest.Predicate(#Predicate<PersonModel> { -$0.age < 0 })
         #expect(negated == .comparison(.init(
