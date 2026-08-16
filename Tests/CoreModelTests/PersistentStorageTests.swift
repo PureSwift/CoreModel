@@ -113,10 +113,15 @@ struct AllTypes: Equatable, Hashable, Codable, Identifiable {
 //   `if #available` instead.
 @Suite struct PersistentStorageTests {
 
-    static func makeStorage(model: Model = Model(entities: Person.self, Event.self, AllTypes.self)) -> PersistentContainerStorage {
+    /// - Warning: This is an atomic (in-memory) store, which CoreData refuses to use for
+    /// a model containing composite attributes — it raises an uncatchable
+    /// `NSInvalidArgumentException`. Do not add a composite attribute to `AllTypes` or
+    /// any other entity used here; see `CompositeCoreDataTests` for the SQLite-backed
+    /// composite coverage.
+    static func makeStorage(model: Model = Model(entities: Person.self, Event.self, AllTypes.self)) throws -> PersistentContainerStorage {
         let description = NSPersistentStoreDescription()
         description.type = NSInMemoryStoreType
-        return PersistentContainerStorage(
+        return try PersistentContainerStorage(
             name: "Test\(UUID())",
             model: model,
             storeDescriptions: [description]
@@ -146,7 +151,7 @@ struct AllTypes: Equatable, Hashable, Codable, Identifiable {
         guard #available(macOS 12, iOS 15, watchOS 8, tvOS 15, *) else {
             return
         }
-        let storage = Self.makeStorage()
+        let storage = try Self.makeStorage()
         var value = Self.makeAllTypes()
         try await storage.insert(value)
         var fetched = try await storage.fetch(AllTypes.self, for: value.id)
@@ -164,7 +169,7 @@ struct AllTypes: Equatable, Hashable, Codable, Identifiable {
         guard #available(macOS 12, iOS 15, watchOS 8, tvOS 15, *) else {
             return
         }
-        let storage = Self.makeStorage()
+        let storage = try Self.makeStorage()
         let people = [
             Person(name: "Alice", age: 30),
             Person(name: "Bob", age: 25),
@@ -215,7 +220,7 @@ struct AllTypes: Equatable, Hashable, Codable, Identifiable {
         guard #available(macOS 12, iOS 15, watchOS 8, tvOS 15, *) else {
             return
         }
-        let storage = Self.makeStorage()
+        let storage = try Self.makeStorage()
         try await storage.register(function: DatabaseFunction(name: "upperName", argumentCount: 1) { arguments in
             guard case let .string(name) = arguments[0] else { return nil }
             return .string(name.uppercased())
@@ -237,7 +242,7 @@ struct AllTypes: Equatable, Hashable, Codable, Identifiable {
         guard #available(macOS 12, iOS 15, watchOS 8, tvOS 15, *) else {
             return
         }
-        let storage = Self.makeStorage()
+        let storage = try Self.makeStorage()
         let person = Person(name: "Alice", age: 30)
         try await storage.insert(person)
         let viewContext = try storage.viewContext
@@ -268,7 +273,7 @@ struct AllTypes: Equatable, Hashable, Codable, Identifiable {
         let model = Model(entities: Person.self, Event.self, AllTypes.self)
         let container = NSPersistentContainer(
             name: "Test\(UUID())",
-            managedObjectModel: NSManagedObjectModel(model: model)
+            managedObjectModel: try NSManagedObjectModel(model: model)
         )
         container.persistentStoreDescriptions.forEach { $0.shouldAddStoreAsynchronously = false }
         try container.syncLoadPersistentStores()
