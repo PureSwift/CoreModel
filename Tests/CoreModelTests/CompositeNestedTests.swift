@@ -18,7 +18,7 @@ import CoreData
 ///
 /// Every assertion lives in a `Self.assert…` helper taking `some ModelStorage`, so the
 /// two backends are held to the same behavior rather than to two hand-written copies.
-@Suite struct CompositeNestedTests {
+@Suite(.serialized) struct CompositeNestedTests {
 
     static let model = Model(entities: [
         EntityDescription(entity: Facility.self)
