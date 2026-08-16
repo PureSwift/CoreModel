@@ -249,6 +249,34 @@ import Testing
         )))
     }
 
+    @available(macOS 15.0, iOS 18.0, tvOS 18.0, watchOS 11.0, *)
+    @Test func regex() throws {
+
+        // the pattern is recovered from the regex the macro captures, and padded
+        // because MATCHES matches the whole value rather than a substring
+        let dynamic = try Regex("Al[a-z]+")
+        let predicate = try FetchRequest.Predicate(#Predicate<PersonModel> { $0.name.contains(dynamic) })
+        #expect(predicate == .comparison(.init(
+            left: .keyPath("name"),
+            right: .attribute(.string(".*Al[a-z]+.*")),
+            type: .matches
+        )))
+        #expect(Self.people.filtered(by: predicate).map(\.id.rawValue) == ["Alice", "Alina"])
+
+        // regex literals and RegexBuilder regexes carry their pattern too
+        let literal = try FetchRequest.Predicate(#Predicate<PersonModel> { $0.name.contains(#/^Al/#) })
+        #expect(literal == .comparison(.init(
+            left: .keyPath("name"),
+            right: .attribute(.string(".*^Al.*")),
+            type: .matches
+        )))
+        #expect(Self.people.filtered(by: literal).map(\.id.rawValue) == ["Alice", "Alina"])
+
+        // the CoreModel API expresses the same comparison directly
+        let direct = "name".compare(.matches, .attribute(.string(".*Al[a-z]+.*")))
+        #expect(Self.people.filtered(by: direct).map(\.id.rawValue) == ["Alice", "Alina"])
+    }
+
     @available(macOS 14.0, iOS 17.0, tvOS 17.0, watchOS 10.0, *)
     @Test func unsupported() {
 
