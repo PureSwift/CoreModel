@@ -13,7 +13,13 @@ import Testing
 @testable import CoreModel
 @testable import CoreDataModel
 
+// - Note: `@MainActor` is required, not cosmetic: these tests use
+//   `NSManagedObjectContext(concurrencyType: .mainQueueConcurrencyType)`, which may
+//   only be touched from the main queue. Swift Testing runs test bodies on arbitrary
+//   tasks, so without this the context is used off its queue — undefined behavior that
+//   surfaced as intermittent EXC_BAD_ACCESS crashes in unrelated places.
 @Suite(.serialized)
+@MainActor
 struct CoreDataTests {
     
     @available(macOS 14, iOS 17, watchOS 10, tvOS 17, *)
