@@ -127,6 +127,10 @@ internal extension FetchRequest.Predicate.Expression {
                 $0.evaluate(with: data, functions: functions)?.attributeValue
             }
             return registered.evaluate(arguments).map { .attribute($0) }
+        case let .arithmetic(arithmetic):
+            let lhs = arithmetic.left.evaluate(with: data, functions: functions)?.attributeValue
+            let rhs = arithmetic.right.evaluate(with: data, functions: functions)?.attributeValue
+            return AttributeValue.arithmetic(arithmetic.function, lhs, rhs).map { .attribute($0) }
         }
     }
 }
@@ -275,6 +279,50 @@ internal extension AttributeValue {
     var stringValue: String? {
         if case let .string(value) = self { return value }
         return nil
+    }
+
+    /// An integer representation for integer value types, for integer arithmetic.
+    var integerValue: Int64? {
+        switch self {
+        case let .int16(value):     return Int64(value)
+        case let .int32(value):     return Int64(value)
+        case let .int64(value):     return value
+        default:                    return nil
+        }
+    }
+
+    /// Apply an arithmetic function to two values.
+    ///
+    /// Integer operands stay in integer arithmetic (except division, which always
+    /// produces a floating-point value, matching `NSExpression`'s `divide:by:`);
+    /// mixed or floating-point operands are computed as `Double`.
+    /// Returns `nil` for non-numeric operands, division by zero, or
+    /// floating-point remainder.
+    static func arithmetic(
+        _ function: FetchRequest.Predicate.ArithmeticExpression.Function,
+        _ lhs: AttributeValue?,
+        _ rhs: AttributeValue?
+    ) -> AttributeValue? {
+        guard let lhs, let rhs else { return nil }
+        if let leftInteger = lhs.integerValue, let rightInteger = rhs.integerValue {
+            switch function {
+            case .add:      return .int64(leftInteger &+ rightInteger)
+            case .subtract: return .int64(leftInteger &- rightInteger)
+            case .multiply: return .int64(leftInteger &* rightInteger)
+            case .divide:   break // always floating-point
+            case .modulus:  return rightInteger == 0 ? nil : .int64(leftInteger % rightInteger)
+            }
+        }
+        guard let leftNumber = lhs.comparableDouble, let rightNumber = rhs.comparableDouble else {
+            return nil
+        }
+        switch function {
+        case .add:      return .double(leftNumber + rightNumber)
+        case .subtract: return .double(leftNumber - rightNumber)
+        case .multiply: return .double(leftNumber * rightNumber)
+        case .divide:   return rightNumber == 0 ? nil : .double(leftNumber / rightNumber)
+        case .modulus:  return nil // integers only
+        }
     }
 
     static func areEqual(_ lhs: AttributeValue?, _ rhs: AttributeValue?, caseInsensitive: Bool) -> Bool {
