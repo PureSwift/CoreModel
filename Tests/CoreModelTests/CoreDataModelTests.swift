@@ -18,7 +18,7 @@ import Testing
 //   suite exercises (`ManagedObjectViewContext`, `NSPersistentContainer.syncLoadPersistentStores()`,
 //   etc.) need macOS 12/iOS 15/watchOS 8/tvOS 15, below this package's deployment target, so
 //   each test guards its body with a runtime `if #available` instead.
-@Suite struct CoreDataModelTests {
+@Suite(.serialized) struct CoreDataModelTests {
 
     static func makeContext() throws -> NSManagedObjectContext {
         let model = Model(entities: Person.self, Event.self)
