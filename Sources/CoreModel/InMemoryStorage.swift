@@ -66,7 +66,12 @@ internal final class InMemoryStorage {
             try validate(fetchRequest.entity)
             let values = (state.objects[fetchRequest.entity].map { Array($0.values) } ?? [])
                 .map { normalized(entity: fetchRequest.entity, $0, objects: state.objects) }
-            return fetchRequest.evaluate(values, functions: state.functions)
+            // objects of other entities are filtered out of the results, but let key paths
+            // that traverse a relationship (e.g. `events.name`) resolve their related objects
+            let related = state.objects
+                .filter { $0.key != fetchRequest.entity }
+                .flatMap { $0.value.values }
+            return fetchRequest.evaluate(values + related, functions: state.functions)
         }
     }
 
