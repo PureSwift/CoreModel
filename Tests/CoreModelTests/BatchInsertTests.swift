@@ -13,7 +13,7 @@ import Testing
 @testable import CoreModel
 @testable import CoreDataModel
 
-@Suite
+@Suite(.serialized)
 struct BatchInsertTests {
 
     /// Synthetic catalog payload: many events sharing a small set of people through
