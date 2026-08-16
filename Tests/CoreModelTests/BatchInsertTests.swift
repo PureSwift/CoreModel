@@ -20,7 +20,7 @@ struct BatchInsertTests {
     /// to-many relationships, duplicate values in the same batch, relationship targets
     /// appearing after the values that reference them, and an upsert pass over
     /// existing data.
-    @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
+    @available(macOS 14, iOS 17, watchOS 10, tvOS 17, *)
     @Test
     func batchInsert() async throws {
 
@@ -115,7 +115,7 @@ struct BatchInsertTests {
     /// batch cost ~100x more — because each fetch request evaluates its predicate
     /// against every pending unsaved object in the context. The prefetched object
     /// cache keeps the cost of a 10x larger batch at roughly 10x.
-    @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
+    @available(macOS 14, iOS 17, watchOS 10, tvOS 17, *)
     @Test
     func batchInsertScaling() async throws {
         // warm up the Core Data stack setup costs
@@ -128,7 +128,7 @@ struct BatchInsertTests {
         #expect(ratio < 40, "10x larger batch should cost roughly 10x, not \(ratio)x")
     }
 
-    @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
+    @available(macOS 14, iOS 17, watchOS 10, tvOS 17, *)
     private func measureInsert(count: Int) async throws -> TimeInterval {
         let store = try await makeStore()
         let people = (0 ..< 20).map {
@@ -148,7 +148,7 @@ struct BatchInsertTests {
         return Date().timeIntervalSince(start)
     }
 
-    @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
+    @available(macOS 14, iOS 17, watchOS 10, tvOS 17, *)
     private func makeStore() async throws -> NSPersistentContainer {
         let model = Model(
             entities:
@@ -157,7 +157,7 @@ struct BatchInsertTests {
                 Campground.self,
                 Campground.Unit.self
         )
-        let managedObjectModel = NSManagedObjectModel(model: model)
+        let managedObjectModel = try NSManagedObjectModel(model: model)
         let store = NSPersistentContainer(
             name: "Test\(UUID())",
             managedObjectModel: managedObjectModel
