@@ -47,7 +47,11 @@ public extension FetchRequest.Predicate.ArithmeticExpression {
         /// Multiplication (`left * right`).
         case multiply   = "multiply:by:"
 
-        /// Division (`left / right`), always producing a floating-point value.
+        /// Division (`left / right`).
+        ///
+        /// Integer operands divide truncating, the way Swift's `/` and
+        /// `NSExpression`'s `divide:by:` both do; floating-point operands
+        /// produce a floating-point value.
         case divide     = "divide:by:"
 
         /// Remainder (`left % right`), integers only.
