@@ -92,6 +92,15 @@ internal extension AttributeValue {
         case let .double(value):    return value.description
         case let .url(value):       return value.description
         case let .decimal(value):   return value.description
+        case let .composite(value):
+            // - Note: Sorted by element name so that diagnostics are deterministic,
+            //   since `Dictionary` iteration order is not.
+            let body = value
+                .sorted { $0.key.rawValue < $1.key.rawValue }
+                .reduce("", {
+                    $0 + ($0.isEmpty ? "" : ", ") + $1.key.rawValue + " = " + $1.value.predicateDescription
+                })
+            return "{" + body + "}"
         }
     }
 }
