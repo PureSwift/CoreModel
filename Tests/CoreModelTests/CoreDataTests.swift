@@ -13,7 +13,7 @@ import Testing
 @testable import CoreModel
 @testable import CoreDataModel
 
-@Suite
+@Suite(.serialized)
 struct CoreDataTests {
     
     @available(macOS 14, iOS 17, watchOS 10, tvOS 17, *)

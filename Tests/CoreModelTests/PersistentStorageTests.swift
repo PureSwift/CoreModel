@@ -111,7 +111,7 @@ struct AllTypes: Equatable, Hashable, Codable, Identifiable {
 // - Note: `@Test`/`@Suite` can't be combined with a declaration-level `@available` — see
 //   CoreDataModelTests.swift for the same note. Each test guards its body with a runtime
 //   `if #available` instead.
-@Suite struct PersistentStorageTests {
+@Suite(.serialized) struct PersistentStorageTests {
 
     /// - Warning: This is an atomic (in-memory) store, which CoreData refuses to use for
     /// a model containing composite attributes — it raises an uncatchable

@@ -101,6 +101,42 @@ import Testing
         #expect(request.evaluate(Fixture.all).map(\.id.rawValue) == ["alice"])
     }
 
+    @Test func nullRelationship() {
+
+        // a null relationship has nothing to traverse into
+        let dave = ModelData(
+            entity: "Person",
+            id: ObjectID(rawValue: "dave"),
+            attributes: ["name": .string("Dave")],
+            relationships: ["events": .null, "favorite": .null]
+        )
+        let objects = Fixture.all + [dave]
+        let any = FetchRequest(entity: "Person", predicate: "events.name".compare(.any, .equalTo, [], .attribute(.string("WWDC"))))
+        #expect(any.evaluate(objects).map(\.id.rawValue) == ["alice"])
+        let toOne = FetchRequest(entity: "Person", predicate: FetchRequest.Predicate.comparison(.init(
+            left: .keyPath("favorite.name"),
+            right: .attribute(.string("WWDC")),
+            type: .equalTo
+        )))
+        #expect(toOne.evaluate(objects).map(\.id.rawValue) == ["alice"])
+    }
+
+    @Test func modifierOnNonCollection() {
+
+        // an ALL/ANY modifier on a plain attribute falls back to a direct comparison
+        let predicate = "name".compare(.any, .equalTo, [], .attribute(.string("Alice")))
+        let request = FetchRequest(entity: "Person", predicate: predicate)
+        #expect(request.evaluate(Fixture.all).map(\.id.rawValue) == ["alice"])
+    }
+
+    @Test func missingRelationshipProperty() {
+
+        // a key path whose leading key isn't a relationship doesn't resolve
+        let predicate = "name.length".compare(.any, .equalTo, [], .attribute(.int64(5)))
+        let request = FetchRequest(entity: "Person", predicate: predicate)
+        #expect(request.evaluate(Fixture.all).isEmpty)
+    }
+
     @Test func unresolvedRelatedObjects() {
 
         // without the related objects, a traversing key path can't resolve
