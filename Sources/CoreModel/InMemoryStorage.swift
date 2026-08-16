@@ -97,8 +97,17 @@ internal final class InMemoryStorage {
     ) -> ModelData {
         guard let description = model[entity] else { return value }
         var value = value
-        for attribute in description.attributes where value.attributes[attribute.id] == nil {
-            value.attributes[attribute.id] = .null
+        for attribute in description.attributes {
+            guard let existing = value.attributes[attribute.id] else {
+                value.attributes[attribute.id] = .null
+                continue
+            }
+            // A composite the caller only partly specified is filled out the same way,
+            // one level down, so that a declared element decodes as the absence it
+            // represents rather than as a missing key. An absent composite stays `.null`
+            // rather than becoming a dictionary of nulls.
+            guard case let .composite(elements) = attribute.type else { continue }
+            value.attributes[attribute.id] = existing.normalized(for: elements)
         }
         for relationship in description.relationships where relationship.type == .toMany {
             guard let destination = model[relationship.destinationEntity],
@@ -157,6 +166,12 @@ internal final class InMemoryStorage {
             // touch every relationship (e.g. a site catalog refresh that never re-states
             // `parkingReservations`, which is written by an entirely separate sync) would
             // silently wipe those links instead of leaving them alone.
+            //
+            // This merge is per-property only: a composite attribute is replaced whole
+            // rather than merged element-wise, matching Core Data's composite setter and
+            // backends that store the composite as a single column or sub-document. Since
+            // `normalized` makes every read well formed, a fetch/modify/insert round trip
+            // still never loses elements.
             if var existing = state.objects[value.entity]?[value.id] {
                 // - Note: Explicit loops rather than `Dictionary.merge(_:uniquingKeysWith:)` —
                 //   the closure-based overload does dynamic casting internally, which is
