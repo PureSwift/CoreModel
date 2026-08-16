@@ -120,14 +120,14 @@ extension Campground: EntityTestInfo {
             "created": .date,
             "updated": .date,
             "address": .string,
-            "location": .string,
+            "location": Campground.LocationCoordinates.attributeType,
             "amenities": .string,
             "phoneNumber": .string,
             "descriptionText": .string,
             "timeZone": .int32,
             "notes": .string,
             "directions": .string,
-            "officeHours": .string
+            "officeHours": Campground.Schedule.attributeType
         ]
     }
     static var expectedRelationships: [String : (type: RelationshipType, destinationEntity: String, inverseRelationshipKey: String?)] {
@@ -144,7 +144,7 @@ extension Campground.Unit: EntityTestInfo {
             "name": .string,
             "notes": .string,
             "amenities": .string,
-            "checkout": .string
+            "checkout": Campground.Schedule.attributeType
         ]
     }
     static var expectedRelationships: [String : (type: RelationshipType, destinationEntity: String, inverseRelationshipKey: String?)] {
