@@ -23,14 +23,9 @@ public extension FetchRequest {
         fetchRequest.predicate = predicate?.toFoundation()
         fetchRequest.fetchLimit = fetchLimit
         fetchRequest.fetchOffset = fetchOffset
-        var sortDescriptors = sortDescriptors.compactMap { sort -> NSSortDescriptor? in
-            guard let property = sort.property else {
-                // Function-based sort terms are not supported by NSFetchRequest;
-                // they require in-memory evaluation, not yet implemented.
-                return nil
-            }
-            return NSSortDescriptor(key: property.rawValue, ascending: sort.ascending)
-        }
+        // Function-based sort terms are not supported by NSFetchRequest;
+        // they require in-memory evaluation, not yet implemented.
+        var sortDescriptors = sortDescriptors.compactMap { $0.toFoundation() }
         sortDescriptors.append(NSSortDescriptor(key: NSManagedObject.BuiltInProperty.id.rawValue, ascending: true))
         fetchRequest.sortDescriptors = sortDescriptors
         let resultType: NSFetchRequestResultType

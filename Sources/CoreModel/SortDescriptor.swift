@@ -48,6 +48,67 @@ extension FetchRequest.SortDescriptor: Codable {}
 extension FetchRequest.SortTerm: Codable {}
 #endif
 
+// MARK: - SortComparator
+
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#elseif canImport(Foundation)
+import Foundation
+#endif
+
+#if canImport(FoundationEssentials) || canImport(Foundation)
+@available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
+public extension FetchRequest.SortDescriptor {
+
+    /// The sort order (`.forward` when ascending).
+    var order: SortOrder {
+        get { ascending ? .forward : .reverse }
+        set { ascending = newValue == .forward }
+    }
+
+    init(term: FetchRequest.SortTerm, order: SortOrder) {
+        self.init(term: term, ascending: order == .forward)
+    }
+
+    init(property: PropertyKey, order: SortOrder) {
+        self.init(property: property, ascending: order == .forward)
+    }
+}
+
+@available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
+extension FetchRequest.SortDescriptor: SortComparator {
+
+    /// Compares two model objects using this descriptor's sort term and order.
+    ///
+    /// Function-based sort terms have no registered functions available through
+    /// `SortComparator`, so they evaluate to `nil` and compare as equal;
+    /// use `Array.sorted(by:functions:)` to sort with custom functions.
+    public func compare(_ lhs: ModelData, _ rhs: ModelData) -> ComparisonResult {
+        let lhsValue: AttributeValue?
+        let rhsValue: AttributeValue?
+        switch term {
+        case let .property(property):
+            lhsValue = lhs.attributes[property]
+            rhsValue = rhs.attributes[property]
+        case let .function(function):
+            let expression = FetchRequest.Predicate.Expression.function(function)
+            lhsValue = expression.evaluate(with: lhs, functions: [:])?.attributeValue
+            rhsValue = expression.evaluate(with: rhs, functions: [:])?.attributeValue
+        }
+        guard let comparison = AttributeValue.order(lhsValue, rhsValue), comparison != 0 else {
+            return .orderedSame
+        }
+        let ascendingResult: ComparisonResult = comparison < 0 ? .orderedAscending : .orderedDescending
+        switch order {
+        case .forward:
+            return ascendingResult
+        case .reverse:
+            return ascendingResult == .orderedAscending ? .orderedDescending : .orderedAscending
+        }
+    }
+}
+#endif
+
 // MARK: - Foundation
 
 #if canImport(Darwin)
@@ -61,6 +122,39 @@ public extension FetchRequest.SortDescriptor {
         let sortDescriptor = NSSortDescriptor(sortDescriptor)
         self.term = .property(PropertyKey(rawValue: sortDescriptor.key ?? ""))
         self.ascending = sortDescriptor.ascending
+    }
+
+    /// Converts to a ``Foundation.SortDescriptor`` comparing the specified root type.
+    ///
+    /// Returns `nil` for function-based sort terms, which have no Foundation equivalent.
+    func toFoundation<Root: NSObject>(comparing root: Root.Type) -> Foundation.SortDescriptor<Root>? {
+        guard let sortDescriptor = toFoundation() else {
+            return nil
+        }
+        return Foundation.SortDescriptor(sortDescriptor, comparing: root)
+    }
+}
+
+public extension FetchRequest.SortDescriptor {
+
+    /// Creates a ``FetchRequest.SortDescriptor`` from an `NSSortDescriptor`.
+    ///
+    /// Returns `nil` if the sort descriptor has no key path.
+    init?(_ sortDescriptor: NSSortDescriptor) {
+        guard let key = sortDescriptor.key else {
+            return nil
+        }
+        self.init(property: PropertyKey(rawValue: key), ascending: sortDescriptor.ascending)
+    }
+
+    /// Converts to an `NSSortDescriptor`.
+    ///
+    /// Returns `nil` for function-based sort terms, which have no Foundation equivalent.
+    func toFoundation() -> NSSortDescriptor? {
+        guard let property else {
+            return nil
+        }
+        return NSSortDescriptor(key: property.rawValue, ascending: ascending)
     }
 }
 #endif

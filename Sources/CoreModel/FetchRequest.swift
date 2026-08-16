@@ -38,3 +38,30 @@ public struct FetchRequest: Equatable, Hashable, Sendable {
 #if !hasFeature(Embedded)
 extension FetchRequest: Codable {}
 #endif
+
+// MARK: - Foundation
+
+#if canImport(Darwin)
+import Foundation
+
+@available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
+public extension FetchRequest {
+
+    /// Creates a fetch request sorted with ``Foundation.SortDescriptor`` values.
+    init<Root: NSObject>(
+        entity: EntityName,
+        sortDescriptors: [Foundation.SortDescriptor<Root>],
+        predicate: Predicate? = nil,
+        fetchLimit: Int = 0,
+        fetchOffset: Int = 0
+    ) {
+        self.init(
+            entity: entity,
+            sortDescriptors: sortDescriptors.map { SortDescriptor($0) },
+            predicate: predicate,
+            fetchLimit: fetchLimit,
+            fetchOffset: fetchOffset
+        )
+    }
+}
+#endif
