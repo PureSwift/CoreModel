@@ -19,6 +19,21 @@ public macro Attribute(_ type: AttributeType? = nil) = #externalMacro(
     type: "AttributeMacro"
 )
 
+/// Declares a property as a composite attribute.
+///
+/// The property's type must conform to ``CompositeAttribute``; its
+/// ``CompositeAttribute/attributeElements`` supply the element list.
+///
+/// ```swift
+/// @CompositeAttribute
+/// var location: LocationCoordinates
+/// ```
+@attached(peer)
+public macro CompositeAttribute() = #externalMacro(
+    module: "CoreModelMacros",
+    type: "CompositeAttributeMacro"
+)
+
 @attached(peer)
 public macro Relationship<T: CoreModel.Entity>(destination: T.Type, inverse: T.CodingKeys) = #externalMacro(
     module: "CoreModelMacros",
