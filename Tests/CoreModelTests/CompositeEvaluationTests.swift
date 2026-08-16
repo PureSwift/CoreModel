@@ -103,6 +103,68 @@ import Testing
         #expect(predicate.evaluate(with: north) == false)
     }
 
+    // MARK: - Relationship traversal into composites
+
+    /// A key path may traverse a relationship and *then* descend into a composite
+    /// element of the related object, e.g. `units.checkout.start`.
+    @Test func relationshipThenCompositeKeyPath() {
+        let early = ModelData(
+            entity: Campground.Unit.entityName,
+            id: "early",
+            attributes: ["checkout": .composite(["start": .int64(6), "end": .int64(10)])],
+            relationships: ["campground": .toOne("north")]
+        )
+        let late = ModelData(
+            entity: Campground.Unit.entityName,
+            id: "late",
+            attributes: ["checkout": .composite(["start": .int64(11), "end": .int64(14)])],
+            relationships: ["campground": .toOne("north")]
+        )
+        let campground = ModelData(
+            entity: Campground.entityName,
+            id: "north",
+            attributes: ["name": .string("North")],
+            relationships: ["units": .toMany([early.id, late.id])]
+        )
+        let objects = [early.id: early, late.id: late, campground.id: campground]
+
+        let anyEarly = "units.checkout.start".compare(.any, .equalTo, [], .attribute(.int64(6)))
+        #expect(anyEarly.evaluate(with: campground, objects: objects))
+
+        let anyMissing = "units.checkout.start".compare(.any, .equalTo, [], .attribute(.int64(99)))
+        #expect(anyMissing.evaluate(with: campground, objects: objects) == false)
+
+        // every unit checks out before noon
+        let allBeforeNoon = "units.checkout.start".compare(.all, .lessThan, [], .attribute(.int64(12)))
+        #expect(allBeforeNoon.evaluate(with: campground, objects: objects))
+
+        // an element the composite doesn't declare resolves to nothing
+        let unknown = "units.checkout.midday".compare(.any, .equalTo, [], .attribute(.int64(6)))
+        #expect(unknown.evaluate(with: campground, objects: objects) == false)
+    }
+
+    /// The same, through a to-one relationship.
+    @Test func toOneRelationshipThenCompositeKeyPath() {
+        let campground = ModelData(
+            entity: Campground.entityName,
+            id: "north",
+            attributes: [
+                "name": .string("North"),
+                "location": .composite(["latitude": .double(40.7), "longitude": .double(-74.0)])
+            ],
+            relationships: [:]
+        )
+        let unit = ModelData(
+            entity: Campground.Unit.entityName,
+            id: "unit",
+            attributes: [:],
+            relationships: ["campground": .toOne(campground.id)]
+        )
+        let objects = [campground.id: campground, unit.id: unit]
+        #expect(("campground.location.latitude" > 30).evaluate(with: unit, objects: objects))
+        #expect(("campground.location.latitude" > 50).evaluate(with: unit, objects: objects) == false)
+    }
+
     // MARK: - Sorting
 
     @Test func sortByElement() {
