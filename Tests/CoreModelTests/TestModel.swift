@@ -32,7 +32,12 @@ struct Person: Equatable, Hashable, Codable, Identifiable {
         self.age = age
         self.events = events
     }
-    
+
+    // - Note: Declared manually because `Event.@Relationship(inverse: .events)`
+    //   must type-check against this enum while macros are still expanding;
+    //   the compiler will not expand `@Entity`'s generated `CodingKeys` to
+    //   satisfy another macro's argument. Entities that are not referenced as a
+    //   relationship destination (e.g. `Facility`) can rely on the generated enum.
     enum CodingKeys: CodingKey {
         case id
         case name
@@ -62,7 +67,8 @@ struct Event: Equatable, Hashable, Codable, Identifiable {
         self.date = date
         self.people = people
     }
-    
+
+    // - Note: Declared manually; see `Person.CodingKeys`.
     enum CodingKeys: CodingKey {
         case id
         case name
@@ -457,13 +463,5 @@ public struct Facility: Equatable, Hashable, Codable, Identifiable {
         self.name = name
         self.address = address
         self.billingAddress = billingAddress
-    }
-
-    public enum CodingKeys: CodingKey {
-
-        case id
-        case name
-        case address
-        case billingAddress
     }
 }
