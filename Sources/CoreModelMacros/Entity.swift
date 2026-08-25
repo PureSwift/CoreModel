@@ -18,6 +18,7 @@ public struct EntityMacro: MemberMacro, ExtensionMacro {
     public static var expansionNames: [String] {
         [
             "entityName",
+            "CodingKeys",
             "attributes",
             "relationships",
             "init(from:)",
@@ -63,13 +64,17 @@ public struct EntityMacro: MemberMacro, ExtensionMacro {
         let relationshipsDeclarationSyntax = try relationshipsDeclarationSyntax(of: node, providingMembersOf: declaration, in: context)
         let initDeclarationSyntax = try initDeclarationSyntax(of: node, providingMembersOf: declaration, in: context)
         let encodeDeclarationSyntax = try encodeDeclarationSyntax(of: node, providingMembersOf: declaration, in: context)
-        return [
+        var declarations = [
             entityNameDeclarationSyntax,
             attributesDeclarationSyntax,
             relationshipsDeclarationSyntax,
             initDeclarationSyntax,
             encodeDeclarationSyntax
         ]
+        if let codingKeysDeclarationSyntax = try codingKeysDeclarationSyntax(of: node, providingMembersOf: declaration, in: context) {
+            declarations.insert(codingKeysDeclarationSyntax, at: 1)
+        }
+        return declarations
     }
 }
 
@@ -123,6 +128,40 @@ extension EntityMacro {
         return DeclSyntax(stringLiteral: entityNameDecl)
     }
     
+    /// Generates a `public enum CodingKeys: String, CodingKey` with a case for `id`
+    /// and each `@Attribute`/`@CompositeAttribute`/`@Relationship` property, in declaration order.
+    ///
+    /// Returns `nil` if the declaration already contains a `CodingKeys` member,
+    /// so manually written coding keys are left untouched.
+    public static func codingKeysDeclarationSyntax(
+        of node: AttributeSyntax,
+        providingMembersOf declaration: some DeclGroupSyntax,
+        in context: some MacroExpansionContext
+    ) throws -> DeclSyntax? {
+        // Skip generation if the type declares its own CodingKeys.
+        for member in declaration.memberBlock.members {
+            if let enumDecl = member.decl.as(EnumDeclSyntax.self), enumDecl.name.text == "CodingKeys" {
+                return nil
+            }
+            if let typealiasDecl = member.decl.as(TypeAliasDeclSyntax.self), typealiasDecl.name.text == "CodingKeys" {
+                return nil
+            }
+        }
+        var caseNames = ["id"]
+        for property in codableProperties(of: declaration) where caseNames.contains(property.name) == false {
+            caseNames.append(property.name)
+        }
+        let cases = caseNames
+            .map { "    case \($0)" }
+            .joined(separator: "\n")
+        let codingKeysDecl = """
+        public enum CodingKeys: String, CodingKey, Sendable, CaseIterable {
+        \(cases)
+        }
+        """
+        return DeclSyntax(stringLiteral: codingKeysDecl)
+    }
+
     public static func attributesDeclarationSyntax(
         of node: AttributeSyntax,
         providingMembersOf declaration: some DeclGroupSyntax,

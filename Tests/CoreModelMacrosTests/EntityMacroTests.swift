@@ -35,9 +35,10 @@ import SwiftSyntaxMacroExpansion
         """)
         let context = BasicMacroExpansionContext()
         let members = try expandMembers(of: node, attachedTo: declaration, in: context)
-        #expect(members.count == 5)
+        #expect(members.count == 6)
         let source = members.map { $0.description }.joined(separator: "\n")
         #expect(source.contains(#"public static var entityName: EntityName { "Person" }"#))
+        #expect(source.contains("public enum CodingKeys: String, CodingKey, Sendable, CaseIterable"))
         #expect(source.contains(".name: .string"))
         #expect(source.contains(".age: .int64"))
         #expect(source.contains(".created: .date"))
@@ -299,7 +300,56 @@ import SwiftSyntaxMacroExpansion
     }
 
     @Test func expansionNames() {
-        #expect(EntityMacro.expansionNames.count == 5)
+        #expect(EntityMacro.expansionNames.count == 6)
+    }
+
+    // MARK: - Coding Keys
+
+    @Test func codingKeysExpansion() throws {
+        let (node, declaration) = try parse("""
+        @Entity
+        struct Person {
+            var id: UUID
+            @Attribute
+            var name: String
+            @Relationship(destination: Pet.self, inverse: .owner)
+            var pets: [Pet.ID]
+        }
+        """)
+        let context = BasicMacroExpansionContext()
+        let expansion = try EntityMacro.codingKeysDeclarationSyntax(of: node, providingMembersOf: declaration, in: context)
+        let codingKeysDecl = try #require(expansion)
+        let source = codingKeysDecl.description
+        #expect(source.contains("public enum CodingKeys: String, CodingKey, Sendable, CaseIterable"))
+        // `id` first, then attributes and relationships in declaration order
+        let idIndex = try #require(source.range(of: "case id")?.lowerBound)
+        let nameIndex = try #require(source.range(of: "case name")?.lowerBound)
+        let petsIndex = try #require(source.range(of: "case pets")?.lowerBound)
+        #expect(idIndex < nameIndex)
+        #expect(nameIndex < petsIndex)
+    }
+
+    /// A manually declared `CodingKeys` suppresses the generated one.
+    @Test func manualCodingKeysSkipsGeneration() throws {
+        let (node, declaration) = try parse("""
+        @Entity
+        struct Person {
+            var id: UUID
+            @Attribute
+            var name: String
+            enum CodingKeys: String, CodingKey {
+                case id
+                case name = "personName"
+            }
+        }
+        """)
+        let context = BasicMacroExpansionContext()
+        let expansion = try EntityMacro.codingKeysDeclarationSyntax(of: node, providingMembersOf: declaration, in: context)
+        #expect(expansion == nil)
+        let members = try expandMembers(of: node, attachedTo: declaration, in: context)
+        #expect(members.count == 5)
+        let source = members.map { $0.description }.joined(separator: "\n")
+        #expect(source.contains("enum CodingKeys") == false)
     }
 
     // MARK: - Composite Attributes
@@ -418,7 +468,7 @@ import SwiftSyntaxMacroExpansion
     }
 
     /// An entity mixing scalar attributes, required and optional composites, and a
-    /// relationship generates all five members consistently.
+    /// relationship generates all six members consistently.
     @Test func mixedEntityExpansion() throws {
         let (node, declaration) = try parse("""
         @Entity("Campground")
@@ -436,7 +486,7 @@ import SwiftSyntaxMacroExpansion
         """)
         let context = BasicMacroExpansionContext()
         let members = try expandMembers(of: node, attachedTo: declaration, in: context)
-        #expect(members.count == 5)
+        #expect(members.count == 6)
         let source = members.map { $0.description }.joined(separator: "\n")
         #expect(source.contains(#"public static var entityName: EntityName { "Campground" }"#))
         // scalar and composite attributes live side by side
