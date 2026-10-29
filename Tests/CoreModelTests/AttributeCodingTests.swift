@@ -216,6 +216,9 @@ import Testing
         #expect(UUID(objectID: ObjectID(uuid)) == uuid)
         #expect(UUID(objectID: "invalid") == nil)
         #expect(String(objectID: "value") == "value")
+        #expect(ObjectID("value").convert(to: String.self) == "value")
+        #expect(ObjectID(uuid).convert(to: UUID.self) == uuid)
+        #expect(ObjectID("invalid").convert(to: UUID.self) == nil)
         // RawRepresentable conversion
         #expect(Color(objectID: "red") == Color.red)
         #expect(Color(objectID: "green") == nil)
