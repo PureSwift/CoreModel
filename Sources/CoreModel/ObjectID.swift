@@ -57,6 +57,14 @@ public extension ObjectID {
     init<T>(_ value: T) where T: ObjectIDConvertible {
         self.init(rawValue: value.description)
     }
+    
+    /// Converts the object ID to the specified identifier type, or `nil` if it is not a valid identifier.
+    ///
+    /// Always returns an optional, unlike calling a type's own initializer
+    /// directly, which is not failable for types such as `String`.
+    func convert<T>(to type: T.Type) -> T? where T: ObjectIDConvertible {
+        T(objectID: self)
+    }
 }
 
 extension UUID: ObjectIDConvertible {

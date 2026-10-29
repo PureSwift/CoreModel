@@ -367,7 +367,7 @@ extension EntityMacro {
             guard container.entity.rawValue == Self.entityName.rawValue else {
                 throw CoreModel.CoreModelError.invalidEntity(container.entity)
             }
-            guard let id = Self.ID(objectID: container.id) else {
+            guard let id = container.id.convert(to: Self.ID.self) else {
                 throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: [], debugDescription: "Cannot decode identifier from \\(container.id)"))
             }
             self.id = id
