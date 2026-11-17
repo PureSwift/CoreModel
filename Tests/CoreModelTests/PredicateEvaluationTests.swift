@@ -170,6 +170,11 @@ import Testing
         #expect(String.wildcardMatch("abd", pattern: "a*c") == false)
         #expect(String.wildcardMatch("abc", pattern: "???"))
         #expect(String.wildcardMatch("abc", pattern: "??") == false)
+        // A `*` in the value doesn't stand in for the pattern's wildcard.
+        #expect(String.wildcardMatch("a*b?[c]", pattern: "a*"))
+        #expect(String.wildcardMatch("a*b", pattern: "*b"))
+        #expect(String.wildcardMatch("x*", pattern: "x*"))
+        #expect(String.wildcardMatch("a*c", pattern: "a?c"))
     }
 
     @Test func fetchRequestEvaluation() {
