@@ -78,6 +78,18 @@ import Testing
         #expect("name".compare(.in, .attribute(.string("Alice in Wonderland"))).evaluate(with: person))
     }
 
+    /// Substrings of strings whose characters take more than one byte: each
+    /// string is stepped through with its own indices.
+    @Test func substringsOfWiderCharacters() {
+        let edsger = ModelData(entity: "Person", id: "2", attributes: ["name": .string("Édsger")])
+        #expect("name".compare(.contains, .attribute(.string("ra"))).evaluate(with: edsger) == false)
+        #expect("name".compare(.contains, .attribute(.string("ds"))).evaluate(with: edsger))
+        #expect("name".compare(.contains, .attribute(.string("Éd"))).evaluate(with: edsger))
+        #expect("name".compare(.in, .attribute(.string("sgra"))).evaluate(with: ModelData(entity: "Person", id: "3", attributes: ["name": .string("gé")])) == false)
+        #expect([UInt8]([1, 2, 3]).contains([2, 3]))
+        #expect(Array("Édsger").contains(Array("ra")) == false)
+    }
+
     @Test func like() {
         #expect("name".compare(.like, .attribute(.string("A*"))).evaluate(with: person))
         #expect("name".compare(.like, .attribute(.string("?lice"))).evaluate(with: person))
@@ -224,6 +236,23 @@ import Testing
             functions: ["NEGATE": negate]
         )
         #expect(byNegatedAge.map { $0.id } == ["a", "b", "c"])
+    }
+
+    /// A null sorts before every value, as in SQLite and Core Data, so the
+    /// order doesn't depend on the order the objects came in.
+    @Test func sortingNulls() {
+        let people: [ModelData] = [
+            ModelData(entity: "Person", id: "a", attributes: ["joined": .null]),
+            ModelData(entity: "Person", id: "b", attributes: ["joined": .date(Date(timeIntervalSince1970: 20))]),
+            ModelData(entity: "Person", id: "c", attributes: [:]),
+            ModelData(entity: "Person", id: "d", attributes: ["joined": .date(Date(timeIntervalSince1970: 10))]),
+        ]
+        let ascending: [FetchRequest.SortDescriptor] = [.init(property: "joined", ascending: true)]
+        let descending: [FetchRequest.SortDescriptor] = [.init(property: "joined", ascending: false)]
+        for order in [people, people.reversed(), [people[1], people[2], people[3], people[0]]] {
+            #expect(order.sorted(by: ascending).map { $0.id } == ["a", "c", "d", "b"])
+            #expect(order.sorted(by: descending).map { $0.id } == ["b", "d", "a", "c"])
+        }
     }
 
     @Test func filtering() {

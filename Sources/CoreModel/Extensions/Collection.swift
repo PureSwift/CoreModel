@@ -31,7 +31,10 @@ internal extension Collection where Element: Equatable {
             var j = other.startIndex
             while j != other.endIndex, i != endIndex, self[i] == other[j] {
                 i = index(after: i)
-                j = index(after: j)
+                // `other`'s own indices: a string's step over a character
+                // depends on its encoding, so one string's step doesn't fit
+                // another's ("Édsger" contained "ra").
+                j = other.index(after: j)
             }
             if j == other.endIndex { return true }
             start = index(after: start)
