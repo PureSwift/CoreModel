@@ -524,13 +524,15 @@ internal extension String {
         var starIndex: Int? = nil
         var starMatchIndex = 0
         while valueIndex < value.count {
-            if patternIndex < pattern.count,
-               pattern[patternIndex] == "?" || pattern[patternIndex] == value[valueIndex] {
-                valueIndex += 1
-                patternIndex += 1
-            } else if patternIndex < pattern.count, pattern[patternIndex] == "*" {
+            // A `*` in the pattern is always the wildcard, even where the
+            // value has a `*` of its own.
+            if patternIndex < pattern.count, pattern[patternIndex] == "*" {
                 starIndex = patternIndex
                 starMatchIndex = valueIndex
+                patternIndex += 1
+            } else if patternIndex < pattern.count,
+               pattern[patternIndex] == "?" || pattern[patternIndex] == value[valueIndex] {
+                valueIndex += 1
                 patternIndex += 1
             } else if let lastStar = starIndex {
                 // backtrack: let the last `*` consume one more character
