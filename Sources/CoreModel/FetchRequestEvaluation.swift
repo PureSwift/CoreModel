@@ -89,13 +89,35 @@ public extension Array where Element == ModelData {
                     lhs = expression.evaluate(with: first, functions: functions)?.attributeValue
                     rhs = expression.evaluate(with: second, functions: functions)?.attributeValue
                 }
-                guard let comparison = AttributeValue.order(lhs, rhs), comparison != 0 else {
+                guard let comparison = AttributeValue.sortOrder(lhs, rhs), comparison != 0 else {
                     continue
                 }
                 return descriptor.ascending ? comparison < 0 : comparison > 0
             }
             // stable tiebreaker on the object identifier
             return first.id.rawValue < second.id.rawValue
+        }
+    }
+}
+
+internal extension AttributeValue {
+
+    /// How two values of one sort key order: as `order(_:_:)`, with a null
+    /// (or missing) value before every other, as SQLite and Core Data sort
+    /// them. Without that, a null was equal to everything, and where nulls
+    /// ended up depended on the sort.
+    static func sortOrder(_ lhs: AttributeValue?, _ rhs: AttributeValue?) -> Int? {
+        let lhsIsNull = lhs == nil || lhs == .null
+        let rhsIsNull = rhs == nil || rhs == .null
+        switch (lhsIsNull, rhsIsNull) {
+        case (true, true):
+            return 0
+        case (true, false):
+            return -1
+        case (false, true):
+            return 1
+        case (false, false):
+            return order(lhs, rhs)
         }
     }
 }
