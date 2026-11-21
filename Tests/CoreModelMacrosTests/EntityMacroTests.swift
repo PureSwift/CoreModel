@@ -44,9 +44,29 @@ import SwiftSyntaxMacroExpansion
         #expect(source.contains(".created: .date"))
         #expect(source.contains("public static var relationships: [CodingKeys: Relationship] { [:] }"))
         #expect(source.contains("public init(from container: ModelData) throws"))
+        #expect(source.contains("guard let id = container.id.convert(to: Self.ID.self) else"))
         #expect(source.contains("self.name = try container.decode(String.self, forKey: Person.CodingKeys.name)"))
         #expect(source.contains("public func encode() -> ModelData"))
         #expect(source.contains("container.encode(self.age, forKey: Person.CodingKeys.age)"))
+    }
+
+    @Test func stringIdentifier() throws {
+        let (node, declaration) = try parse("""
+        @Entity
+        struct Tag {
+            let id: String
+            @Attribute
+            var name: String
+        }
+        """)
+        let context = BasicMacroExpansionContext()
+        let members = try expandMembers(of: node, attachedTo: declaration, in: context)
+        let source = members.map { $0.description }.joined(separator: "\n")
+        // the conversion is failable for identifier types with a non-failable initializer, like String
+        #expect(source.contains("guard let id = container.id.convert(to: Self.ID.self) else"))
+        #expect(source.contains("Self.ID(objectID:") == false)
+        #expect(source.contains("self.id = id"))
+        #expect(source.contains("id: ObjectID(self.id)"))
     }
 
     @Test func extensionExpansion() throws {
