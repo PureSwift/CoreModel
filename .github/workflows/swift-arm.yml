@@ -8,7 +8,7 @@ jobs:
       strategy:
         matrix:
           arch: ["armv6", "armv7"]
-          swift: ["6.3.2"]
+          swift: ["6.4.2"]
           config: ["debug" , "release"]
           linux: ["raspios"]
           release: ["bookworm"]
@@ -20,13 +20,13 @@ jobs:
           run: apt update -y; apt install wget -y
         - name: Install SDK
           run: |
-            wget https://github.com/xtremekforever/swift-armv7/releases/download/${{ matrix.swift }}/swift-${{ matrix.swift }}-RELEASE-${{ matrix.linux }}-${{ matrix.release }}-${{ matrix.arch }}-sdk.tar.gz
+            wget https://github.com/swift-embedded-linux/armhf-debian/releases/download/${{ matrix.swift }}/swift-${{ matrix.swift }}-RELEASE-${{ matrix.linux }}-${{ matrix.release }}-${{ matrix.arch }}-sdk.tar.gz
             tar -xvf swift-${{ matrix.swift }}-RELEASE-${{ matrix.linux }}-${{ matrix.release }}-${{ matrix.arch }}-sdk.tar.gz
             mv swift-${{ matrix.swift }}-RELEASE-${{ matrix.linux }}-${{ matrix.release }}-${{ matrix.arch }} /opt/swift-${{ matrix.swift }}-RELEASE-${{ matrix.linux }}-${{ matrix.release }}-${{ matrix.arch }}
         - name: Swift Version
           run: swift --version
         - name: Build
-          run: SWIFT_BUILD_DYNAMIC_LIBRARY=1 swift build -c ${{ matrix.config }} --destination /opt/swift-${{ matrix.swift }}-RELEASE-${{ matrix.linux }}-${{ matrix.release }}-${{ matrix.arch }}/${{ matrix.linux }}-${{ matrix.release }}.json
+          run: SWIFT_BUILD_DYNAMIC_LIBRARY=1 swift build -c ${{ matrix.config }} --build-system native --destination /opt/swift-${{ matrix.swift }}-RELEASE-${{ matrix.linux }}-${{ matrix.release }}-${{ matrix.arch }}/${{ matrix.linux }}-${{ matrix.release }}.json
 
     linux-arm-debian-build:
       name: Linux (Debian)
@@ -34,7 +34,7 @@ jobs:
       strategy:
         matrix:
           arch: ["armv7"]
-          swift: ["6.3.2"]
+          swift: ["6.4.2"]
           config: ["debug" , "release"]
           linux: ["debian"]
           release: ["bookworm", "bullseye"]
@@ -46,13 +46,13 @@ jobs:
           run: apt update -y; apt install wget -y
         - name: Install SDK
           run: |
-            wget https://github.com/xtremekforever/swift-armv7/releases/download/${{ matrix.swift }}/swift-${{ matrix.swift }}-RELEASE-${{ matrix.linux }}-${{ matrix.release }}-${{ matrix.arch }}-sdk.tar.gz
+            wget https://github.com/swift-embedded-linux/armhf-debian/releases/download/${{ matrix.swift }}/swift-${{ matrix.swift }}-RELEASE-${{ matrix.linux }}-${{ matrix.release }}-${{ matrix.arch }}-sdk.tar.gz
             tar -xvf swift-${{ matrix.swift }}-RELEASE-${{ matrix.linux }}-${{ matrix.release }}-${{ matrix.arch }}-sdk.tar.gz
             mv swift-${{ matrix.swift }}-RELEASE-${{ matrix.linux }}-${{ matrix.release }}-${{ matrix.arch }} /opt/swift-${{ matrix.swift }}-RELEASE-${{ matrix.linux }}-${{ matrix.release }}-${{ matrix.arch }}
         - name: Swift Version
           run: swift --version
         - name: Build
-          run: SWIFT_BUILD_DYNAMIC_LIBRARY=1 swift build -c ${{ matrix.config }} --destination /opt/swift-${{ matrix.swift }}-RELEASE-${{ matrix.linux }}-${{ matrix.release }}-${{ matrix.arch }}/${{ matrix.linux }}-${{ matrix.release }}.json
+          run: SWIFT_BUILD_DYNAMIC_LIBRARY=1 swift build -c ${{ matrix.config }} --build-system native --destination /opt/swift-${{ matrix.swift }}-RELEASE-${{ matrix.linux }}-${{ matrix.release }}-${{ matrix.arch }}/${{ matrix.linux }}-${{ matrix.release }}.json
         - name: Upload artifacts
           uses: actions/upload-artifact@v4
           with:

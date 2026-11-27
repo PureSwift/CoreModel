@@ -3,13 +3,20 @@ on: [push]
 jobs:
 
   macos:
-    name: macOS
+    name: macOS (Swift ${{ matrix.swift }})
     runs-on: macos-26
     strategy:
+      fail-fast: false
       matrix:
+        swift: ["6.3.3", "6.4.2"]
         config: ["debug", "release"]
         options: ["", "SWIFT_BUILD_DYNAMIC_LIBRARY=1"]
     steps:
+    - name: Install Swift
+      uses: compnerd/gha-setup-swift@main
+      with:
+        swift-version: swift-${{ matrix.swift }}-release
+        swift-build: ${{ matrix.swift }}-RELEASE
     - name: Checkout
       uses: actions/checkout@v4
     - name: Swift Version
@@ -26,6 +33,11 @@ jobs:
       contents: read
       code-quality: write # required by actions/upload-code-coverage
     steps:
+    - name: Install Swift
+      uses: compnerd/gha-setup-swift@main
+      with:
+        swift-version: swift-6.4.2-release
+        swift-build: 6.4.2-RELEASE
     - name: Checkout
       uses: actions/checkout@v4
     - name: Swift Version
@@ -62,7 +74,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        container: ["swift:latest", "swiftlang/swift:nightly-noble"]
+        container: ["swift:6.3.3", "swift:6.4.2", "swiftlang/swift:nightly-noble"]
         config: ["debug", "release"]
         options: ["", "SWIFT_BUILD_DYNAMIC_LIBRARY=1"]
     container: ${{ matrix.container }}
@@ -76,27 +88,21 @@ jobs:
     - name: Test
       run: ${{ matrix.options }} swift test -c ${{ matrix.config }} --no-parallel
 
-  skip-fuse:
-      name: Skip Fuse (Android)
-      runs-on: macos-26
-      steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Swift Version
-        run: swift --version
-      - name: Build (Skip Fuse)
-        run: SKIP_FUSE=1 swift build --target CoreModel
-
   android:
       name: Android
       strategy:
         fail-fast: false
         matrix:
-          swift: ['6.3.2']
+          swift: ['6.4.2']
           arch: ["aarch64", "x86_64"]
       runs-on: macos-26
       timeout-minutes: 30
       steps:
+        - name: Install Swift
+          uses: compnerd/gha-setup-swift@main
+          with:
+            swift-version: swift-6.4.2-release
+            swift-build: 6.4.2-RELEASE
         - uses: actions/checkout@v4
         - name: "Build Swift Package for Android"
           run: |
@@ -107,7 +113,7 @@ jobs:
   android-sdk:
       name: Android (Swift SDK, ${{ matrix.triple }})
       runs-on: ubuntu-latest
-      container: swift:6.3.2
+      container: swift:6.4.2
       timeout-minutes: 30
       strategy:
         fail-fast: false
@@ -123,7 +129,7 @@ jobs:
         - name: Install Android Swift SDK
           run: |
             set -eux
-            url="https://download.swift.org/swift-6.3.2-release/android-sdk/swift-6.3.2-RELEASE/swift-6.3.2-RELEASE_android.artifactbundle.tar.gz"
+            url="https://download.swift.org/swift-6.4.2-release/android-sdk/swift-6.4.2-RELEASE/swift-6.4.2-RELEASE_android.artifactbundle.tar.gz"
             curl -fsSL "$url" -o android.artifactbundle.tar.gz
             swift sdk install android.artifactbundle.tar.gz
             swift sdk list
@@ -131,7 +137,7 @@ jobs:
           run: |
             set -eux
             unset ANDROID_NDK_ROOT
-            sdk_dir="$(find / -maxdepth 8 -type d -path '*swift-6.3.2-RELEASE_android.artifactbundle/swift-android' 2>/dev/null | head -1)"
+            sdk_dir="$(find / -maxdepth 8 -type d -path '*swift-6.4.2-RELEASE_android.artifactbundle/swift-android' 2>/dev/null | head -1)"
             test -n "$sdk_dir"
             cd "$sdk_dir"
             curl -fSL -o ndk.zip "https://dl.google.com/android/repository/android-ndk-r27d-Linux.zip"
