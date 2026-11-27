@@ -3,18 +3,20 @@ on: [push]
 jobs:
 
   macos:
-    name: macOS
+    name: macOS (Swift ${{ matrix.swift }})
     runs-on: macos-26
     strategy:
+      fail-fast: false
       matrix:
+        swift: ["6.3.3", "6.4.2"]
         config: ["debug", "release"]
         options: ["", "SWIFT_BUILD_DYNAMIC_LIBRARY=1"]
     steps:
     - name: Install Swift
       uses: compnerd/gha-setup-swift@main
       with:
-        swift-version: swift-6.4.2-release
-        swift-build: 6.4.2-RELEASE
+        swift-version: swift-${{ matrix.swift }}-release
+        swift-build: ${{ matrix.swift }}-RELEASE
     - name: Checkout
       uses: actions/checkout@v4
     - name: Swift Version
@@ -72,7 +74,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        container: ["swift:6.4.2", "swiftlang/swift:nightly-noble"]
+        container: ["swift:6.3.3", "swift:6.4.2", "swiftlang/swift:nightly-noble"]
         config: ["debug", "release"]
         options: ["", "SWIFT_BUILD_DYNAMIC_LIBRARY=1"]
     container: ${{ matrix.container }}
